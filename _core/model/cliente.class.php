@@ -39,7 +39,7 @@ class Cliente extends Flex {
 
     protected $pessoa = null;
     
-    public function getpessoa()
+    public function getPessoa()
     {
         if(!Pessoa::exists($this->id_pessoa)){
             return null;

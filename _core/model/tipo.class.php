@@ -1,11 +1,10 @@
 <?php
 
-class Categoria extends Flex {
+class Tipo extends Flex {
 
-    protected $tableName = 'categorias';
+    protected $tableName = 'tipos';
     protected $mapper = array(
         'id' => 'int',
-        'tipo' => 'int',
 		'nome' => 'string',
         'usr_cad' => 'string',
         'dt_cad' => 'sql',
@@ -16,7 +15,7 @@ class Categoria extends Flex {
     protected $primaryKey = array('id');
 
     public static $configGG = array(
-        'nome' => 'Categorias',
+        'nome' => 'Tipos',
         'class' => __CLASS__,
         'ordenacao' => 'nome ASC',
         'envia-arquivo' => true,
@@ -26,10 +25,9 @@ class Categoria extends Flex {
 
     public static function createTable(){
         return '
-        DROP TABLE IF EXISTS `categorias`;
-        CREATE TABLE `categorias` (
+        DROP TABLE IF EXISTS `tipos`;
+        CREATE TABLE `tipos` (
             `id` int(11) NOT NULL AUTO_INCREMENT,
-            `tipo` int(1) NOT NULL,
             `nome` VARCHAR(100) NOT NULL,
             `usr_cad` varchar(20) NOT NULL,
             `dt_cad` datetime NOT NULL,
@@ -38,11 +36,13 @@ class Categoria extends Flex {
             PRIMARY KEY(`id`)
         ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4;';
     }
-    
-    public static $tipos = [
-        1 => 'Saída',
-        2 => 'Entrada',
-    ];
+
+    public static function getTipos(){
+        return Tipo::search([
+            's' => 'id, nome',
+            'o' => 'nome'
+        ]);
+    }
 
     public static function validate() {
     	global $request;
@@ -51,11 +51,7 @@ class Categoria extends Flex {
         $paramAdd = 'AND id NOT IN('.$id.')';
 
     	if(!isset($_POST['nome']) || $_POST['nome'] == ''){
-    		$error .= '<li>O campo "Nome" n&atilde;o foi informado</li>';
-    	}
-    	
-        if(!isset($_POST['tipo']) || $_POST['tipo'] == ''){
-    		$error .= '<li>O campo "Tipo" n&atilde;o foi informado</li>';
+    		$error .= '<li>O campo "Descrição" n&atilde;o foi informado</li>';
     	}
     	
         if($error==''){
@@ -79,7 +75,6 @@ class Categoria extends Flex {
                 $obj = self::load($id);
             }
             
-			$obj->set('tipo', $_POST['tipo']);
 			$obj->set('nome', $_POST['nome']);
 
             $obj->save();
@@ -115,12 +110,6 @@ class Categoria extends Flex {
         $classe = __CLASS__;
         $obj = new $classe();
         $obj->set('id', $codigo);
-        $obj->set('avisos',1);
-
-        if($obj->get('id_pessoa') == '') {
-            $obj->set(('id_pessoa'), $request->get('id_pessoa'));
-        }
-
         
         if ($codigo > 0) {
             $obj = self::load($codigo);
@@ -128,30 +117,15 @@ class Categoria extends Flex {
         	$codigo = time();
         	$string = '<input name="tempId" type="hidden" value="'.$codigo.'"/>';
         }
-        
     	$string .= '
-                <div class="row g-2">
-                   <div class="col-sm-5 required">
-                        <div class="form-floating">
-                            <select class="form-select" id="tipo" name="tipo" required>
-                            <option value="">Selecione</option>';
-                            foreach(self::$tipos as $k => $v){
-                                $string .= '<option value="'.$k.'" '.($k == $obj->get('tipo') ? 'selected' : '').'>'.$v.'</option>';
-                            }
-                            $string .='
-                            </select>
-                            <label for="">Tipo</label>
-                        </div>
-                   </div> 
-                   
-                   <div class="col-sm-7 required">
-                        <div class="form-floating">
-                            <input class="form-control" name="nome" placeholder="" value="'.$obj->get('nome').'">
-                            <label class="form-label">Nome</label>
-                        </div>
-                   </div> 
-                </div>';
-		
+        <div class="row g-2">
+            <div class="col-sm-12 required">
+                <div class="form-floating">
+                    <input class="form-control" name="nome" placeholder="" value="'.$obj->get('nome').'">
+                    <label class="form-label">Nome</label>
+                </div>
+            </div> 
+        </div>';
 
         return $string;
     }
@@ -162,8 +136,7 @@ class Categoria extends Flex {
             <thead>
               <tr>
                 <th width="10">'.GG::getCheckboxHead().'</th>
-                <th class="col-sm-7">Nome</th>
-                <th class="col-sm-5">Tipo</th>
+                <th class="col-sm-12">Nome</th>
               </tr>
             </thead>
             <tbody>';
@@ -183,7 +156,6 @@ class Categoria extends Flex {
         return '
         <td>'.GG::getCheckboxLine($obj->get('id')).'</td>
         <td class="link-edit">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->get('nome')).'</td>'.GG::getResponsiveList(['Nome' => $obj->nome], $obj).'
-        <td>'.self::$tipos[$obj->get('tipo')].'</td>
         ';
     }
 
@@ -192,10 +164,6 @@ class Categoria extends Flex {
         
         if ($request->query('nome') > 0) {
             $paramAdd .= " AND nome LIKE '%{$request->query('nome')}%'";
-        }
-        
-        if ($request->query('tipo') > 0) {
-            $paramAdd .= " AND tipo = {$request->query('tipo')}";
         }
         
         if(Utils::dateValid($request->query('inicio'))){
@@ -214,27 +182,13 @@ class Categoria extends Flex {
         $string = ''; 
         
         $string .= '
-        <div class="col-sm-6 mb-3">
+        <div class="col-sm-12 mb-3">
             <div class="form-floating">
                 <input name="nome" id="filterNome" type="text" class="form-control" value="'.$request->query('nome').'" placeholder="seu dado aqui" />
                 <label for="filterNome" class="form-label">Nome</label>
             </div>
         </div>';
 
-        $string .='
-        <div class="col-sm-6">
-            <div class="form-floating">
-                <select class="form-select" id="tipo" name="tipo">
-                <option value="">Selecione</option>';
-                foreach(self::$tipos as $k => $v){
-                    $string .= '<option value="'.$k.'" '.($k == $request->query('tipo') ? 'selected' : '').'>'.$v.'</option>';
-                }
-                $string .='
-                </select>
-                <label for="">Tipo</label>
-            </div>
-        </div> ';
-        
         $string .= '
         <div class="col-sm-6 mb-3">
             <div class="form-floating">

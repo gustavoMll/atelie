@@ -183,7 +183,7 @@ class Usuario extends Pessoa {
         
         $string = '<input name="id_pessoa" type="hidden" value="'.$id_pessoa.'"/>';
         $string .= Pessoa::form($id_pessoa);
-        
+
 
         $string .= '
         <div class="col-sm-6 col-md-4 mb-3">
@@ -301,7 +301,6 @@ class Usuario extends Pessoa {
                     <th class="col-sm-3">Email</th>
                     <th class="col-sm-3">Login</th>
                     <th class="col-sm-3">&Uacute;ltimo acesso</th>
-                    <th width="10"></th>
                 </tr>
                 </thead>
                 <tbody>';
