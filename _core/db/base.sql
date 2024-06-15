@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 30-Maio-2024 às 15:31
+-- Tempo de geração: 15-Jun-2024 às 16:53
 -- Versão do servidor: 10.4.27-MariaDB
 -- versão do PHP: 8.2.0
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Banco de dados: `tracoengenharia`
+-- Banco de dados: `atelie`
 --
 
 -- --------------------------------------------------------
@@ -58,57 +58,28 @@ CREATE TABLE `categorias` (
 -- --------------------------------------------------------
 
 --
+-- Estrutura da tabela `clientes`
+--
+
+CREATE TABLE `clientes` (
+  `id` int(11) NOT NULL,
+  `id_pessoa` int(11) NOT NULL,
+  `obs` text DEFAULT NULL,
+  `usr_cad` varchar(20) NOT NULL,
+  `dt_cad` datetime NOT NULL,
+  `usr_ualt` varchar(20) NOT NULL,
+  `dt_ualt` datetime NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Estrutura da tabela `configs`
 --
 
 CREATE TABLE `configs` (
   `chave` varchar(50) NOT NULL,
   `valor` text DEFAULT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Estrutura da tabela `contas`
---
-
-CREATE TABLE `contas` (
-  `id` int(11) NOT NULL,
-  `id_projeto` int(11) NOT NULL,
-  `id_categoria` int(11) NOT NULL DEFAULT 0,
-  `descricao` varchar(255) DEFAULT NULL,
-  `numero_nf` varchar(50) DEFAULT NULL,
-  `tipo` int(1) NOT NULL,
-  `status` int(1) NOT NULL,
-  `vencimento` date NOT NULL,
-  `pagamento` date DEFAULT NULL,
-  `valor` float(11,2) NOT NULL DEFAULT 0.00,
-  `ref` varchar(6) DEFAULT NULL,
-  `usr_cad` varchar(20) NOT NULL,
-  `dt_cad` datetime NOT NULL,
-  `usr_ualt` varchar(20) NOT NULL,
-  `dt_ualt` datetime NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Estrutura da tabela `contatos`
---
-
-CREATE TABLE `contatos` (
-  `id` int(11) NOT NULL,
-  `id_pessoa` int(11) NOT NULL,
-  `nome` varchar(255) NOT NULL,
-  `setor` varchar(50) DEFAULT NULL,
-  `email` varchar(255) DEFAULT NULL,
-  `tel` varchar(18) NOT NULL,
-  `tel2` varchar(18) DEFAULT NULL,
-  `obs` text DEFAULT NULL,
-  `usr_cad` varchar(20) NOT NULL,
-  `dt_cad` datetime NOT NULL,
-  `usr_ualt` varchar(20) NOT NULL,
-  `dt_ualt` datetime NOT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -172,31 +143,6 @@ CREATE TABLE `historico` (
 -- --------------------------------------------------------
 
 --
--- Estrutura da tabela `movimentacoes`
---
-
-CREATE TABLE `movimentacoes` (
-  `id` int(11) NOT NULL,
-  `tipo` int(1) NOT NULL DEFAULT 1,
-  `id_conta` int(11) NOT NULL,
-  `id_projeto` int(11) NOT NULL,
-  `status` int(1) NOT NULL,
-  `data` date NOT NULL,
-  `valor` float(11,2) NOT NULL DEFAULT 0.00,
-  `juro` float(11,2) NOT NULL DEFAULT 0.00,
-  `multa` float(11,2) NOT NULL DEFAULT 0.00,
-  `desconto` float(11,2) NOT NULL DEFAULT 0.00,
-  `adicional` float(11,2) NOT NULL DEFAULT 0.00,
-  `obs` text DEFAULT NULL,
-  `usr_cad` varchar(20) NOT NULL,
-  `dt_cad` datetime NOT NULL,
-  `usr_ualt` varchar(20) NOT NULL,
-  `dt_ualt` datetime NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
 -- Estrutura da tabela `permissoes`
 --
 
@@ -239,56 +185,32 @@ CREATE TABLE `permissoesusuario` (
 
 CREATE TABLE `pessoas` (
   `id` int(11) NOT NULL,
-  `nomefantasia` varchar(255) DEFAULT NULL,
-  `razaosocial` varchar(255) DEFAULT NULL,
-  `cpfcnpj` varchar(14) DEFAULT NULL,
-  `ie` varchar(20) DEFAULT NULL,
-  `rg` varchar(20) DEFAULT NULL,
-  `im` varchar(20) DEFAULT NULL,
-  `sexo` int(1) NOT NULL DEFAULT 1,
-  `cep` varchar(10) DEFAULT NULL,
-  `endereco` varchar(255) DEFAULT NULL,
-  `numero` varchar(10) DEFAULT NULL,
-  `complemento` varchar(255) DEFAULT NULL,
-  `bairro` varchar(255) DEFAULT NULL,
+  `nome` varchar(100) NOT NULL,
+  `cpf` varchar(11) NOT NULL,
+  `dt_nasc` date DEFAULT NULL,
+  `telefone1` varchar(20) NOT NULL,
+  `telefone2` varchar(20) DEFAULT NULL,
+  `email` varchar(200) NOT NULL,
+  `cep` varchar(9) DEFAULT NULL,
+  `endereco` varchar(255) NOT NULL,
+  `numero` int(11) NOT NULL,
+  `bairro` varchar(255) NOT NULL,
   `cidade` varchar(255) DEFAULT NULL,
   `estado` varchar(2) DEFAULT NULL,
-  `dt_nasc` date DEFAULT NULL,
-  `tel` varchar(18) DEFAULT NULL,
-  `tel2` varchar(18) DEFAULT NULL,
-  `tel3` varchar(18) DEFAULT NULL,
-  `email` varchar(255) DEFAULT NULL,
-  `obs` text DEFAULT NULL,
-  `status` int(2) NOT NULL,
-  `tipo` int(1) NOT NULL DEFAULT 1,
-  `ativo` int(1) DEFAULT 1,
+  `complemento` varchar(255) DEFAULT NULL,
+  `referencia` varchar(255) DEFAULT NULL,
   `usr_cad` varchar(20) NOT NULL,
   `dt_cad` datetime NOT NULL,
   `usr_ualt` varchar(20) NOT NULL,
   `dt_ualt` datetime NOT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
-
 --
--- Estrutura da tabela `projetos`
+-- Extraindo dados da tabela `pessoas`
 --
 
-CREATE TABLE `projetos` (
-  `id` int(11) NOT NULL,
-  `id_cliente` int(11) NOT NULL,
-  `nome` varchar(255) NOT NULL,
-  `valor` float(11,2) DEFAULT NULL,
-  `area` float(11,2) DEFAULT NULL,
-  `dt_ini` date DEFAULT NULL,
-  `dt_entrega` date DEFAULT NULL,
-  `status` int(1) DEFAULT 1,
-  `ativo` int(1) DEFAULT 1,
-  `usr_cad` varchar(20) NOT NULL,
-  `dt_cad` datetime NOT NULL,
-  `usr_ualt` varchar(20) NOT NULL,
-  `dt_ualt` datetime NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+INSERT INTO `pessoas` (`id`, `nome`, `cpf`, `dt_nasc`, `telefone1`, `telefone2`, `email`, `cep`, `endereco`, `numero`, `bairro`, `cidade`, `estado`, `complemento`, `referencia`, `usr_cad`, `dt_cad`, `usr_ualt`, `dt_ualt`) VALUES
+(1, 'Administrador', '11111111111', '0000-00-00', '', NULL, '', NULL, '', 0, '', NULL, NULL, NULL, NULL, '0', '2024-06-15 11:51:33', '0', '2024-06-15 00:00:00');
 
 -- --------------------------------------------------------
 
@@ -298,14 +220,10 @@ CREATE TABLE `projetos` (
 
 CREATE TABLE `usuarios` (
   `id` int(11) NOT NULL,
-  `nome` varchar(100) NOT NULL,
+  `id_pessoa` int(11) NOT NULL,
   `login` varchar(20) NOT NULL,
   `senha` varchar(50) NOT NULL,
-  `email` varchar(200) NOT NULL,
-  `img` varchar(255) DEFAULT NULL,
-  `tel` varchar(20) NOT NULL,
   `acesso_total` int(11) DEFAULT NULL,
-  `ativo` int(1) DEFAULT 1,
   `ip` varchar(20) DEFAULT NULL,
   `token` varchar(20) DEFAULT NULL,
   `ultimo_acesso` datetime DEFAULT NULL,
@@ -321,9 +239,9 @@ CREATE TABLE `usuarios` (
 -- Extraindo dados da tabela `usuarios`
 --
 
-INSERT INTO `usuarios` (`id`, `nome`, `login`, `senha`, `email`, `img`, `tel`, `acesso_total`, `ativo`, `ip`, `token`, `ultimo_acesso`, `tentativas`, `ultima_tentativa`, `usr_cad`, `dt_cad`, `usr_ualt`, `dt_ualt`) VALUES
-(1, 'Eliemar Junior', 'ejunior', '2a1b3cb0216a9b7f6f1ae50a9d0c11ff11ce915e', 'eliemar@levsistemas.com.br', NULL, '27998712202', 1, 1, NULL, NULL, NULL, 0, NULL, 'base', '2024-05-30 08:07:45', 'base', '2024-05-30 08:07:45'),
-(2, 'Lev Sistemas', 'levsistemas', '41770fd39745bbab0970cbbc30f8b02e48109eba', 'contato@levsistemas.com.br', '', '2740422406', 1, 1, '::1', '', '2024-05-30 08:10:04', 0, NULL, 'base', '2024-05-30 08:07:45', 'site', '2024-05-30 08:10:04');
+INSERT INTO `usuarios` (`id`, `id_pessoa`, `login`, `senha`, `acesso_total`, `ip`, `token`, `ultimo_acesso`, `tentativas`, `ultima_tentativa`, `usr_cad`, `dt_cad`, `usr_ualt`, `dt_ualt`) VALUES
+(1, 1, 'admin', 'e2178678cf061c82af8d6aee9a0c592b4ef1db60', 1, NULL, NULL, NULL, 0, NULL, '', '2024-06-15 10:59:28', '', '2024-06-15 10:59:28'),
+(2, 3, 'teste', 'e2178678cf061c82af8d6aee9a0c592b4ef1db60', 0, '', NULL, NULL, 0, NULL, 'admin', '2024-06-15 11:24:42', 'admin', '2024-06-15 11:36:07');
 
 --
 -- Índices para tabelas despejadas
@@ -342,16 +260,11 @@ ALTER TABLE `categorias`
   ADD PRIMARY KEY (`id`);
 
 --
--- Índices para tabela `contas`
+-- Índices para tabela `clientes`
 --
-ALTER TABLE `contas`
-  ADD PRIMARY KEY (`id`);
-
---
--- Índices para tabela `contatos`
---
-ALTER TABLE `contatos`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE `clientes`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `id_pessoa` (`id_pessoa`);
 
 --
 -- Índices para tabela `estaticos`
@@ -369,12 +282,6 @@ ALTER TABLE `fotos`
 -- Índices para tabela `historico`
 --
 ALTER TABLE `historico`
-  ADD PRIMARY KEY (`id`);
-
---
--- Índices para tabela `movimentacoes`
---
-ALTER TABLE `movimentacoes`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -396,16 +303,11 @@ ALTER TABLE `pessoas`
   ADD PRIMARY KEY (`id`);
 
 --
--- Índices para tabela `projetos`
---
-ALTER TABLE `projetos`
-  ADD PRIMARY KEY (`id`);
-
---
 -- Índices para tabela `usuarios`
 --
 ALTER TABLE `usuarios`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `id_pessoa` (`id_pessoa`);
 
 --
 -- AUTO_INCREMENT de tabelas despejadas
@@ -424,15 +326,9 @@ ALTER TABLE `categorias`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT de tabela `contas`
+-- AUTO_INCREMENT de tabela `clientes`
 --
-ALTER TABLE `contas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT de tabela `contatos`
---
-ALTER TABLE `contatos`
+ALTER TABLE `clientes`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -454,12 +350,6 @@ ALTER TABLE `historico`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT de tabela `movimentacoes`
---
-ALTER TABLE `movimentacoes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT de tabela `permissoes`
 --
 ALTER TABLE `permissoes`
@@ -475,13 +365,7 @@ ALTER TABLE `permissoesusuario`
 -- AUTO_INCREMENT de tabela `pessoas`
 --
 ALTER TABLE `pessoas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT de tabela `projetos`
---
-ALTER TABLE `projetos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de tabela `usuarios`
