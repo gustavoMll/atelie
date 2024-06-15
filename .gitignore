@@ -1,0 +1,7 @@
+/uploads/*
+/_core/vendor
+.DS_Store
+composer.lock
+.env
+robots.txt
+sitemap.xml

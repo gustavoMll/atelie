@@ -1,0 +1,2 @@
+<?php
+$Modules = Cliente::$configGG;

@@ -1,0 +1,2 @@
+<?php
+$Modules = Permissao::$configGG;

@@ -1,0 +1,2 @@
+<?php
+$Modules = Contato::$configGG;
