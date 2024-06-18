@@ -39,6 +39,13 @@ class Documento extends Flex {
     }
 
 
+    public static function getDocs($params = 'descricao'){
+        return self::search([
+            's' => 'id,'.$params,
+            'o' => 'descricao'
+        ]);
+    }
+
     public static function validate() {
         global $request;
         $error = '';

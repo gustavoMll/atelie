@@ -32,7 +32,7 @@
                         <?php } ?>
                     </a>
                     <ul class="dropdown-menu bg-dark text-white text-center">
-                        <li><a class="dropdown-item p-3 text-white">Bem vindo, <br><strong><?=$objSession->get('nome')?></strong></a></li>
+                        <li><a class="dropdown-item p-3 text-white">Bem vindo, <br><strong><?=$objSession->getPessoa()->get('nome')?></strong></a></li>
                         <li>
                             <a class="dropdown-item p-3 text-white d-flex text-white align-items-center justify-content-center gap-2" target="_blank" href="javascript:;" aria-label="ver perfil" data-bs-toggle="modal" data-bs-target="#perfil">
                                 <i class="ti ti-user"></i>

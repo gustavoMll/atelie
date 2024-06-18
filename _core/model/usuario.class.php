@@ -68,7 +68,7 @@ class Usuario extends Pessoa {
     public function getpessoa()
     {
         if(!Pessoa::exists($this->id_pessoa)){
-            return null;
+            return new Pessoa();
         }
         return Pessoa::load($this->id_pessoa);
     }

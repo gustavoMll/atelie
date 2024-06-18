@@ -15,9 +15,13 @@ $objClass = new $Modules['class']();
 
 $paramAdd = $Modules['class']::filter($request);
 
+if($Modules['class'] == 'Pessoa'){
+    $paramAdd .= " AND id IN (SELECT id_pessoa FROM clientes)";
+}
+
 $rs = $Modules['class']::search([
     's' => "{$objClass->getPk()[0]},{$name}",
-    'w' => $paramAdd,
+    'w' => "{$paramAdd}",
     'a' => $term,
     'o' => '2',
 ]);

@@ -30,7 +30,7 @@
 
                     </div>
                     <ul id="dropdownList" class="bg-white">
-                        <li>Bem vindo, <strong><?=$objSession->get('nome')?></strong></li>
+                        <li>Bem vindo, <strong><?=$objSession->getPessoa()->get('nome')?></strong></li>
                         <li>
                             <a class="d-flex align-items-center justify-content-center gap-2" target="_blank" href="javascript:;" aria-label="ver perfil" data-bs-toggle="modal" data-bs-target="#perfil">
                                 <i class="ti ti-user"></i>

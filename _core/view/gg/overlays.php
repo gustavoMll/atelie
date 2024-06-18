@@ -18,7 +18,7 @@
 
                         <div class="col-sm-6 mb-3">
                             <div class="form-floating">
-                                <input type="text" class="form-control" name="perfilNome" id="perfilNome" placeholder="nome" value="<?= $objSession->get('nome') ?>">
+                                <input type="text" class="form-control" name="perfilNome" id="perfilNome" placeholder="nome" value="<?= $objSession->getPessoa()->get('nome') ?>">
                                 <label for="perfilNome" class="form-label">Nome</label>
                             </div>
                         </div>

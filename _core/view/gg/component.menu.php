@@ -41,19 +41,6 @@
         <?php } ?>
     <?php } ?>
 
-    <?php if($objSession->hasPermition('contas')){?>
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle d-flex align-items-center <?=($request->get('module') == 'contas-a-pagar' || $request->get('module') == 'contas-a-receber' ? " active" : '')?>" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="ti ti-calculator fs-3"></i>
-                Contas
-            </a>
-            <ul class="dropdown-menu dropdown-menu-transparent" aria-labelledby="navbarDropdown">
-                <li><a class="dropdown-item mx-2" href="<?=__PATH__?>contas-a-pagar">Contas a Pagar</a></li>
-                <li><a class="dropdown-item mx-2" href="<?=__PATH__?>contas-a-receber">Contas a Receber</a></li>
-            </ul>
-        </li>
-    <?php }?>
-
 
 
     <?php if($objSession->hasPermition('permissoes') || $objSession->hasPermition('usuarios')){ ?>
