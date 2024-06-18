@@ -23,7 +23,7 @@ class ItemAluguel extends Flex {
         'class' => __CLASS__,
         'ordenacao' => 'id ASC',
         'envia-arquivo' => false,
-        'show-menu'=> true,
+        'show-menu'=> false,
         'icon' => 'ti ti-plus'
     );
 

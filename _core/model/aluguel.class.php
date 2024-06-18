@@ -183,7 +183,7 @@ class Aluguel extends Flex {
                 <div class="card-body">
                     <div class="d-flex justify-content-between"> 
                         <h5 class="card-title">Itens do Aluguel</h5>
-                        <a type="button" class="btn btn-secondary btn-sm px-3" onclick="javascript:modalForm(`itensaluguel`,0, `/id_aluguel/'.$codigo.'`);">
+                        <a type="button" class="btn btn-secondary btn-sm px-3" onclick="javascript:modalForm(`itensaluguel`,0, `/id_aluguel/'.$codigo.'`, loadItens);">
                             <i class="ti ti-plus"></i>Adicionar Itens
                         </a>
                     </div>

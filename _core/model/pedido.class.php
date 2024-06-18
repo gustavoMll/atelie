@@ -178,7 +178,7 @@ class Pedido extends Flex {
                 <div class="card-body">
                     <div class="d-flex justify-content-between"> 
                         <h5 class="card-title">Alugueis do Pedido</h5>
-                        <a type="button" class="btn btn-secondary btn-sm px-3" onclick="javascript:modalForm(`alugueis`,0, `/id_pedido/'.$codigo.'`);">
+                        <a type="button" class="btn btn-secondary btn-sm px-3" onclick="javascript:modalForm(`alugueis`,0, `/id_pedido/'.$codigo.'`, loadAlugueis);">
                             <i class="ti ti-plus"></i>Adicionar Aluguel
                         </a>
                     </div>
