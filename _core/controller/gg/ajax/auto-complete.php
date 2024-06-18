@@ -27,8 +27,19 @@ $rs = $Modules['class']::search([
 ]);
 
 $json = array();
+$id = 0;
 while($rs->next()){
-    $json[] = array('value' => "{$rs->getInt($objClass->getPk()[0])}", 'label' => $rs->getString($name));
+    $id = $rs->getInt($objClass->getPk()[0]);
+    if($Modules['class'] == 'Pessoa'){
+        $rs2  = Cliente::search([
+            's' => 'id',
+            'w' => 'id_pessoa = '.$rs->getInt($objClass->getPk()[0])
+        ]);
+        if($rs2->next()){
+            $id = $rs2->getInt('id');
+        }
+    }
+    $json[] = array('value' => "{$id}", 'label' => $rs->getString($name));
 }
 
 echo json_encode($json);

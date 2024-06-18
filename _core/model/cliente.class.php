@@ -38,13 +38,16 @@ class Cliente extends Flex {
     }
 
     protected $pessoa = null;
-    
     public function getPessoa()
     {
-        if(!Pessoa::exists($this->id_pessoa)){
-            return new Pessoa();
+        if (!$this->pessoa || $this->pessoa->get('id') != $this->get('id_pessoa')) {
+            if (Pessoa::exists((int) $this->get('id_pessoa'), 'id')) {
+                $this->pessoa = Pessoa::load($this->get('id_pessoa'));
+            } else {
+                $this->pessoa = new Pessoa();
+            }
         }
-        return Pessoa::load($this->id_pessoa);
+        return $this->pessoa;
     }
 
     public static function validate() {

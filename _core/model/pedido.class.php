@@ -50,11 +50,17 @@ class Pedido extends Flex {
         4 => 'Dinheiro',
     ];
     
-    public function getCliente(){
-        if (!Pessoa::exists($this->get('id_cliente'))){
-            return new Pessoa();
+    protected $cliente = null;
+    public function getCliente()
+    {
+        if (!$this->cliente || $this->cliente->get('id') != $this->get('id_cliente')) {
+            if (Cliente::exists((int) $this->get('id_cliente'), 'id')) {
+                $this->cliente = Cliente::load($this->get('id_cliente'));
+            } else {
+                $this->cliente = new Cliente();
+            }
         }
-        return Pessoa::load($this->get('id_cliente'));
+        return $this->cliente;
     }
 
 
@@ -158,7 +164,7 @@ class Pedido extends Flex {
         <div class="col-sm-8 mb-3 required">
             <input type="hidden" name="id_cliente" id="id_cliente" value="' . $obj->get('id_cliente') . '"/>
             <div class="form-floating">
-                <input id="nome_fantasia" type="text" placeholder="seu dado aqui" class="form-control autocomplete" data-table="pessoas" data-name="nome" data-field="id_cliente" value="'.$obj->getCliente()->get('nome').'"/>
+                <input id="nome_fantasia" type="text" placeholder="seu dado aqui" class="form-control autocomplete" data-table="pessoas" data-name="nome" data-field="id_cliente" value="'.$obj->getCliente()->getPessoa()->get('nome').'"/>
                 <label for="id_cliente">Cliente</label>
             </div>
         </div>';
@@ -213,7 +219,7 @@ class Pedido extends Flex {
         $string .='
         <div class="col-sm-6 mb-3">
             <div class="form-floating">
-                <input type="text" id="total" value="'.Utils::parseMoney($obj->get('total')).'" name="total" placeholder="Seu dado aqui" class="form-control money">
+                <input type="text" id="total" value="'.$obj->get('total').'" name="total" placeholder="Seu dado aqui" class="form-control money">
                 <label>Tota do Pedido</label>
             </div>
         </div>
@@ -271,11 +277,11 @@ class Pedido extends Flex {
     public static function getLine($obj){
         return '
         <td>'.GG::getCheckboxLine($obj->get('id')).'</td>
-        <td class="link-edit">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->getCliente()->get('nome')).'</td>
+        <td class="link-edit">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->getCliente()->getPessoa()->get('nome')).'</td>
         <td>'.Utils::dateFormat($obj->get('data'), 'd/m/Y').'</td>
         <td>'.($obj->get('total')).'</td>
          '.GG::getResponsiveList([
-            'Cliente' => $obj->getCliente()->get('nome'),
+            'Cliente' => $obj->getCliente()->getPessoa()->get('nome'),
             'Data' => Utils::dateFormat($obj->get('data'), 'd/m/Y'),
             'Pre&ccedil;o' => ($obj->get('total')),
         ], $obj).'
