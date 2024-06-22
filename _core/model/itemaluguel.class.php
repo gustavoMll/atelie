@@ -90,11 +90,11 @@ class ItemAluguel extends Flex {
     		$error .= '<li>O campo "Aluguel" n&atilde;o foi informado</li>';
     	}
         
-        if(!isset($_POST['tipo_item']) || $_POST['tipo_item'] == ''){
+        if(!isset($_POST['tipo_item']) || $_POST['tipo_item'] == '' || !in_array($_POST['tipo_item'], [1,2])){
     		$error .= '<li>O campo "Tipo de Item" n&atilde;o foi informado</li>';
     	}
         
-        if(!isset($_POST['qtd']) || $_POST['qtd'] == ''){
+        if(isset($_POST['tipo_item']) && $_POST['tipo_item'] == 1 && (!isset($_POST['qtd']) || $_POST['qtd'] == '')){
     		$error .= '<li>O campo "Quantidade de Item" n&atilde;o foi informado</li>';
     	}
     	
@@ -168,7 +168,7 @@ class ItemAluguel extends Flex {
         	$string = '<input name="tempId" type="hidden" value="'.$codigo.'"/>';
         }
 
-        $string = '<input name="id_aluguel" type="hidden" value="'.$request->getInt('id_aluguel').'"/>';
+        $string = '<input name="id_aluguel" type="hidden" value="'.$request->query('id_aluguel').'"/>';
 
         $string .= '
         <div class="col-md-3 mb-3 required">
@@ -206,7 +206,7 @@ class ItemAluguel extends Flex {
         ';
 
         $string .='
-        <div class="col-md-3 mb-3 '.($obj->get('tipo_item') == 2 ? 'd-none' : '').' required" id="div_qtd" >
+        <div class="col-md-3 mb-3 '.($obj->get('tipo_item') == 2 ? 'd-none' : '').'" id="div_qtd" >
             <div class="form-floating">
                 <input type="number" id="qtd" name="qtd" min="1" value="'.$obj->get('qtd').'" class="form-control">
                 <label for="qtd">Quantidade</label>

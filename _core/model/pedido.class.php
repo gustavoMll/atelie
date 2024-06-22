@@ -14,9 +14,9 @@ class Pedido extends Flex {
         'usr_ualt' => 'string',
         'dt_ualt' => 'sql',
 	);
-
+    
     protected $primaryKey = array('id');
-
+    
     public static $configGG = array(
         'nome' => 'Pedidos',
         'class' => __CLASS__,
@@ -25,7 +25,7 @@ class Pedido extends Flex {
         'show-menu'=> true,
         'icon' => 'ti ti-plus'
     );
-
+    
     public static function createTable(){
         return '
         DROP TABLE IF EXISTS `pedidos`;
@@ -42,21 +42,23 @@ class Pedido extends Flex {
             `dt_ualt` datetime NOT NULL,
             PRIMARY KEY(`id`),
             FOREIGN KEY (id_cliente) REFERENCES cliente(id)
-        ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4;';
-    }
-
-    public static $formas_pag = [
-        1 => 'Cartão Crédito',
-        2 => 'Cartão Débito',
-        3 => 'Pix',
-        4 => 'Dinheiro',
-    ];
-    
-    protected $cliente = null;
-    public function getCliente()
-    {
-        if (!$this->cliente || $this->cliente->get('id') != $this->get('id_cliente')) {
-            if (Cliente::exists((int) $this->get('id_cliente'), 'id')) {
+            ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4;';
+        }
+        
+        public static $formas_pag = [
+            1 => 'Cartão Crédito',
+            2 => 'Cartão Débito',
+            3 => 'Pix',
+            4 => 'Dinheiro',
+        ];
+       
+        public static $entrada_minima = 50.00;
+        
+        protected $cliente = null;
+        public function getCliente()
+        {
+            if (!$this->cliente || $this->cliente->get('id') != $this->get('id_cliente')) {
+                if (Cliente::exists((int) $this->get('id_cliente'), 'id')) {
                 $this->cliente = Cliente::load($this->get('id_cliente'));
             } else {
                 $this->cliente = new Cliente();
@@ -91,10 +93,14 @@ class Pedido extends Flex {
             $error .= '<li>O campo "Data" &eacute foi inv&aacute;lido</li>';
         }
 
-        if(!isset($_POST['valor_entrada']) || $_POST['valor_entrada'] == '' || (float)$_POST['valor_entrada'] < 0){
+        if(!isset($_POST['valor_entrada']) || $_POST['valor_entrada'] == ''){
             $error .= '<li>O campo "Valor de Entrada" n&atilde;o foi informado</li>';
         }
-    	
+
+        if(isset($_POST['valor_entrada']) && ((float) str_replace(',','.',str_replace('.','',$_POST["valor_entrada"])) < (float) self::$entrada_minima)){
+            $error .= '<li>O campo "Valor de Entrada" &eacute; inv&aacute;lido/</li>';
+        }
+    	 
         if($error==''){
             return true;
         }else{
@@ -117,11 +123,10 @@ class Pedido extends Flex {
             }
             
 			$obj->set('id_cliente', (int) $_POST['id_cliente']);
-			$obj->set('total', Utils::parseMoney($_POST['total']));
+			$obj->set('total', (float) str_replace(',','.',str_replace('.','',$_POST["total"])));
 			$obj->set('data', $_POST['data']);
 			$obj->set('forma_pag', (int) $_POST['forma_pag']);
-			$obj->set('valor_entrada', Utils::parseMoney($_POST['valor_entrada']));
-            
+			$obj->set('valor_entrada', (float) str_replace(',','.',str_replace('.','',$_POST["valor_entrada"])));
             $obj->save();
             
             DocumentoPedido::delete($obj->get('id'));
@@ -136,7 +141,7 @@ class Pedido extends Flex {
 
             $rs = Aluguel::search([
                 's' => 'id',
-                'w' => 'id_pedido = '.isset($_POST['tempId']) ? (int)$_POST['tempId'] : $obj->get('id')
+                'w' => 'id_pedido = '.(isset($_POST['tempId']) ? (int)$_POST['tempId'] : $obj->get('id'))
             ]);
 
             while($rs->next()){
@@ -171,12 +176,14 @@ class Pedido extends Flex {
         $obj = new $classe();
         $obj->set('id', $codigo);
         
+       
         if ($codigo > 0) {
             $obj = self::load($codigo);
         }else{
         	$codigo = time();
         	$string = '<input name="tempId" type="hidden" value="'.$codigo.'"/>';
         }
+
     	$string .= '
         <div class="col-sm-8 mb-3 required">
             <input type="hidden" name="id_cliente" id="id_cliente" value="' . $obj->get('id_cliente') . '"/>
@@ -241,7 +248,7 @@ class Pedido extends Flex {
         $string .='
         <div class="col-sm-6 mb-3">
             <div class="form-floating">
-                <input type="text" id="total" value="'.$obj->get('total').'" name="total" placeholder="Seu dado aqui" class="form-control money">
+                <input type="text" id="total" value="'.Utils::parseMoney((float) $obj->get('total')).'" name="total" placeholder="Seu dado aqui" class="form-control money">
                 <label>Tota do Pedido</label>
             </div>
         </div>
@@ -250,7 +257,7 @@ class Pedido extends Flex {
         $string .= '
             <div class="col-sm-6 mb-3 required">
                 <div class="form-floating">
-                    <input class="form-control money" name="valor_entrada" placeholder="" value="'.$obj->get('valor_entrada').'">
+                    <input class="form-control money" name="valor_entrada" min="50" placeholder="" value="'.($obj->get('valor_entrada') != '' ? Utils::parseMoney((float) $obj->get('valor_entrada')) : Utils::parseMoney(self::$entrada_minima)).'">
                     <label class="form-label">Valor de Entrada</label>
                 </div>
         </div>';
@@ -309,11 +316,11 @@ class Pedido extends Flex {
         <td>'.GG::getCheckboxLine($obj->get('id')).'</td>
         <td class="link-edit">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->getCliente()->getPessoa()->get('nome')).'</td>
         <td>'.Utils::dateFormat($obj->get('data'), 'd/m/Y').'</td>
-        <td>'.($obj->get('total')).'</td>
+        <td>'.Utils::parseMoney($obj->get('total')).'</td>
          '.GG::getResponsiveList([
             'Cliente' => $obj->getCliente()->getPessoa()->get('nome'),
             'Data' => Utils::dateFormat($obj->get('data'), 'd/m/Y'),
-            'Pre&ccedil;o' => ($obj->get('total')),
+            'Pre&ccedil;o' => Utils::parseMoney($obj->get('total')),
         ], $obj).'
         ';
     }

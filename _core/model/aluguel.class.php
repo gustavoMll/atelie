@@ -87,7 +87,7 @@ class Aluguel extends Flex {
 
             $rs = ItemAluguel::search([
                 's' => 'id',
-                'w' => 'id_aluguel='.isset($_POST['tempId']) ? $_POST['tempId'] : $obj->get('id'),
+                'w' => 'id_aluguel='.(isset($_POST['tempId']) ? $_POST['tempId'] : $obj->get('id')),
             ]);
 
             while($rs->next()){
@@ -123,7 +123,6 @@ class Aluguel extends Flex {
         $classe = __CLASS__;
         $obj = new $classe();
         $obj->set('id', $codigo);
-
         if ($codigo > 0) {
             $obj = self::load($codigo);
         }else{
@@ -161,7 +160,7 @@ class Aluguel extends Flex {
                 <div class="card-body">
                     <div class="d-flex justify-content-between"> 
                         <h5 class="card-title">Itens do Aluguel</h5>
-                        <a type="button" class="btn btn-secondary btn-sm px-3" onclick="javascript:modalForm(`itensaluguel`,0, `/id_aluguel/'.$codigo.'`, loadItens);">
+                        <a type="button" class="btn btn-secondary btn-sm px-3" onclick="javascript:modalForm(`itensaluguel`,0, `?id_aluguel='.$codigo.'`, loadItens);">
                             <i class="ti ti-plus"></i>Adicionar Itens
                         </a>
                     </div>
