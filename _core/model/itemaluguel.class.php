@@ -53,16 +53,16 @@ class ItemAluguel extends Flex {
     
     public function getItem(){
 
-        if($this->get('tipo_item' != 1 && $this->get('tipo_item') != 2 )){
+        if($this->get('tipo_item') != 1 && $this->get('tipo_item') != 2 ){
             return new Fantasia();
         }
-
+        
         if($this->get('tipo_item') == 1){
             if(!Acessorio::exists($this->get('id_item'))){
                 return new Acessorio();
             }
             return Acessorio::load($this->get('id_item'));
-        
+            
         }else if($this->get('tipo_item') == 2){
             if(!Fantasia::exists($this->get('id_item'))){
                 return new Fantasia();
@@ -168,7 +168,6 @@ class ItemAluguel extends Flex {
         	$string = '<input name="tempId" type="hidden" value="'.$codigo.'"/>';
         }
 
-        // echo $request->getInt('id_aluguel'); exit;
         $string = '<input name="id_aluguel" type="hidden" value="'.$request->getInt('id_aluguel').'"/>';
 
         $string .= '
@@ -176,7 +175,7 @@ class ItemAluguel extends Flex {
             <div class="form-floating">
                 <select class="form-select" id="tipo_item" name="tipo_item" onchange="mudarTipo(this.value)">';
                     foreach(self::$nm_tipos as $k => $v){
-                        $string .= '<option value="'.$k.'">'.$v.'</option>';
+                        $string .= '<option value="'.$k.'" '.($obj->get('tipo_item') == $k ? 'selected' : '').'>'.$v.'</option>';
                     }
                 $string .='
                 </select>
@@ -185,21 +184,21 @@ class ItemAluguel extends Flex {
         </div>';
 
         $string .= '
-        <div class="col-sm-6 mb-3 d-none" id="div_fantasia">
+        <div class="col-md-9 mb-3 '.($obj->get('tipo_item') == 1 || $obj->get('tipo_item') == '' ? 'd-none' : '').'" id="div_fantasia" >
             <input type="hidden" name="id_fantasia" id="id_fantasia" value="' . $obj->get('id_fantasia') . '"/>
             <div class="form-floating">
-                <input id="nome_fantasia" type="text" placeholder="seu dado aqui" class="form-control autocomplete" data-table="fantasias" data-name="descricao" data-field="id_fantasia" value=""/>
+                <input id="nome_fantasia" type="text" placeholder="seu dado aqui" class="form-control autocomplete" data-table="fantasias" data-name="descricao" data-field="id_fantasia" value="'.$obj->getItem()->get('descricao').'"/>
                 <label for="id_fantasia">Fantasia</label>
             </div>
         </div>
         ';
         
         $string .= '
-        <div class="col-md-6 mb-3" id="div_acessorio">
+        <div class="col-md-6 mb-3 '.($obj->get('tipo_item') == 2 ? 'd-none' : '').'" id="div_acessorio" >
             <input type="hidden" name="id_acessorio" id="id_acessorio" value="' . $obj->get('id_acessorio') . '"/>
             <div class="form-floating">
                 <div class="form-floating">
-                    <input id="nomeAcessorio" name="desc_acessorio" type="text" placeholder="seu dado aqui" class="form-control autocomplete" autocomplete="off" data-table="acessorios" data-name="descricao" data-field="id_acessorio" value=""/>
+                    <input id="nomeAcessorio" name="desc_acessorio" type="text" placeholder="seu dado aqui" class="form-control autocomplete" autocomplete="off" data-table="acessorios" data-name="descricao" data-field="id_acessorio" value="'.$obj->getItem()->get('descricao').'"/>
                     <label for="id_acessorio">Acessorio</label>
                 </div>
             </div>
@@ -207,9 +206,9 @@ class ItemAluguel extends Flex {
         ';
 
         $string .='
-        <div class="col-md-3 mb-3 required">
+        <div class="col-md-3 mb-3 '.($obj->get('tipo_item') == 2 ? 'd-none' : '').' required" id="div_qtd" >
             <div class="form-floating">
-                <input type="number" id="qtd" name="qtd" min="1" value="1" class="form-control">
+                <input type="number" id="qtd" name="qtd" min="1" value="'.$obj->get('qtd').'" class="form-control">
                 <label for="qtd">Quantidade</label>
             </div>
         </div>
@@ -220,7 +219,7 @@ class ItemAluguel extends Flex {
             <div class="form-floating">
                 <select class="form-select" name="modificar" id="modificar" onchange="mostrarTxt(this.value)">
                     <option value="0">Não</option>
-                    <option value="1">Sim</option>
+                    <option value="1" '.($obj->get('obs') != '' ? 'selected' : '').'>Sim</option>
                 </select>
                 <label>Modificar?</label>
             </div>
@@ -228,7 +227,7 @@ class ItemAluguel extends Flex {
         ';
 
         $string .= '
-        <div class="col-sm-12 mb-3" id="div_txt" style="display: none">
+        <div class="col-sm-12 mb-3" id="div_txt" '.($obj->get('obs') == '' ? 'style="display: none"' : '').'>
             <div class="form-group">
                 <label for="">Observa&ccedil;&atilde;o</label>
                 <textarea class="form-control ckeditor" name="obs" id="obs'.$obj->getTableName().'">'.$obj->get('obs').'</textarea>
@@ -241,8 +240,10 @@ class ItemAluguel extends Flex {
                 if(tipo == 1){
                     $(`#div_fantasia`).addClass(`d-none`);
                     $(`#div_acessorio`).removeClass(`d-none`);
+                    $(`#div_qtd`).removeClass(`d-none`);
                 }else if(tipo == 2){
                     $(`#div_acessorio`).addClass(`d-none`);
+                    $(`#div_qtd`).addClass(`d-none`);
                     $(`#div_fantasia`).removeClass(`d-none`);
                 }
             }
@@ -291,14 +292,14 @@ class ItemAluguel extends Flex {
         return '
         <td>'.GG::getCheckboxLine($obj->get('id')).'</td>
         <td>'.self::$nm_tipos[$obj->get('tipo_item')].'</td>
-        <td class="link-edit">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->getItem()->get('descricao')).'</td>
+        <td class="link-edit">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->getItem()->get('descricao'), false).'</td>
         <td class="text-center">'.$obj->get('qtd').'</td>
-        <td>'.Utils::parseMoney($obj->getItem()->get('preco')).'</td>
+        <td>'.$obj->getItem()->get('preco').'</td>
         '.GG::getResponsiveList([
             'Tipo' => self::$nm_tipos[$obj->get('tipo_item')],
             'Descri&ccedil;&atilde;o' => $obj->getItem()->get('descricao'),
             'Quantidade' => $obj->get('qtd'),
-            'Pre&ccedil;o' => Utils::parseMoney($obj->getItem()->get('preco')),
+            'Pre&ccedil;o' => $obj->getItem()->get('preco'),
         ], $obj).'
         ';
     }

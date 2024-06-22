@@ -8,6 +8,7 @@ class Pedido extends Flex {
 		'total' => 'float',
 		'forma_pag' => 'int',
         'data' => 'string',
+        'valor_entrada' => 'float',
         'usr_cad' => 'string',
         'dt_cad' => 'sql',
         'usr_ualt' => 'string',
@@ -34,6 +35,7 @@ class Pedido extends Flex {
             `total` FLOAT(11,2) NOT NULL,
             `forma_pag` INT(1) NOT NULL,
             `data` DATE NOT NULL,
+            `valor_entrada` FLOAT(11,2) NOT NULL,
             `usr_cad` varchar(20) NOT NULL,
             `dt_cad` datetime NOT NULL,
             `usr_ualt` varchar(20) NOT NULL,
@@ -74,13 +76,12 @@ class Pedido extends Flex {
     		$error .= '<li>O campo "Cliente" n&atilde;o foi informado</li>';
     	}
     	
+        if(isset($_POST['id_cliente']) && !Cliente::exists("id={$_POST['id_cliente']}")){
+            $error .= '<li>O cliente informado n&atilde;o existe</li>';
+        }
         if(!isset($_POST['total']) || $_POST['total'] == '' || (float) $_POST['total'] < 0){
     		$error .= '<li>O campo "Total" n&atilde;o foi informado</li>';
     	}
-    	
-        // if(!isset($_POST['forma_pag']) || $_POST['forma_pag'] == '' || !isset(self::$formas_pag[(int) $_POST['forma_pag']])){
-    	// 	$error .= '<li>O campo "Forma de Pagamento" n&atilde;o foi informado</li>';
-    	// }
        
         if(!isset($_POST['data']) || $_POST['data'] == ''){
     		$error .= '<li>O campo "Data" n&atilde;o foi informado</li>';
@@ -88,6 +89,10 @@ class Pedido extends Flex {
 
         if(isset($_POST['data']) && !Utils::dateValid($_POST['data'])){
             $error .= '<li>O campo "Data" &eacute foi inv&aacute;lido</li>';
+        }
+
+        if(!isset($_POST['valor_entrada']) || $_POST['valor_entrada'] == '' || (float)$_POST['valor_entrada'] < 0){
+            $error .= '<li>O campo "Valor de Entrada" n&atilde;o foi informado</li>';
         }
     	
         if($error==''){
@@ -115,6 +120,7 @@ class Pedido extends Flex {
 			$obj->set('total', Utils::parseMoney($_POST['total']));
 			$obj->set('data', $_POST['data']);
 			$obj->set('forma_pag', (int) $_POST['forma_pag']);
+			$obj->set('valor_entrada', Utils::parseMoney($_POST['valor_entrada']));
             
             $obj->save();
             
@@ -127,9 +133,20 @@ class Pedido extends Flex {
                     $objDP->save();
                 }
             }
-            echo 'Registro salvo com sucesso!';
 
-            Utils::generateSitemap();
+            $rs = Aluguel::search([
+                's' => 'id',
+                'w' => 'id_pedido = '.isset($_POST['tempId']) ? (int)$_POST['tempId'] : $obj->get('id')
+            ]);
+
+            while($rs->next()){
+                $objAluguel = Aluguel::load($rs->getInt('id'));
+                $objAluguel->set('id_pedido', $obj->get('id'));
+                $objAluguel->save();
+            }
+            
+
+            echo 'Registro salvo com sucesso!';
 
             $ret['success'] = true;
             $ret['obj'] = $obj;   
@@ -163,16 +180,21 @@ class Pedido extends Flex {
     	$string .= '
         <div class="col-sm-8 mb-3 required">
             <input type="hidden" name="id_cliente" id="id_cliente" value="' . $obj->get('id_cliente') . '"/>
-            <div class="form-floating">
-                <input id="nome_fantasia" type="text" placeholder="seu dado aqui" class="form-control autocomplete" data-table="pessoas" data-name="nome" data-field="id_cliente" value="'.$obj->getCliente()->getPessoa()->get('nome').'"/>
+            <div class="input-group">
+                <div class="form-floating">
+                    <input id="nome_fantasia" type="text" placeholder="seu dado aqui" class="form-control autocomplete" data-table="pessoas" data-name="nome" data-field="id_cliente" value="'.$obj->getCliente()->getPessoa()->get('nome').'"/>
                 <label for="id_cliente">Cliente</label>
+                </div>
+                <a type="button" class="btn btn-secondary btn-sm px-3" onclick="javascript:modalForm(`clientes`,0);">
+                    <i class="ti ti-plus"></i>
+                </a>
             </div>
         </div>';
 
         $string .= '
         <div class="col-sm-4 mb-3 required">
             <div class="form-floating">
-                <input type="date" name="data" id="data" value="'.$obj->get('data').'" class="form-control">
+                <input type="date" name="data" id="data" value="'.($obj->get('data') != '' ? $obj->get('data') : date('Y-m-d') ).'" class="form-control">
                 <label>Data</label>
             </div>
         </div>
@@ -184,7 +206,7 @@ class Pedido extends Flex {
                 <div class="card-body">
                     <div class="d-flex justify-content-between"> 
                         <h5 class="card-title">Alugueis do Pedido</h5>
-                        <a type="button" class="btn btn-secondary btn-sm px-3" onclick="javascript:modalForm(`alugueis`,0, `/id_pedido/'.$codigo.'`, loadAlugueis);">
+                        <a type="button" class="btn btn-secondary btn-sm px-3" onclick="javascript:modalForm(`alugueis`,0, `?id_pedido='.$codigo.'`, loadAlugueis);">
                             <i class="ti ti-plus"></i>Adicionar Aluguel
                         </a>
                     </div>
@@ -224,6 +246,14 @@ class Pedido extends Flex {
             </div>
         </div>
         ';
+
+        $string .= '
+            <div class="col-sm-6 mb-3 required">
+                <div class="form-floating">
+                    <input class="form-control money" name="valor_entrada" placeholder="" value="'.$obj->get('valor_entrada').'">
+                    <label class="form-label">Valor de Entrada</label>
+                </div>
+        </div>';
         
     	
         $string .= '

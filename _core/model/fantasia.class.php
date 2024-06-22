@@ -251,7 +251,6 @@ class Fantasia extends Flex {
                     <th class="col-sm-5">Descri&ccedil;&atilde;o</th>
                     <th class="col-sm-2">Tipo</th>
                     <th class="col-sm-2">Pre&ccedil;o</th>
-                    <th width="10"></th>
                 </tr>
                 </thead>
                 <tbody>';
