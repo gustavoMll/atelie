@@ -2,10 +2,10 @@
 
 <div>
     <h1>Sistema de controle de aluguéis de fantasias e acessórios da loja Ateliê Festa e Fantasia.</h1>
-    <h3>Este é um projeto desenvolvido em PHP.Para acessá-lo localmente, será necessário que a máquina possua um servidor local e o composer instalado.</h3>
+    <h3>Este é um projeto desenvolvido em PHP. Para acessá-lo localmente, será necessário que a máquina possua um servidor local e o composer instalado.</h3>
     <h5>Passo a passo para instalar e rodar o projeto:</h5>
     <ul>
-        <li>O primeiro passo é ter o PHP e um servidor local rodando em sua máquina. Recomendamos que seja utilizado o Xampp por sua praticidade. Ele pode ser baixado <a href="https://www.apachefriends.org/pt_br/download.html" target="_blank">aqui</a>Ao baixar o Xampp, você irá baixar também o php.</li>
+        <li>O primeiro passo é ter o PHP e um servidor local rodando em sua máquina. Recomendamos que seja utilizado o Xampp por sua praticidade. Ele pode ser baixado <a href="https://www.apachefriends.org/pt_br/download.html" target="_blank">aqui</a>. Ao baixar o Xampp, você irá baixar também o php.</li>
         <li>Após ter o php e o servidor, você deve ter o Composer em sua máquina. Ele pode ser baixado <a href="https://getcomposer.org/download/" target="_blank">aqui</a>. Se estiver usando Windows, basta baixar o executável e realizar a instalação. Csao use uma distribuição Linux, siga o passo a passo disponível no site.</li>
         <li>Agora que o Xampp está baixado e isntalado, você deve garantir que o projeto esteja acessível dentro do servidor. Para isso, você deve encontrar a pasta do xampp no local que ele foi instalado (no disco local C, por exemplo). Dentro da pasta do xampp, encontre o diretório htdocs e coloque a pasta do projeto dentro desse diretório.</li>
         <li>O próximo passo é instalar o composer dentro do seu projeto. Utilize um terminal para acessar a pasta do projeto. Se o xampp foi instalado no disco local C, por exemplo, o caminho para o projeto será algo como C:\xampp\htdocs\atelie. Agora acesse a pasta _core e certifique-se que dentro dela há o arquivo composer.json. Caso esteja tudo certo, basta rodar o comando: composer install. Isso deve baixar todas as bibliotecas necessárias. Em caso de ocorrer um erro ao baixar as bibliotecas, tente executar o comando: composer install --ignore-platform-reqs</li>
