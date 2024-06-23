@@ -633,6 +633,12 @@ function fieldFunctions() {
 		$(obj).autocomplete({
 			source: function (request, response) {
 				url = urlBase + "/term/" + encodeURI(request.term);
+				if($(obj).attr("input-aux")){
+					url += "/input-aux/" + $(obj).attr("input-aux");
+				}
+				if($(obj).attr("data-div")){
+					url += "/data-div/" + $(obj).attr("data-div");
+				}
 				if ($(obj).attr("data-name")) {
 					url += "/camponome/" + $(obj).attr("data-name");
 				}
@@ -649,6 +655,10 @@ function fieldFunctions() {
 				});
 			},
 			select: function (event, ui) {
+				console.log(ui);
+				if($(obj).attr("input-aux")){
+					$("#"+$(obj).attr("input-aux")).val(ui.item.campo)
+				}
 				$("#" + $(obj).attr("data-field")).val(ui.item.value);
 				$(obj).val(ui.item.label);
 				return false;

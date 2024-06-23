@@ -80,7 +80,7 @@ class ItemAluguel extends Flex {
     }
 
 
-    public static function validate() {
+    public static function validate($id = 0) {
     	global $request;
         $error = '';
         $id = $request->getInt('id');
@@ -94,9 +94,17 @@ class ItemAluguel extends Flex {
     		$error .= '<li>O campo "Tipo de Item" n&atilde;o foi informado</li>';
     	}
         
-        if(isset($_POST['tipo_item']) && $_POST['tipo_item'] == 1 && (!isset($_POST['qtd']) || $_POST['qtd'] == '')){
-    		$error .= '<li>O campo "Quantidade de Item" n&atilde;o foi informado</li>';
-    	}
+        if(isset($_POST['tipo_item']) && $_POST['tipo_item'] == 1){
+            if(!isset($_POST['qtd']) || $_POST['qtd'] == ''){
+                $error .= '<li>O campo "Quantidade de Item" n&atilde;o foi informado</li>';
+            }elseif(self::exists("id={$id}")){
+                $obj = ItemAluguel::load($id);
+                if((int) $_POST['qtd'] > $obj->get('qtd_disp')){
+                    $error .= '<li>A quantidade de itens n&atilde;o pode ser maior que a quantidade disponível</li>';
+                }
+            }
+        }   
+
     	
         if($error==''){
             return true;
@@ -111,10 +119,10 @@ class ItemAluguel extends Flex {
         $classe = __CLASS__;
         $ret = array('success'=>false, 'obj'=> null);
 
-        if(self::validate()){
+        if(self::validate($request->getInt('id'))){
         	$id = $request->getInt('id');
             $obj = new $classe(array($id));
-
+            $objAcessorio = new Acessorio();
             if ($id > 0) {
                 $obj = self::load($id);
             }
@@ -122,17 +130,24 @@ class ItemAluguel extends Flex {
             $obj->set('tipo_item', (int) $_POST['tipo_item']);
            
             if((int) $_POST['tipo_item'] == 1){
+                echo "AAAA"; exit;
                 $obj->set('id_item', (int) $_POST['id_acessorio']);
+                $objAcessorio = Acessorio::load((int) $_POST['id_acessorio']);
+               
+                if((int) $_POST['qtd'] <= $objAcessorio->get('qtd_disp')){
+                    $objAcessorio->set('qtd_disp', $objAcessorio->get('qtd_disp') - $obj->set('qtd', (int) $_POST['qtd']));
+                }
             }elseif((int) $_POST['tipo_item'] == 2){
                 $obj->set('id_item', (int) $_POST['id_fantasia']);
             }
 
 			$obj->set('id_aluguel', (int) $_POST['id_aluguel']);
-			$obj->set('qtd', (int) $_POST['qtd']);
+			$obj->set('qtd', (int) $_POST['tipo_item'] == 1 ? (int) $_POST['qtd'] : 1);
 			$obj->set('modificar', (int) $_POST['modificar']);
 			$obj->set('obs', $_POST['obs']);
             
             $obj->save();
+            if((int) $_POST['tipo_item'] == 1) $objAcessorio->save();
 
             echo 'Registro salvo com sucesso!';
 
@@ -168,7 +183,7 @@ class ItemAluguel extends Flex {
         	$string = '<input name="tempId" type="hidden" value="'.$codigo.'"/>';
         }
 
-        $string = '<input name="id_aluguel" type="hidden" value="'.$request->query('id_aluguel').'"/>';
+        $string = '<input name="id_aluguel" type="hidden" value="'.($request->query('id_aluguel') != '' ? $request->query('id_aluguel') : $request->getInt('id')).'"/>';
 
         $string .= '
         <div class="col-md-3 mb-3 required">
@@ -187,7 +202,7 @@ class ItemAluguel extends Flex {
         <div class="col-md-9 mb-3 '.($obj->get('tipo_item') == 1 || $obj->get('tipo_item') == '' ? 'd-none' : '').'" id="div_fantasia" >
             <input type="hidden" name="id_fantasia" id="id_fantasia" value="' . $obj->get('id_fantasia') . '"/>
             <div class="form-floating">
-                <input id="nome_fantasia" type="text" placeholder="seu dado aqui" class="form-control autocomplete" data-table="fantasias" data-name="descricao" data-field="id_fantasia" value="'.$obj->getItem()->get('descricao').'"/>
+                <input id="nome_fantasia" type="text" placeholder="seu dado aqui" class="form-control autocomplete" data-table="fantasias" data-name="descricao" data-field="id_fantasia" value="'.$obj->getItem()->get('descricao') .'"/>
                 <label for="id_fantasia">Fantasia</label>
             </div>
         </div>
@@ -198,9 +213,18 @@ class ItemAluguel extends Flex {
             <input type="hidden" name="id_acessorio" id="id_acessorio" value="' . $obj->get('id_acessorio') . '"/>
             <div class="form-floating">
                 <div class="form-floating">
-                    <input id="nomeAcessorio" name="desc_acessorio" type="text" placeholder="seu dado aqui" class="form-control autocomplete" autocomplete="off" data-table="acessorios" data-name="descricao" data-field="id_acessorio" value="'.$obj->getItem()->get('descricao').'"/>
+                    <input id="nomeAcessorio" name="desc_acessorio" type="text" placeholder="seu dado aqui" class="form-control autocomplete" autocomplete="off" data-table="acessorios" data-name="descricao-qtd_disp" input-aux="qtd-disp" data-field="id_acessorio" value="'.$obj->getItem()->get('descricao').'"/>
                     <label for="id_acessorio">Acessorio</label>
                 </div>
+            </div>
+        </div>
+        ';
+        
+        $string .='
+        <div class="col-md-3 mb-3 '.($obj->get('tipo_item') == 2 ? 'd-none' : '').'" id="div_qtd-disp" >
+            <div class="form-floating">
+                <input type="number" readonly id="qtd-disp" name="qtd_disp" value="'.$obj->getItem()->get('qtd_disp').'" class="form-control">
+                <label for="qtd">Quantidade Disponível</label>
             </div>
         </div>
         ';
@@ -241,9 +265,11 @@ class ItemAluguel extends Flex {
                     $(`#div_fantasia`).addClass(`d-none`);
                     $(`#div_acessorio`).removeClass(`d-none`);
                     $(`#div_qtd`).removeClass(`d-none`);
+                    $(`#div_qtd-disp`).removeClass(`d-none`);
                 }else if(tipo == 2){
                     $(`#div_acessorio`).addClass(`d-none`);
                     $(`#div_qtd`).addClass(`d-none`);
+                    $(`#div_qtd-disp`).addClass(`d-none`);
                     $(`#div_fantasia`).removeClass(`d-none`);
                 }
             }

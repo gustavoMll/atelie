@@ -189,7 +189,7 @@ class Pedido extends Flex {
             <input type="hidden" name="id_cliente" id="id_cliente" value="' . $obj->get('id_cliente') . '"/>
             <div class="input-group">
                 <div class="form-floating">
-                    <input id="nome_fantasia" type="text" placeholder="seu dado aqui" class="form-control autocomplete" data-table="pessoas" data-name="nome" data-field="id_cliente" value="'.$obj->getCliente()->getPessoa()->get('nome').'"/>
+                    <input id="nome_fantasia" type="text" placeholder="seu dado aqui" class="form-control autocomplete" data-table="pessoas" data-name="nome-cpf" data-div="()" data-field="id_cliente" value="'.$obj->getCliente()->getPessoa()->get('nome').'"/>
                 <label for="id_cliente">Cliente</label>
                 </div>
                 <a type="button" class="btn btn-secondary btn-sm px-3" onclick="javascript:modalForm(`clientes`,0);">

@@ -441,6 +441,7 @@ function getAddress(idField, nameField) {
 			"https://viacep.com.br/ws/" + cep.replace(/[^0-9]/g, "") + "/json/",
 			function (data) {
 				if (data) {
+					console.log(data);
 					$(`#${idField}endereco`).val(unescape(data.logradouro));
 					$(`#${idField}bairro`).val(unescape(data.bairro));
 					if ($(`#${idField}id_cidade`)) $(`#${idField}id_cidade`).val(unescape(data.ibge));
