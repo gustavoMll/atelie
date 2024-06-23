@@ -80,12 +80,12 @@ class ItemAluguel extends Flex {
     }
 
 
-    public static function validate($id = 0) {
+    public static function validate($id_acessorio) {
     	global $request;
         $error = '';
         $id = $request->getInt('id');
         $paramAdd = 'AND id NOT IN('.$id.')';
-    	
+
         if(!isset($_POST['id_aluguel']) || $_POST['id_aluguel'] == ''){
     		$error .= '<li>O campo "Aluguel" n&atilde;o foi informado</li>';
     	}
@@ -97,9 +97,9 @@ class ItemAluguel extends Flex {
         if(isset($_POST['tipo_item']) && $_POST['tipo_item'] == 1){
             if(!isset($_POST['qtd']) || $_POST['qtd'] == ''){
                 $error .= '<li>O campo "Quantidade de Item" n&atilde;o foi informado</li>';
-            }elseif(self::exists("id={$id}")){
-                $obj = ItemAluguel::load($id);
-                if((int) $_POST['qtd'] > $obj->get('qtd_disp')){
+            }elseif(self::exists("id={$id_acessorio}")){
+                $obj = Acessorio::load($id_acessorio);
+                if(($id == 0 && (int) $_POST['qtd'] > $obj->get('qtd_disp')) || ($id > 0 && (int) $_POST['qtd'] > $obj->get('qtd_disp') + (int)$_POST['qtd'])){
                     $error .= '<li>A quantidade de itens n&atilde;o pode ser maior que a quantidade disponível</li>';
                 }
             }
@@ -118,8 +118,9 @@ class ItemAluguel extends Flex {
     	global $request, $defaultPath;
         $classe = __CLASS__;
         $ret = array('success'=>false, 'obj'=> null);
+        $id_acessorio = isset($_POST['id_acessorio']) ? (int) $_POST['id_acessorio'] : 0;
 
-        if(self::validate($request->getInt('id'))){
+        if(self::validate($id_acessorio)){
         	$id = $request->getInt('id');
             $obj = new $classe(array($id));
             $objAcessorio = new Acessorio();
@@ -130,12 +131,14 @@ class ItemAluguel extends Flex {
             $obj->set('tipo_item', (int) $_POST['tipo_item']);
            
             if((int) $_POST['tipo_item'] == 1){
-                echo "AAAA"; exit;
-                $obj->set('id_item', (int) $_POST['id_acessorio']);
-                $objAcessorio = Acessorio::load((int) $_POST['id_acessorio']);
+                $obj->set('id_item', $id_acessorio);
+                $objAcessorio = Acessorio::load($id_acessorio);
                
-                if((int) $_POST['qtd'] <= $objAcessorio->get('qtd_disp')){
-                    $objAcessorio->set('qtd_disp', $objAcessorio->get('qtd_disp') - $obj->set('qtd', (int) $_POST['qtd']));
+                if($id == 0 && (int) $_POST['qtd'] <= $objAcessorio->get('qtd_disp')){
+                    $objAcessorio->set('qtd_disp', $objAcessorio->get('qtd_disp') - (int) $_POST['qtd']);
+                }elseif($id > 0 && (int) $_POST['qtd'] <= $objAcessorio->get('qtd_disp') + (int) $_POST['qtd']){
+                    $nova_qtd = (int) $_POST['qtd'] - $obj->get('qtd');
+                    $objAcessorio->set('qtd_disp', $objAcessorio->get('qtd_disp') - $nova_qtd);
                 }
             }elseif((int) $_POST['tipo_item'] == 2){
                 $obj->set('id_item', (int) $_POST['id_fantasia']);
@@ -150,8 +153,6 @@ class ItemAluguel extends Flex {
             if((int) $_POST['tipo_item'] == 1) $objAcessorio->save();
 
             echo 'Registro salvo com sucesso!';
-
-            Utils::generateSitemap();
 
             $ret['success'] = true;
             $ret['obj'] = $obj;   
@@ -200,7 +201,7 @@ class ItemAluguel extends Flex {
 
         $string .= '
         <div class="col-md-9 mb-3 '.($obj->get('tipo_item') == 1 || $obj->get('tipo_item') == '' ? 'd-none' : '').'" id="div_fantasia" >
-            <input type="hidden" name="id_fantasia" id="id_fantasia" value="' . $obj->get('id_fantasia') . '"/>
+            <input type="hidden" name="id_fantasia" id="id_fantasia" value="' . $obj->get('id_item') . '"/>
             <div class="form-floating">
                 <input id="nome_fantasia" type="text" placeholder="seu dado aqui" class="form-control autocomplete" data-table="fantasias" data-name="descricao" data-field="id_fantasia" value="'.$obj->getItem()->get('descricao') .'"/>
                 <label for="id_fantasia">Fantasia</label>
@@ -210,7 +211,7 @@ class ItemAluguel extends Flex {
         
         $string .= '
         <div class="col-md-6 mb-3 '.($obj->get('tipo_item') == 2 ? 'd-none' : '').'" id="div_acessorio" >
-            <input type="hidden" name="id_acessorio" id="id_acessorio" value="' . $obj->get('id_acessorio') . '"/>
+            <input type="hidden" name="id_acessorio" id="id_acessorio" value="' . $obj->get('id_item') . '"/>
             <div class="form-floating">
                 <div class="form-floating">
                     <input id="nomeAcessorio" name="desc_acessorio" type="text" placeholder="seu dado aqui" class="form-control autocomplete" autocomplete="off" data-table="acessorios" data-name="descricao-qtd_disp" input-aux="qtd-disp" data-field="id_acessorio" value="'.$obj->getItem()->get('descricao').'"/>

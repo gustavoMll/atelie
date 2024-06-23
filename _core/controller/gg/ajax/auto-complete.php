@@ -56,6 +56,7 @@ while($rs->next()){
     }
 
     $label = $rs->getString($arr[0]);
+    $campo = $rs->getString($arr[0]);
     if(count($arr) > 1){
         for($i=1;$i<count($arr);$i++){
             $campo = $rs->getString($arr[$i]);
