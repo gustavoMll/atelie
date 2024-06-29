@@ -16,7 +16,11 @@ include(__DIR__. "/../config.{$module}.php");
 $objClass = new $Modules['class']();
 
 if(!$Modules['class']::delete($id)){
-    Utils::jsonResponse('Erro ao excluir registro.');
+    $msg = 'Erro ao excluir registro.';
+    if($Modules['class'] == 'Acessorio' || $Modules['class'] == 'Fantasia'){
+        $msg .= ' Este registro está vinculado a um aluguel.';
+    }
+    Utils::jsonResponse($msg);
 }
 
 Utils::jsonResponse('Registro exclu&iacute;do com sucesso.',true);

@@ -9,7 +9,7 @@ class Acessorio extends Flex {
 		'preco' => 'float',
 		'qtd_total' => 'int',
 		'qtd_disp' => 'int',
-		'foto' => 'string',
+		'img' => 'string',
         'ativo' => 'int',
         'usr_cad' => 'string',
         'dt_cad' => 'sql',
@@ -38,7 +38,7 @@ class Acessorio extends Flex {
             `preco` FLOAT(11, 2) NOT NULL,
             `qtd_total` INT(11) NOT NULL,
             `qtd_disp` INT(11) NOT NULL,
-            `foto` VARCHAR(255) NULL,
+            `img` VARCHAR(255) NULL,
             `ativo` INT(1) NOT NULL,
             `usr_cad` varchar(20) NOT NULL,
             `dt_cad` datetime NOT NULL,
@@ -49,7 +49,7 @@ class Acessorio extends Flex {
         ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4;';
     }
 
-    public static $tamFoto = array(
+    public static $tamImg = array(
         'thumb' => array('w'=>288,'h'=>288),
         'small' => array('w'=>576,'h'=>576),
         'regular' => array('w'=>992,'h'=>992),
@@ -125,8 +125,8 @@ class Acessorio extends Flex {
             
             $imgBefore = '';
             if (isset($_FILES['img']) && $_FILES['img']['name'] != '') {
-                $imgBefore = $obj->get('foto');
-                $obj->set('foto', Image::configureName($_FILES['img']['name']));
+                $imgBefore = $obj->get('img');
+                $obj->set('img', Image::configureName($_FILES['img']['name']));
             }
            
             $obj->save();
@@ -143,7 +143,7 @@ class Acessorio extends Flex {
             
             }
             if (isset($_FILES['img']) && $_FILES['img']['name'] != '') {
-                Image::saveFromUpload($imgBefore,'img', self::$tamFoto, $id, $obj->getTableName());
+                Image::saveFromUpload($imgBefore,'img', self::$tamImg, $id, $obj->getTableName());
             }
 
             echo 'Registro salvo com sucesso!';
@@ -161,27 +161,31 @@ class Acessorio extends Flex {
         global $defaultPath;
         $classe = __CLASS__;
         $obj = new $classe();
+        $ret = 0;
 
-        $arrIds = (substr_count($ids, ',') > 0 ? explode(',', $ids) : array($ids));
+        if(!ItemAluguel::exists("tipo_item=1 AND id_item IN ({$ids})")){
+            $arrIds = (substr_count($ids, ',') > 0 ? explode(',', $ids) : array($ids));
 
-        foreach ($arrIds as $id) { 
-            self::deleteImage($id, 'img');
-            Foto::deleteByTipo($id, $obj->getTableName());
-            
-            $caminho = $defaultPath."uploads/".$obj->getTableName()."/{$id}/";
-            if(is_dir($caminho)){
-                $ponteiro  = opendir($caminho);
-                while ($nome_itens = readdir($ponteiro)) {
-                    if($nome_itens != "." && $nome_itens != ".."){
-                        @unlink($caminho.$nome_itens);
+            foreach ($arrIds as $id) { 
+                self::deleteImage($id, 'img');
+                Foto::deleteByTipo($id, $obj->getTableName());
+                
+                $caminho = $defaultPath."uploads/".$obj->getTableName()."/{$id}/";
+                if(is_dir($caminho)){
+                    $ponteiro  = opendir($caminho);
+                    while ($nome_itens = readdir($ponteiro)) {
+                        if($nome_itens != "." && $nome_itens != ".."){
+                            @unlink($caminho.$nome_itens);
+                        }
                     }
+                @rmdir($caminho);
                 }
-               @rmdir($caminho);
-            }
+                
+            } 
             
-        } 
-        
-        $ret = $obj->dbDelete($obj, 'id IN('.$ids.')');
+            $ret = $obj->dbDelete($obj, 'id IN('.$ids.')');
+        }
+
         return $ret;
     }
 
@@ -250,8 +254,8 @@ class Acessorio extends Flex {
         $string .= '
         <div class="form-group col-sm-12 mb-3">
             <label for="input_img_'.$obj->getTableName().'">Imagem<small class="rule">('.implode(', ',Image::$typesAllowed).')</small></label>
-            <input name="img" id="input_img_'.$obj->getTableName().'" onchange="showPreview(this, `foto`, `'.$obj->getTableName().'`);" type="file" class="form-control" value=""/>
-        </div>'.GG::getPreviewImage($obj, 'foto');
+            <input name="img" id="input_img_'.$obj->getTableName().'" onchange="showPreview(this, `img`, `'.$obj->getTableName().'`);" type="file" class="form-control" value=""/>
+        </div>'.GG::getPreviewImage($obj);
 
         return $string;
     }
@@ -283,7 +287,7 @@ class Acessorio extends Flex {
     }
 
     public static function getLine($obj){
-        $img = $obj->getImage('t', $obj->get('id'), $obj->getTableName(), 'foto'); 
+        $img = $obj->getImage('t'); 
         $ret = '<i class="ti ti-photo"></i>';        
         
         if($img != ''){

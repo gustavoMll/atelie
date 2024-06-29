@@ -55,8 +55,10 @@ while($rs->next()){
         }
     }
 
+    $campos = array();
     $label = $rs->getString($arr[0]);
     $campo = $rs->getString($arr[0]);
+    $campos[0] = $campo;
     if(count($arr) > 1){
         for($i=1;$i<count($arr);$i++){
             $campo = $rs->getString($arr[$i]);
@@ -73,11 +75,12 @@ while($rs->next()){
                     $label .= '/'.$campo;
                 }
             }
+            $campos[] = $campo;
         }
         
     }
 
-    $json[] = array('value' => "{$id}", 'label' => $label, 'campo' => $campo);
+    $json[] = array('value' => "{$id}", 'label' => $label, 'campos' => $campos);
 }
 
 echo json_encode($json);

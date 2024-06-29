@@ -52,7 +52,6 @@ class ItemAluguel extends Flex {
     ];
     
     public function getItem(){
-
         if($this->get('tipo_item') != 1 && $this->get('tipo_item') != 2 ){
             return new Fantasia();
         }
@@ -70,6 +69,16 @@ class ItemAluguel extends Flex {
             return Fantasia::load($this->get('id_item'));
         }
     }
+
+    public function getQtdItensAlugados($id_item){
+        $rs = ItemAluguel::search([
+            's' => 'SUM(qtd) AS qtd',
+            'w' => "tipo_item=1 AND id_item={$id_item} AND id_aluguel NOT IN (SELECT id FROM alugueis WHERE dt_entrega <> null)",
+        ]);
+
+        $rs->next();
+        return (int) $rs->getInt('qtd');
+    }
     
     public function getAcessorio(){
         if($this->get('tipo_item') != 1 || !Acessorio::exists($this->get('id_item'))){
@@ -83,9 +92,8 @@ class ItemAluguel extends Flex {
     public static function validate($id_acessorio) {
     	global $request;
         $error = '';
-        $id = $request->getInt('id');
+        $id = $request->getInt('id') > 0;
         $paramAdd = 'AND id NOT IN('.$id.')';
-
         if(!isset($_POST['id_aluguel']) || $_POST['id_aluguel'] == ''){
     		$error .= '<li>O campo "Aluguel" n&atilde;o foi informado</li>';
     	}
@@ -95,16 +103,31 @@ class ItemAluguel extends Flex {
     	}
         
         if(isset($_POST['tipo_item']) && $_POST['tipo_item'] == 1){
-            if(!isset($_POST['qtd']) || $_POST['qtd'] == ''){
-                $error .= '<li>O campo "Quantidade de Item" n&atilde;o foi informado</li>';
-            }elseif(self::exists("id={$id_acessorio}")){
-                $obj = Acessorio::load($id_acessorio);
-                if(($id == 0 && (int) $_POST['qtd'] > $obj->get('qtd_disp')) || ($id > 0 && (int) $_POST['qtd'] > $obj->get('qtd_disp') + (int)$_POST['qtd'])){
-                    $error .= '<li>A quantidade de itens n&atilde;o pode ser maior que a quantidade disponível</li>';
+            if(!isset($_POST['id_acessorio']) || $_POST['id_acessorio'] == ''){
+                $error .= '<li>O campo "Acess&oacute;rio" n&atilde;o foi informado</li>';
+            }elseif(!Acessorio::exists("id={$_POST['id_acessorio']}")){
+                $error .= '<li>O acess&oacute;rio informado n&atilde;o existe</li>';
+            }else{
+                if(!isset($_POST['qtd']) || $_POST['qtd'] == ''){
+                    $error .= '<li>O campo "Quantidade de Item" n&atilde;o foi informado</li>';
+                }elseif((int) $_POST['qtd'] <= 0){
+                    $error .= '<li>A quantidade informada &eacute; inv&acute;lida</li>';
+                }elseif(self::exists("id={$id_acessorio}")){
+                    $obj = Acessorio::load($id_acessorio);
+                    $qtd_ori = 0;
+                    if($id > 0) $qtd_ori = ItemAluguel::load($id)->get('qtd');
+                    if(($id == 0 && (int) $_POST['qtd'] > $obj->get('qtd_disp')) || ($id > 0 && $obj->get('qtd_disp') < (int)$_POST['qtd'] - ($qtd_ori))){
+                        $error .= '<li>A quantidade de itens n&atilde;o pode ser maior que a quantidade disponível</li>';
+                    }
                 }
             }
-        }   
-
+        }elseif(isset($_POST['tipo_item']) && $_POST['tipo_item'] == 2){
+            if(!isset($_POST['id_fantasia']) || $_POST['id_fantasia'] == ''){
+                $error .= '<li>O campo "Fantasia" n&atilde;o foi informado</li>';
+            }elseif(!Fantasia::exists("id={$_POST['id_fantasia']}")){
+                $error .= '<li>A fantasia informada n&atilde;o existe</li>';
+            }
+        }
     	
         if($error==''){
             return true;
@@ -124,22 +147,16 @@ class ItemAluguel extends Flex {
         	$id = $request->getInt('id');
             $obj = new $classe(array($id));
             $objAcessorio = new Acessorio();
+            $qtd_original = 0;
             if ($id > 0) {
                 $obj = self::load($id);
+                $qtd_original = $obj->get('qtd');
             }
             
             $obj->set('tipo_item', (int) $_POST['tipo_item']);
            
             if((int) $_POST['tipo_item'] == 1){
-                $obj->set('id_item', $id_acessorio);
-                $objAcessorio = Acessorio::load($id_acessorio);
-               
-                if($id == 0 && (int) $_POST['qtd'] <= $objAcessorio->get('qtd_disp')){
-                    $objAcessorio->set('qtd_disp', $objAcessorio->get('qtd_disp') - (int) $_POST['qtd']);
-                }elseif($id > 0 && (int) $_POST['qtd'] <= $objAcessorio->get('qtd_disp') + (int) $_POST['qtd']){
-                    $nova_qtd = (int) $_POST['qtd'] - $obj->get('qtd');
-                    $objAcessorio->set('qtd_disp', $objAcessorio->get('qtd_disp') - $nova_qtd);
-                }
+                $obj->set('id_item', (int) $_POST['id_acessorio']);
             }elseif((int) $_POST['tipo_item'] == 2){
                 $obj->set('id_item', (int) $_POST['id_fantasia']);
             }
@@ -148,9 +165,19 @@ class ItemAluguel extends Flex {
 			$obj->set('qtd', (int) $_POST['tipo_item'] == 1 ? (int) $_POST['qtd'] : 1);
 			$obj->set('modificar', (int) $_POST['modificar']);
 			$obj->set('obs', $_POST['obs']);
+
+            if($obj->get('tipo_item') == 1){
+                $objAcessorio = Acessorio::load($obj->get('id_item'));
+                if($id > 0 && (int) $_POST['qtd'] <= $objAcessorio->get('qtd_disp') + (int) $_POST['qtd']){
+                    $nova_qtd = (int) $_POST['qtd'] - $qtd_original;
+                    $objAcessorio->set('qtd_disp', $objAcessorio->get('qtd_disp') - $nova_qtd);
+                }elseif($id == 0){
+                    $objAcessorio->set('qtd_disp', ((int)$objAcessorio->get('qtd_disp') - (int) $_POST['qtd']));
+                }
+                $objAcessorio->save();
+            }
             
             $obj->save();
-            if((int) $_POST['tipo_item'] == 1) $objAcessorio->save();
 
             echo 'Registro salvo com sucesso!';
 
@@ -184,7 +211,7 @@ class ItemAluguel extends Flex {
         	$string = '<input name="tempId" type="hidden" value="'.$codigo.'"/>';
         }
 
-        $string = '<input name="id_aluguel" type="hidden" value="'.($request->query('id_aluguel') != '' ? $request->query('id_aluguel') : $request->getInt('id')).'"/>';
+        $string = '<input name="id_aluguel" type="hidden" value="'.($obj->get('id_aluguel') != '' ? $obj->get('id_aluguel') : $request->getInt('id_aluguel')).'"/>';
 
         $string .= '
         <div class="col-md-3 mb-3 required">
@@ -203,7 +230,7 @@ class ItemAluguel extends Flex {
         <div class="col-md-9 mb-3 '.($obj->get('tipo_item') == 1 || $obj->get('tipo_item') == '' ? 'd-none' : '').'" id="div_fantasia" >
             <input type="hidden" name="id_fantasia" id="id_fantasia" value="' . $obj->get('id_item') . '"/>
             <div class="form-floating">
-                <input id="nome_fantasia" type="text" placeholder="seu dado aqui" class="form-control autocomplete" data-table="fantasias" data-name="descricao" data-field="id_fantasia" value="'.$obj->getItem()->get('descricao') .'"/>
+                <input id="nome_fantasia" type="text" placeholder="seu dado aqui" class="form-control autocomplete" data-table="fantasias" data-name="descricao-preco" data-field="id_fantasia" value="'.$obj->getItem()->get('descricao') .'"/>
                 <label for="id_fantasia">Fantasia</label>
             </div>
         </div>
@@ -214,9 +241,18 @@ class ItemAluguel extends Flex {
             <input type="hidden" name="id_acessorio" id="id_acessorio" value="' . $obj->get('id_item') . '"/>
             <div class="form-floating">
                 <div class="form-floating">
-                    <input id="nomeAcessorio" name="desc_acessorio" type="text" placeholder="seu dado aqui" class="form-control autocomplete" autocomplete="off" data-table="acessorios" data-name="descricao-qtd_disp" input-aux="qtd-disp" data-field="id_acessorio" value="'.$obj->getItem()->get('descricao').'"/>
+                    <input id="nomeAcessorio" name="desc_acessorio" type="text" placeholder="seu dado aqui" class="form-control autocomplete" autocomplete="off" data-table="acessorios" data-name="descricao-qtd_disp-preco" input-aux="preco-acessorio/qtd-disp" data-field="id_acessorio" value="'.$obj->getItem()->get('descricao').'"/>
                     <label for="id_acessorio">Acessorio</label>
                 </div>
+            </div>
+        </div>
+        ';
+
+        $string .='
+        <div class="col-md-3 mb-3 '.($obj->get('tipo_item') == 2 ? 'd-none' : '').'" id="div_preco-acessorio" >
+            <div class="form-floating">
+                <input type="number" readonly id="preco-acessorio" value="'.$obj->getItem()->get('preco').'" class="form-control">
+                <label for="preco-acessorio">Pre&ccedil;o</label>
             </div>
         </div>
         ';
@@ -226,15 +262,6 @@ class ItemAluguel extends Flex {
             <div class="form-floating">
                 <input type="number" readonly id="qtd-disp" name="qtd_disp" value="'.$obj->getItem()->get('qtd_disp').'" class="form-control">
                 <label for="qtd">Quantidade Disponível</label>
-            </div>
-        </div>
-        ';
-
-        $string .='
-        <div class="col-md-3 mb-3 '.($obj->get('tipo_item') == 2 ? 'd-none' : '').'" id="div_qtd" >
-            <div class="form-floating">
-                <input type="number" id="qtd" name="qtd" min="1" value="'.$obj->get('qtd').'" class="form-control">
-                <label for="qtd">Quantidade</label>
             </div>
         </div>
         ';
@@ -264,14 +291,18 @@ class ItemAluguel extends Flex {
             function mudarTipo(tipo){
                 if(tipo == 1){
                     $(`#div_fantasia`).addClass(`d-none`);
+                    $(`#div_preco-fantasia`).addClass(`d-none`);
                     $(`#div_acessorio`).removeClass(`d-none`);
                     $(`#div_qtd`).removeClass(`d-none`);
                     $(`#div_qtd-disp`).removeClass(`d-none`);
+                    $(`#div_preco-acessorio`).removeClass(`d-none`);
                 }else if(tipo == 2){
                     $(`#div_acessorio`).addClass(`d-none`);
                     $(`#div_qtd`).addClass(`d-none`);
                     $(`#div_qtd-disp`).addClass(`d-none`);
+                    $(`#div_preco-acessorio`).addClass(`d-none`);
                     $(`#div_fantasia`).removeClass(`d-none`);
+                    $(`#div_preco-fantasia`).removeClass(`d-none`);
                 }
             }
 

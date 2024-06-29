@@ -27,44 +27,58 @@ class Pedido extends Flex {
     );
     
     public static function createTable(){
-        return '
-        DROP TABLE IF EXISTS `pedidos`;
-        CREATE TABLE `pedidos` (
-            `id` int(11) NOT NULL AUTO_INCREMENT,
-            `id_cliente` int(11) NOT NULL,
-            `total` FLOAT(11,2) NOT NULL,
-            `forma_pag` INT(1) NOT NULL,
-            `data` DATE NOT NULL,
-            `valor_entrada` FLOAT(11,2) NOT NULL,
-            `usr_cad` varchar(20) NOT NULL,
-            `dt_cad` datetime NOT NULL,
-            `usr_ualt` varchar(20) NOT NULL,
-            `dt_ualt` datetime NOT NULL,
-            PRIMARY KEY(`id`),
-            FOREIGN KEY (id_cliente) REFERENCES cliente(id)
-            ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4;';
-        }
+    return '
+    DROP TABLE IF EXISTS `pedidos`;
+    CREATE TABLE `pedidos` (
+        `id` int(11) NOT NULL AUTO_INCREMENT,
+        `id_cliente` int(11) NOT NULL,
+        `total` FLOAT(11,2) NOT NULL,
+        `forma_pag` INT(1) NOT NULL,
+        `data` DATE NOT NULL,
+        `valor_entrada` FLOAT(11,2) NOT NULL,
+        `usr_cad` varchar(20) NOT NULL,
+        `dt_cad` datetime NOT NULL,
+        `usr_ualt` varchar(20) NOT NULL,
+        `dt_ualt` datetime NOT NULL,
+        PRIMARY KEY(`id`),
+        FOREIGN KEY (id_cliente) REFERENCES cliente(id)
+        ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4;';
+    }
         
-        public static $formas_pag = [
-            1 => 'Cartão Crédito',
-            2 => 'Cartão Débito',
-            3 => 'Pix',
-            4 => 'Dinheiro',
-        ];
-       
-        public static $entrada_minima = 50.00;
-        
-        protected $cliente = null;
-        public function getCliente()
-        {
-            if (!$this->cliente || $this->cliente->get('id') != $this->get('id_cliente')) {
-                if (Cliente::exists((int) $this->get('id_cliente'), 'id')) {
+    public static $formas_pag = [
+        1 => 'Cartão Crédito',
+        2 => 'Cartão Débito',
+        3 => 'Pix',
+        4 => 'Dinheiro',
+    ];
+    
+    public static $entrada_minima = 50.00;
+    
+    protected $cliente = null;
+    public function getCliente(){
+        if (!$this->cliente || $this->cliente->get('id') != $this->get('id_cliente')) {
+            if (Cliente::exists((int) $this->get('id_cliente'), 'id')) {
                 $this->cliente = Cliente::load($this->get('id_cliente'));
             } else {
                 $this->cliente = new Cliente();
             }
         }
         return $this->cliente;
+    }
+
+    public function getValorPedido($tempId = 0){
+        $valor = 0;
+        $id = $tempId > 0 ? $tempId : $this->get('id'); 
+
+        $rs = Aluguel::search([
+            's' => 'id',
+            'w' => 'id_pedido='.$id,
+        ]);
+
+        while($rs->next()){
+            $valor += Aluguel::load($rs->getInt('id'))->getValorAluguel();    
+        }
+        return $valor;
     }
 
 
@@ -123,7 +137,7 @@ class Pedido extends Flex {
             }
             
 			$obj->set('id_cliente', (int) $_POST['id_cliente']);
-			$obj->set('total', (float) str_replace(',','.',str_replace('.','',$_POST["total"])));
+			$obj->set('total', Utils::parseMoney($id > 0 ? $obj->getValorPedido() : $obj->getValorPedido($_POST['tempId'])));
 			$obj->set('data', $_POST['data']);
 			$obj->set('forma_pag', (int) $_POST['forma_pag']);
 			$obj->set('valor_entrada', (float) str_replace(',','.',str_replace('.','',$_POST["valor_entrada"])));
@@ -139,17 +153,27 @@ class Pedido extends Flex {
                 }
             }
 
+            if(isset($_POST['tempId'])){
+                $rs = Aluguel::search([
+                    's' => 'id',
+                    'w' => 'id_pedido = '.(isset($_POST['tempId']) ? (int)$_POST['tempId'] : $obj->get('id'))
+                ]);
+
+                while($rs->next()){
+                    $objAluguel = Aluguel::load($rs->getInt('id'));
+                    $objAluguel->set('id_pedido', $obj->get('id'));
+                    $objAluguel->save();
+                }
+            }
+
             $rs = Aluguel::search([
                 's' => 'id',
-                'w' => 'id_pedido = '.(isset($_POST['tempId']) ? (int)$_POST['tempId'] : $obj->get('id'))
+                'w' => "id_pedido NOT IN (SELECT id FROM pedidos)"
             ]);
 
             while($rs->next()){
-                $objAluguel = Aluguel::load($rs->getInt('id'));
-                $objAluguel->set('id_pedido', $obj->get('id'));
-                $objAluguel->save();
+                $objAluguel->delete($rs->getInt('id'));
             }
-            
 
             echo 'Registro salvo com sucesso!';
 
@@ -165,7 +189,21 @@ class Pedido extends Flex {
         $classe = __CLASS__;
         $obj = new $classe();
 
+        $rs = ItemAluguel::search([
+            's' => 'id_item, qtd',
+            'w' => "tipo_item = 2 AND id_aluguel IN (SELECT id FROM alugueis WHERE id_pedido IN ({$ids}))",
+        ]);
+
+        while($rs->next()){
+            $objA = Acessorio::load($rs->getInt('id_item'));
+            $objA->set('qtd_disp', (int) $objA->get('qtd_disp') + (int) $rs->getInt('qtd'));
+            $objA->save();
+        }
+
+        Flex::dbDelete(new ItemAluguel(), "id_aluguel IN (SELECT id FROM alugueis WHERE id_pedido IN ({$ids}))");
+        Flex::dbDelete(new Aluguel(), "id_pedido IN ({$ids})");
         $ret = $obj->dbDelete($obj, 'id IN('.$ids.')');
+        
         return $ret;
     }
 
@@ -213,7 +251,7 @@ class Pedido extends Flex {
                 <div class="card-body">
                     <div class="d-flex justify-content-between"> 
                         <h5 class="card-title">Alugueis do Pedido</h5>
-                        <a type="button" class="btn btn-secondary btn-sm px-3" onclick="javascript:modalForm(`alugueis`,0, `?id_pedido='.$codigo.'`, loadAlugueis);">
+                        <a type="button" class="btn btn-secondary btn-sm px-3" onclick="javascript:modalForm(`alugueis`,0, `/id_pedido/'.$codigo.'`, loadAlugueis);">
                             <i class="ti ti-plus"></i>Adicionar Aluguel
                         </a>
                     </div>
@@ -236,7 +274,7 @@ class Pedido extends Flex {
             <div class="form-floating">
                 <select class="form-select" id="forma_pag" name="forma_pag">';
                 foreach(self::$formas_pag as $k => $v){
-                    $string .= '<option value="'.$k.'">'.$v.'</option>';
+                    $string .= '<option value="'.$k.'" '.($k == $obj->get('forma_pag') ? 'selected' : '').'>'.$v.'</option>';
                 }
                 $string .='
                 </select>
@@ -248,7 +286,7 @@ class Pedido extends Flex {
         $string .='
         <div class="col-sm-6 mb-3">
             <div class="form-floating">
-                <input type="text" id="total" value="'.Utils::parseMoney((float) $obj->get('total')).'" name="total" placeholder="Seu dado aqui" class="form-control money">
+                <input type="text" id="total" value="'.Utils::parseMoney((float) $obj->get('total')).'" name="total" readonly placeholder="Seu dado aqui" class="form-control money">
                 <label>Tota do Pedido</label>
             </div>
         </div>
@@ -316,11 +354,11 @@ class Pedido extends Flex {
         <td>'.GG::getCheckboxLine($obj->get('id')).'</td>
         <td class="link-edit">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->getCliente()->getPessoa()->get('nome')).'</td>
         <td>'.Utils::dateFormat($obj->get('data'), 'd/m/Y').'</td>
-        <td>'.Utils::parseMoney($obj->get('total')).'</td>
+        <td>'.Utils::parseMoney($obj->getValorPedido()).'</td>
          '.GG::getResponsiveList([
             'Cliente' => $obj->getCliente()->getPessoa()->get('nome'),
             'Data' => Utils::dateFormat($obj->get('data'), 'd/m/Y'),
-            'Pre&ccedil;o' => Utils::parseMoney($obj->get('total')),
+            'Pre&ccedil;o' => Utils::parseMoney($obj->getValorPedido()),
         ], $obj).'
         ';
     }

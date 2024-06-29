@@ -23,7 +23,7 @@ class Aluguel extends Flex {
         'class' => __CLASS__,
         'ordenacao' => 'dt_entrega ASC',
         'envia-arquivo' => false,
-        'show-menu'=> true,
+        'show-menu'=> false,
         'icon' => 'ti ti-plus'
     );
 
@@ -47,14 +47,51 @@ class Aluguel extends Flex {
         ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4;';
     }
     
+    public function getValorAluguel($tempId = 0){
+        $valor = 0;
+        $id = $tempId > 0 ? $tempId : $this->get('id'); 
+        
+        $rs = ItemAluguel::search([
+            's' => 'id, id_item, tipo_item, qtd',
+            'w' => 'id_aluguel='.$id,
+        ]);
+
+        while($rs->next()){
+            if($rs->getInt('tipo_item') == 1){
+                if(Acessorio::exists("id={$rs->getInt('id_item')}")){
+                    $valor += ((float) Acessorio::load($rs->getInt('id_item'))->get('preco') * (int) $rs->getInt('qtd'));
+                }
+            }elseif($rs->getInt('tipo_item') == 2){
+                if(Fantasia::exists("id={$rs->getInt('id_item')}")){
+                    $valor += (float) Fantasia::load($rs->getInt('id_item'))->get('preco'); 
+                }
+            }
+        }
+        return $valor;
+    }
+
+    protected $pedido = null;
+    public function getPedido(){
+        if (!$this->pedido || $this->pedido->get('id') != $this->get('id_pedido')) {
+            if (Pedido::exists((int) $this->get('id_pedido'), 'id')) {
+                $this->pedido = Pedido::load($this->get('id_pedido'));
+            } else {
+                $this->pedido = new Pedido();
+            }
+        }
+        return $this->pedido;
+    }
+
     public static function validate() {
     	global $request;
         $error = '';
         $id = $request->getInt('id');
         $paramAdd = 'AND id NOT IN('.$id.')';
     	
-        
-    	
+        if(!isset($_POST['dt_prazo']) || $_POST['dt_prazo'] == '' || !Utils::dateValid($_POST['dt_prazo'])){
+    		$error .= '<li>O campo "Prazo de Devolu&ccedil;&atilde;o" n&atilde;o foi informado</li>';
+    	}
+
         if($error==''){
             return true;
         }else{
@@ -67,7 +104,8 @@ class Aluguel extends Flex {
     	global $request, $defaultPath;
         $classe = __CLASS__;
         $ret = array('success'=>false, 'obj'=> null);
-
+        
+        
         if(self::validate()){
         	$id = $request->getInt('id');
             $obj = new $classe(array($id));
@@ -75,13 +113,13 @@ class Aluguel extends Flex {
             if ($id > 0) {
                 $obj = self::load($id);
             }
-            
+
 			$obj->set('id_pedido', (int) $_POST['id_pedido']);
 			$obj->set('dt_uso', $_POST['dt_uso']);
 			$obj->set('dt_prazo', $_POST['dt_prazo']);
 			$obj->set('dt_entrega', $_POST['dt_entrega']);
 			$obj->set('local_uso', $_POST['local_uso']);
-			$obj->set('valor_aluguel', Utils::parseMoney($_POST['valor_aluguel']));
+			$obj->set('valor_aluguel', Utils::parseMoney($id > 0 ? $obj->getValorAluguel() : $obj->getValorAluguel($_POST['tempId'])));
             
             $obj->save();
 
@@ -96,6 +134,19 @@ class Aluguel extends Flex {
                 $objIA->save();
             }
 
+            $rs = ItemAluguel::search([
+                's' => 'id, id_item, tipo_item',
+                'w' => "id_aluguel NOT IN (SELECT id FROM alugueis)"
+            ]);
+
+            while($rs->next()){
+                $objIA = ItemAluguel::load($rs->getInt('id'));
+                if($rs->getInt('tipo_item') == 1){
+                    $objA = Acessorio::load($rs->getInt('id_item'));
+                    $objA->set('qtd_disp', $objA->get('qtd_disp') + $objIA->get('qtd'));
+                }
+                $objIA->dbDelete($objIA, "id={$objIA->get('id')}");
+            }
 
             echo 'Registro salvo com sucesso!';
 
@@ -112,6 +163,20 @@ class Aluguel extends Flex {
         global $defaultPath;
         $classe = __CLASS__;
         $obj = new $classe();
+        
+        $rs = ItemAluguel::search([
+            's' => 'id, id_item, tipo_item',
+            'w' => "id_aluguel NOT IN (SELECT id FROM alugueis)"
+        ]);
+
+        while($rs->next()){
+            $objIA = ItemAluguel::load($rs->getInt('id'));
+            if($rs->getInt('tipo_item') == 1){
+                $objA = Acessorio::load($rs->getInt('id_item'));
+                $objA->set('qtd_disp', $objA->get('qtd_disp') + $objIA->get('qtd'));
+            }
+            $objIA->dbDelete($objIA, "id={$objIA->get('id')}");
+        }
 
         $ret = $obj->dbDelete($obj, 'id IN('.$ids.')');
         return $ret;
@@ -123,16 +188,17 @@ class Aluguel extends Flex {
         $classe = __CLASS__;
         $obj = new $classe();
         $obj->set('id', $codigo);
+
         if ($codigo > 0) {
             $obj = self::load($codigo);
         }else{
         	$codigo = time();
         	$string = '<input name="tempId" type="hidden" value="'.$codigo.'"/>';
         }
-
-        $string .= '<input name="id_pedido" type="hidden" value="'.$request->query('id_pedido').'"/>';
+       
+        $string .= '<input name="id_pedido" type="hidden" value="'.($obj->get('id_pedido') != '' ? $obj->get('id_pedido') : $request->getInt('id_pedido')).'"/>';
     	$string .= '
-        <div class="col-sm-4 mb-3 required">
+        <div class="col-sm-4 mb-3">
             <div class="form-floating">
                 <input class="form-control" type="date" name="dt_uso" placeholder="" value="'.$obj->get('dt_uso').'">
                 <label class="form-label">Data de Uso</label>
@@ -141,7 +207,7 @@ class Aluguel extends Flex {
     	$string .= '
         <div class="col-sm-4 mb-3 required">
             <div class="form-floating">
-                <input class="form-control" type="date" name="dt_prazo" placeholder="" value="'.$obj->get('dt_prazo').'">
+                <input class="form-control" type="date" name="dt_prazo" placeholder="Data" required value="'.$obj->get('dt_prazo').'">
                 <label class="form-label">Prazo de Devolução</label>
             </div>
         </div>';
@@ -160,7 +226,7 @@ class Aluguel extends Flex {
                 <div class="card-body">
                     <div class="d-flex justify-content-between"> 
                         <h5 class="card-title">Itens do Aluguel</h5>
-                        <a type="button" class="btn btn-secondary btn-sm px-3" onclick="javascript:modalForm(`itensaluguel`,0, `?id_aluguel='.$codigo.'`, loadItens);">
+                        <a type="button" class="btn btn-secondary btn-sm px-3" onclick="javascript:modalForm(`itensaluguel`,0, `/id_aluguel/'.$codigo.'`, loadItens);">
                             <i class="ti ti-plus"></i>Adicionar Itens
                         </a>
                     </div>
@@ -188,7 +254,7 @@ class Aluguel extends Flex {
         </div>';
 
         $string .= '
-            <div class="col-sm-3 mb-3 required">
+            <div class="col-sm-3 mb-3">
                 <div class="form-floating">
                     <input class="form-control money" readonly name="valor_aluguel" placeholder="" value="'.$obj->get('valor_aluguel').'">
                     <label class="form-label">Valor do Aluguel</label>
@@ -204,7 +270,7 @@ class Aluguel extends Flex {
                 <thead>
                 <tr>
                     <th width="10">'.GG::getCheckboxHead().'</th>
-                    <th class="col-sm-4">Data de Uso</th>
+                    <th class="col-sm-4">Cliente</th>
                     <th class="col-sm-4">Prazo</th>
                     <th class="col-sm-4">Valor (R$)</th>
                 </tr>
@@ -224,16 +290,15 @@ class Aluguel extends Flex {
     }
 
     public static function getLine($obj){
-        
         return '
         <td>'.GG::getCheckboxLine($obj->get('id')).'</td>
-        <td class="link-edit">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), Utils::dateFormat($obj->get('dt_uso'), 'd/m/Y'), false).'</td>
-        <td>'.Utils::dateFormat($obj->get('dt_prazo'), 'd/m/Y').'</td>
-        <td>'.Utils::parseMoney($obj->get('valor_aluguel')).'</td>
+        <td>'.$obj->getPedido()->getCliente()->getPessoa()->get('nome').'</td>
+        <td class="link-edit">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), Utils::dateFormat($obj->get('dt_prazo'), 'd/m/Y'), false).'</td>
+        <td>'.Utils::parseMoney($obj->getValorAluguel()).'</td>
         '.GG::getResponsiveList([
-            'Data' => Utils::dateFormat($obj->get('dt_uso'), 'd/m/Y'),
+            'Data' => $obj->getPedido()->getCliente()->getPessoa()->get('nome'),
             'Prazo' => Utils::dateFormat($obj->get('dt_prazo'), 'd/m/Y'),
-            'Valor' => Utils::parseMoney($obj->get('valor_aluguel')),
+            'Valor' => Utils::parseMoney($obj->getValorAluguel()),
         ], $obj).'
         ';
     }
