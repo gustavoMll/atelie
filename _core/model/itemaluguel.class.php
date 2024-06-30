@@ -92,7 +92,7 @@ class ItemAluguel extends Flex {
     public static function validate($id_acessorio) {
     	global $request;
         $error = '';
-        $id = $request->getInt('id') > 0;
+        $id = $request->getInt('id');
         $paramAdd = 'AND id NOT IN('.$id.')';
         if(!isset($_POST['id_aluguel']) || $_POST['id_aluguel'] == ''){
     		$error .= '<li>O campo "Aluguel" n&atilde;o foi informado</li>';
@@ -111,12 +111,16 @@ class ItemAluguel extends Flex {
                 if(!isset($_POST['qtd']) || $_POST['qtd'] == ''){
                     $error .= '<li>O campo "Quantidade de Item" n&atilde;o foi informado</li>';
                 }elseif((int) $_POST['qtd'] <= 0){
-                    $error .= '<li>A quantidade informada &eacute; inv&acute;lida</li>';
+                    $error .= '<li>A quantidade informada &eacute; inv&aacute;lida</li>';
                 }elseif(self::exists("id={$id_acessorio}")){
                     $obj = Acessorio::load($id_acessorio);
+                    
                     $qtd_ori = 0;
-                    if($id > 0) $qtd_ori = ItemAluguel::load($id)->get('qtd');
-                    if(($id == 0 && (int) $_POST['qtd'] > $obj->get('qtd_disp')) || ($id > 0 && $obj->get('qtd_disp') < (int)$_POST['qtd'] - ($qtd_ori))){
+                    if($id > 0){
+                        $objIA = ItemAluguel::load($id);
+                        $qtd_ori = $objIA->get('qtd');
+                    } 
+                    if(($id == 0 && (int) $_POST['qtd'] > $obj->get('qtd_disp')) || ($id > 0 && (int)$_POST['qtd'] > $qtd_ori + $obj->get('qtd_disp'))){
                         $error .= '<li>A quantidade de itens n&atilde;o pode ser maior que a quantidade disponível</li>';
                     }
                 }
@@ -151,6 +155,7 @@ class ItemAluguel extends Flex {
             if ($id > 0) {
                 $obj = self::load($id);
                 $qtd_original = $obj->get('qtd');
+                
             }
             
             $obj->set('tipo_item', (int) $_POST['tipo_item']);
@@ -241,7 +246,7 @@ class ItemAluguel extends Flex {
             <input type="hidden" name="id_acessorio" id="id_acessorio" value="' . $obj->get('id_item') . '"/>
             <div class="form-floating">
                 <div class="form-floating">
-                    <input id="nomeAcessorio" name="desc_acessorio" type="text" placeholder="seu dado aqui" class="form-control autocomplete" autocomplete="off" data-table="acessorios" data-name="descricao-qtd_disp-preco" input-aux="preco-acessorio/qtd-disp" data-field="id_acessorio" value="'.$obj->getItem()->get('descricao').'"/>
+                    <input id="nomeAcessorio" name="desc_acessorio" type="text" placeholder="seu dado aqui" class="form-control autocomplete" autocomplete="off" data-table="acessorios" data-name="descricao-qtd_disp-preco" input-aux="qtd-disp/preco-acessorio" data-field="id_acessorio" value="'.$obj->getItem()->get('descricao').'"/>
                     <label for="id_acessorio">Acessorio</label>
                 </div>
             </div>
@@ -262,6 +267,15 @@ class ItemAluguel extends Flex {
             <div class="form-floating">
                 <input type="number" readonly id="qtd-disp" name="qtd_disp" value="'.$obj->getItem()->get('qtd_disp').'" class="form-control">
                 <label for="qtd">Quantidade Disponível</label>
+            </div>
+        </div>
+        ';
+
+        $string .='
+        <div class="col-md-3 mb-3 '.($obj->get('tipo_item') == 2 ? 'd-none' : '').'" id="div_qtd" >
+            <div class="form-floating">
+                <input type="number" name="qtd" id="qtd" value="'.$obj->get('qtd').'" class="form-control">
+                <label for="qtd">Quantidade</label>
             </div>
         </div>
         ';

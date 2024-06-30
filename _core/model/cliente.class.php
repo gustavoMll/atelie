@@ -175,9 +175,9 @@ class Cliente extends Flex {
     public static function filter($request) {
         $paramAdd = '1=1';
 
-        foreach(['nome', 'cpf', 'cep', 'rua', 'bairro', 'cidade', 'estado'] as $key){
+        foreach(['nome', 'cpf', 'cep', 'endereco', 'bairro', 'cidade', 'estado'] as $key){
             if($request->query($key) != ''){
-                $paramAdd .= " AND id IN (SELECT id FROM pessoas WHERE `$key` LIKE '%{$request->query($key)}%')";
+                $paramAdd .= " AND id_pessoa IN (SELECT id FROM pessoas WHERE `$key` LIKE '%{$request->query($key)}%')";
             }
         }
 

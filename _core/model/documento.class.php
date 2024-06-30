@@ -163,7 +163,6 @@ class Documento extends Flex {
                     <th width="10">'.GG::getCheckboxHead().'</th>
                     <th class="col-sm-8">Descri&ccedil;&atilde;o</th>
                     <th class="col-sm-4">Obrigat&oacute;rio?</th>
-                    <th width="10"></th>
                 </tr>
                 </thead>
                 <tbody>';

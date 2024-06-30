@@ -119,7 +119,7 @@ class Acessorio extends Flex {
             
 			$obj->set('descricao', $_POST['descricao']);
 			$obj->set('id_tipo', (int) $_POST['tipo']);
-			$obj->set('preco', (float) $_POST['preco']);
+			$obj->set('preco', Utils::parseFloat($_POST['preco']));
 			$obj->set('qtd_total', (int) $_POST['qtd_total']);
             $obj->set('qtd_disp',(int) $_POST['qtd_total']);
             
@@ -228,7 +228,7 @@ class Acessorio extends Flex {
         $string .= '
             <div class="col-sm-4 mb-3 required">
                 <div class="form-floating">
-                    <input class="form-control money" name="preco" placeholder="" value="'.$obj->get('preco').'">
+                    <input class="form-control money" name="preco" placeholder="" value="'.($obj->get('preco') != '' ? Utils::parseMoney($obj->get('preco')) : '').'">
                     <label class="form-label">Preço</label>
                 </div>
         </div>';
@@ -269,7 +269,7 @@ class Acessorio extends Flex {
                     <th class="col-sm-3">Foto</th>
                     <th class="col-sm-5">Descri&ccedil;&atilde;o</th>
                     <th class="col-sm-2">Tipo</th>
-                    <th class="col-sm-2">Pre&ccedil;o</th>
+                    <th class="col-sm-2">Pre&ccedil;o (R$)</th>
                 </tr>
                 </thead>
                 <tbody>';
@@ -305,32 +305,30 @@ class Acessorio extends Flex {
         '.GG::getResponsiveList([
             'Descri&ccedil;&atilde;o' => $obj->get('descricao'),
             'Tipo' => $obj->getTipo()->get('descricao'),
-            'Pre&ccedil;o' => $obj->get('preco'),
+            'Pre&ccedil;o' => Utils::parseMoney($obj->get('preco')),
         ], $obj).'
         <td>'.$obj->getTipo()->get('descricao').'</td>
-        <td>'.$obj->get('preco').'</td>
+        <td>'.Utils::parseMoney($obj->get('preco')).'</td>
         ';
     }
 
     public static function filter($request) {
         $paramAdd = '1=1';
        
-        foreach(['descricao', 'tamanho'] as $key){
-            if($request->query($key) != ''){
-                $paramAdd .= " AND `{$key}` like '%{$request->query($key)}%' ";
-            }
+        if($request->query('descricao') != ''){
+            $paramAdd .= " AND `descricao` = {$request->query('descricao')}";
         }
         
         if($request->query('tipo') != ''){
-            $paramAdd .= " AND `tipo` = {$request->query('tipo')}";
+            $paramAdd .= " AND `id_tipo` = {$request->query('tipo')}";
         }
         
         if($request->query('preco_min') != ''){
-            $paramAdd .= " AND `preco` >= {$request->query('preco_min')} ";
+            $paramAdd .= " AND `preco` >= ".Utils::parseFloat($request->query('preco_min'));
         }
       
         if($request->query('preco_max') != ''){
-            $paramAdd .= " AND `preco` <= {$request->query('preco_max')} ";
+            $paramAdd .= " AND `preco` <= ".Utils::parseFloat($request->query('preco_max'));
         }
 
         if(Utils::dateValid($request->query('inicio'))){
@@ -350,7 +348,7 @@ class Acessorio extends Flex {
         $string = '';
 
         $string .= '
-        <div class="col-sm-6 col-lg-5 mb-3">
+        <div class="col-sm-8 mb-3">
             <div class="form-floating">
                 <input name="descricao" id="filterDescricao" type="text" class="form-control" value="'.$request->query('descricao').'" placeholder="seu dado aqui" />
                 <label for="filterDescricao" class="form-label">Descri&ccedil;&atilde;o</label>
@@ -358,7 +356,7 @@ class Acessorio extends Flex {
         </div>';
         
         $string .= '
-        <div class="col-sm-4 col-lg-2 mb-3">
+        <div class="col-sm-4 mb-3">
             <div class="form-floating">
                 <select class="form-select" name="tipo" id="tipo">
                 <option value="">Selecione</option>';
@@ -372,14 +370,6 @@ class Acessorio extends Flex {
             </div>
         </div>
         ';
-
-        $string .= '
-        <div class="col-sm-6 col-lg-5 mb-3">
-            <div class="form-floating">
-                <input name="tamanho" id="filterTamanho" type="text" class="form-control" value="'.$request->query('tamanho').'" placeholder="seu dado aqui" />
-                <label for="filterTamanho" class="form-label">Tamanho</label>
-            </div>
-        </div>';
         
         $string .= '
         <div class="col-sm-6 col-lg-3 mb-3">

@@ -105,7 +105,6 @@ class Aluguel extends Flex {
         $classe = __CLASS__;
         $ret = array('success'=>false, 'obj'=> null);
         
-        
         if(self::validate()){
         	$id = $request->getInt('id');
             $obj = new $classe(array($id));
@@ -115,11 +114,11 @@ class Aluguel extends Flex {
             }
 
 			$obj->set('id_pedido', (int) $_POST['id_pedido']);
-			$obj->set('dt_uso', $_POST['dt_uso']);
-			$obj->set('dt_prazo', $_POST['dt_prazo']);
-			$obj->set('dt_entrega', $_POST['dt_entrega']);
+			$obj->set('dt_uso', Utils::dateFormat($_POST['dt_uso'], 'Y-m-d'));
+			$obj->set('dt_prazo', Utils::dateFormat($_POST['dt_prazo'], 'Y-m-d'));
+			$obj->set('dt_entrega', Utils::dateFormat($_POST['dt_entrega'], 'Y-m-d'));
 			$obj->set('local_uso', $_POST['local_uso']);
-			$obj->set('valor_aluguel', Utils::parseMoney($id > 0 ? $obj->getValorAluguel() : $obj->getValorAluguel($_POST['tempId'])));
+			$obj->set('valor_aluguel', Utils::parseFloat($id > 0 ? $obj->getValorAluguel() : $obj->getValorAluguel($_POST['tempId'])));
             
             $obj->save();
 
@@ -200,14 +199,14 @@ class Aluguel extends Flex {
     	$string .= '
         <div class="col-sm-4 mb-3">
             <div class="form-floating">
-                <input class="form-control" type="date" name="dt_uso" placeholder="" value="'.$obj->get('dt_uso').'">
+                <input class="form-control date" type="text" name="dt_uso" placeholder="" value="'.($obj->get('dt_uso') != '' ? Utils::dateFormat($obj->get('dt_uso'),'d/m/Y') : '').'">
                 <label class="form-label">Data de Uso</label>
             </div>
         </div>';
     	$string .= '
         <div class="col-sm-4 mb-3 required">
             <div class="form-floating">
-                <input class="form-control" type="date" name="dt_prazo" placeholder="Data" required value="'.$obj->get('dt_prazo').'">
+                <input class="form-control date" type="text" name="dt_prazo" placeholder="Data" required value="'.($obj->get('dt_prazo') != '' ? Utils::dateFormat($obj->get('dt_prazo'),'d/m/Y') : '').'">
                 <label class="form-label">Prazo de Devolução</label>
             </div>
         </div>';
@@ -215,7 +214,7 @@ class Aluguel extends Flex {
         $string .= '
         <div class="col-sm-4 mb-3">
             <div class="form-floating">
-                <input class="form-control" readonly type="date" name="dt_entrega" placeholder="" value="'.$obj->get('dt_entrega').'">
+                <input class="form-control date" readonly type="text" name="dt_entrega" placeholder="" value="'.($obj->get('dt_entrega') != '' ? Utils::dateFormat($obj->get('dt_entrega'),'d/m/Y') : '').'">
                 <label class="form-label">Entrega</label>
             </div>
         </div>';
@@ -256,7 +255,7 @@ class Aluguel extends Flex {
         $string .= '
             <div class="col-sm-3 mb-3">
                 <div class="form-floating">
-                    <input class="form-control money" readonly name="valor_aluguel" placeholder="" value="'.$obj->get('valor_aluguel').'">
+                    <input class="form-control money" readonly name="valor_aluguel" placeholder="" value="'.($obj->get('valor_aluguel') != '' ? Utils::parseMoney($obj->getValorAluguel()) : '').'">
                     <label class="form-label">Valor do Aluguel</label>
                 </div>
         </div>';

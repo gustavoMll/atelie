@@ -293,7 +293,7 @@ class Pessoa extends Flex {
         $string = '';
 
         $string .= '
-        <div class="col-sm-6 col-md-4 mb-3">
+        <div class="col-sm-8 mb-3">
             <div class="form-floating">
                 <input name="nome" id="filterNome" type="text" class="form-control" value="'.$request->query('nome').'" placeholder="seu dado aqui" />
                 <label for="filterNome" class="form-label">Nome</label>
@@ -301,7 +301,7 @@ class Pessoa extends Flex {
         </div>';
        
         $string .= '
-        <div class="col-sm-6 col-md-4 mb-3">
+        <div class="col-sm-4 col-md-4 mb-3">
             <div class="form-floating">
                 <input name="cpf" id="filterCpf" type="text" class="form-control" value="'.$request->query('cpf').'" placeholder="seu dado aqui" />
                 <label for="filterCpf" class="form-label">CPF</label>
@@ -309,7 +309,7 @@ class Pessoa extends Flex {
         </div>';
 
         $string .= '
-        <div class="col-sm-6 col-md-4 mb-3">
+        <div class="col-sm-4 col-md-4 mb-3">
             <div class="form-floating">
                 <input name="telefone" id="filterTelefone" type="text" class="form-control" value="'.$request->query('telefone').'" placeholder="seu dado aqui" />
                 <label for="filterTelefone" class="form-label">Telefone</label>
@@ -317,7 +317,7 @@ class Pessoa extends Flex {
         </div>';
       
         $string .= '
-        <div class="col-sm-6 col-md-4 mb-3">
+        <div class="col-sm-4 col-md-4 mb-3">
             <div class="form-floating">
                 <input name="cep" id="filterCEP" type="text" class="form-control" value="'.$request->query('cep').'" placeholder="seu dado aqui" />
                 <label for="filterCEP" class="form-label">CEP</label>
@@ -325,10 +325,10 @@ class Pessoa extends Flex {
         </div>';
         
         $string .= '
-        <div class="col-sm-6 col-md-4 mb-3">
+        <div class="col-sm-4 col-md-4 mb-3">
             <div class="form-floating">
                 <input name="endereco" id="filterRua" type="text" class="form-control" value="'.$request->query('endereco').'" placeholder="seu dado aqui" />
-                <label for="filterendereco" class="form-label">endereco</label>
+                <label for="filterendereco" class="form-label">Endere&ccedil;o</label>
             </div>
         </div>';
         
@@ -349,9 +349,9 @@ class Pessoa extends Flex {
         </div>';
         
         $string .= '
-        <div class="col-sm-6 col-md-2 mb-3">
+        <div class="col-sm-6 col-md-4 mb-3">
             <div class="form-floating">
-                <input name="estado" id="filterEstado" type="text" class="form-control" value="'.$request->query('estado').'" placeholder="seu dado aqui" />
+                <input name="estado" id="filterEstado" maxlength="2" type="text" class="form-control" value="'.$request->query('estado').'" placeholder="seu dado aqui" />
                 <label for="filterEstado" class="form-label">Estado</label>
             </div>
         </div>';
@@ -390,7 +390,7 @@ class Pessoa extends Flex {
         ';
         
         $string .= '
-        <div class="col-sm-6 mb-3">
+        <div class="col-sm-6 col-md-12 mb-3">
             <div class="form-floating">
                 <select class="form-select" name="offset" id="offset">';
                 foreach($GLOBALS['QtdRegistros'] as $key){

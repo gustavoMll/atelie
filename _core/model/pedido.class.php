@@ -138,7 +138,7 @@ class Pedido extends Flex {
             
 			$obj->set('id_cliente', (int) $_POST['id_cliente']);
 			$obj->set('total', Utils::parseMoney($id > 0 ? $obj->getValorPedido() : $obj->getValorPedido($_POST['tempId'])));
-			$obj->set('data', $_POST['data']);
+			$obj->set('data', Utils::dateFormat($_POST['data'], 'Y-m-d'));
 			$obj->set('forma_pag', (int) $_POST['forma_pag']);
 			$obj->set('valor_entrada', (float) str_replace(',','.',str_replace('.','',$_POST["valor_entrada"])));
             $obj->save();
@@ -239,7 +239,7 @@ class Pedido extends Flex {
         $string .= '
         <div class="col-sm-4 mb-3 required">
             <div class="form-floating">
-                <input type="date" name="data" id="data" value="'.($obj->get('data') != '' ? $obj->get('data') : date('Y-m-d') ).'" class="form-control">
+                <input type="text" name="data" id="data" value="'.($obj->get('data') != '' ? Utils::dateFormat($obj->get('data'), 'd/m/Y') : date('d-m-Y') ).'" class="form-control date">
                 <label>Data</label>
             </div>
         </div>
@@ -366,22 +366,16 @@ class Pedido extends Flex {
     public static function filter($request) {
         $paramAdd = '1=1';
        
-        foreach(['descricao', 'tamanho'] as $key){
-            if($request->query($key) != ''){
-                $paramAdd .= " AND `{$key}` like '%{$request->query($key)}%' ";
-            }
+        if($request->query('cliente') != ''){
+            $paramAdd .= " AND id_cliente IN (SELECT id FROM clientes WHERE id_pessoa IN (SELECT id FROM pessoas WHERE nome LIKE '%{$request->query('cliente')}%'))";
         }
         
-        if($request->query('tipo') != ''){
-            $paramAdd .= " AND `tipo` = {$request->query('tipo')}";
+        if($request->query('forma_pag') != ''){
+            $paramAdd .= " AND `forma_pag` = {$request->query('forma_pag')}";
         }
         
-        if($request->query('preco_min') != ''){
-            $paramAdd .= " AND `preco` >= {$request->query('preco_min')} ";
-        }
-      
-        if($request->query('preco_max') != ''){
-            $paramAdd .= " AND `preco` <= {$request->query('preco_max')} ";
+        if(Utils::dateValid($request->query('dt_prazo'))){
+            $paramAdd .= " AND id IN (SELECT id_pedido FROM alugueis WHERE DATE(`dt_prazo`) <= '".Utils::dateFormat($request->query('dt_prazo'),'Y-m-d')."')";
         }
 
         if(Utils::dateValid($request->query('inicio'))){
@@ -401,55 +395,39 @@ class Pedido extends Flex {
         $string = '';
 
         $string .= '
-        <div class="col-sm-6 col-lg-5 mb-3">
+        <div class="col-sm-8 mb-3">
             <div class="form-floating">
-                <input name="descricao" id="filterDescricao" type="text" class="form-control" value="'.$request->query('descricao').'" placeholder="seu dado aqui" />
-                <label for="filterDescricao" class="form-label">Descri&ccedil;&atilde;o</label>
+                <input name="cliente" id="filterDescricao" type="text" class="form-control" value="'.$request->query('cliente').'" placeholder="seu dado aqui" />
+                <label for="filterDescricao" class="form-label">Cliente</label>
             </div>
         </div>';
         
         $string .= '
-        <div class="col-sm-4 col-lg-2 mb-3">
+        <div class="col-sm-4 mb-3">
             <div class="form-floating">
-                <select class="form-select" name="tipo" id="tipo">
+                <input name="dt_prazo" id="filterPrazo" type="text" class="form-control date" value="'.$request->query('dt_prazo').'" placeholder="seu dado aqui" />
+                <label for="filterPrazo">Prazo de Devolu&ccedil;&atilde;o</label>
+            </div>
+        </div>';
+
+        $string .='
+        <div class="col-sm-4">
+            <div class="form-floating">
+                <select class="form-select" id="filterForma" name="forma_pag">
                 <option value="">Selecione</option>';
-                $tipos = Tipo::getTipos();
-                while($tipos->next()){
-                    $string .= '<option value="'.$tipos->getInt('id').'" '.($tipos->getInt('id') == $request->query('tipo') ? 'selected' : '').'>'.$tipos->getString('nome').'</option>';
+                foreach(self::$formas_pag as $k => $v){
+                    $string .= '<option value="'.$k.'" '.($k == $request->get('forma_pag') ? 'selected' : '').'>'.$v.'</option>';
                 }
-                $string.='
+                $string .='
                 </select>
-                <label for="tipo" class="form-label">Tipo</label>
+                <label>Forma de Pagamento</label>
             </div>
         </div>
         ';
 
-        $string .= '
-        <div class="col-sm-6 col-lg-5 mb-3">
-            <div class="form-floating">
-                <input name="tamanho" id="filterTamanho" type="text" class="form-control" value="'.$request->query('tamanho').'" placeholder="seu dado aqui" />
-                <label for="filterTamanho" class="form-label">Tamanho</label>
-            </div>
-        </div>';
-        
-        $string .= '
-        <div class="col-sm-6 col-lg-3 mb-3">
-            <div class="form-floating">
-                <input name="preco_min" id="filterPrecoMin" type="text" class="form-control" value="'.$request->query('preco_min').'" placeholder="seu dado aqui" />
-                <label for="filterPrecoMin" class="form-label">Pre&ccedil;o min</label>
-            </div>
-        </div>';
-        
-        $string .= '
-        <div class="col-sm-6 col-lg-3 mb-3">
-            <div class="form-floating">
-                <input name="preco_max" id="filterPrecoMax" type="text" class="form-control" value="'.$request->query('preco_max').'" placeholder="seu dado aqui" />
-                <label for="filterPrecoMax" class="form-label">Pre&ccedil;o max</label>
-            </div>
-        </div>';
       
         $string .= '
-        <div class="col-sm-6 col-lg-3 mb-3">
+        <div class="col-sm-4 mb-3">
             <div class="form-floating">
                 <input name="inicio" id="filterInicio" type="text" class="form-control date" value="'.$request->query('inicio').'" placeholder="seu dado aqui" />
                 <label for="filterInicio">Cadastrados desde</label>
@@ -457,7 +435,7 @@ class Pedido extends Flex {
         </div>';
         
         $string .= '
-        <div class="col-sm-6 col-lg-3 mb-3">
+        <div class="col-sm-4 mb-3">
             <div class="form-floating">
                 <input name="fim" id="filterFim" type="text" class="form-control date" value="'.$request->query('fim').'" placeholder="seu dado aqui" />
                 <label for="filteFim" class="form-label">Cadastrados at&eacute;</label>
@@ -465,14 +443,10 @@ class Pedido extends Flex {
         </div>';
 
         $string .= '
-        <div class="col-sm-6 mb-3">
+        <div class="col-sm-4 mb-3">
             <div class="form-floating">
                 <select class="form-select" name="order" id="order">';
                 foreach([
-                    'descricao' => 'A-Z',
-                    'descricao desc' => 'Z-A',
-                    'preco' => 'Menor pre&ccedil;o',
-                    'preco desc' => 'Maior pre&ccedil;o',
                     'id' => 'Mais antigo primeiro',
                     'id desc' => 'Mais recente primeiro',
                 ] as $key => $value){
