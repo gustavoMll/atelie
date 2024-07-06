@@ -46,6 +46,23 @@ class ItemAluguel extends Flex {
         ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4;';
     }
 
+    public function restaurarQtdItens(){
+        $rs = self::search([
+            's' => 'id',
+            'w' => 'tipo_item = 1 AND id_aluguel NOT IN (SELECT id FROM alugueis)'
+        ]);
+
+        while($rs->next()){
+            $objIA = self::load($rs->getInt('id'));
+            $objA = Acessorio::load($objIA->get('id_item'));
+            if($objA->get('qtd') <= $objA->get('qtd_disp') + $objIA->get('qtd')){
+                $objA->set('qtd_disp', $objA->get('qtd_disp') + $objIA->get('qtd'));
+            }
+            $objA->save();
+            Flex::dbDelete($objIA, "id={$objIA->get('id')}");
+        }
+    }
+
     public static $nm_tipos = [
         1 => 'Acessório',
         2 => 'Fantasia'
@@ -80,20 +97,37 @@ class ItemAluguel extends Flex {
         return (int) $rs->getInt('qtd');
     }
     
+
+    protected $acessorio = null;
     public function getAcessorio(){
-        if($this->get('tipo_item') != 1 || !Acessorio::exists($this->get('id_item'))){
-            return new Acessorio();
+        if (!$this->acessorio || $this->get('titpo_item') != 1 || $this->acessorio->get('id') != $this->get('id_item')) {
+            if (Acessorio::exists((int) $this->get('id_item'), 'id')) {
+                $this->acessorio = Acessorio::load($this->get('id_item'));
+            } else {
+                $this->acessorio = new Acessorio();
+            }
         }
-
-        return Acessorio::load($this->get('id_item'));
+        return $this->acessorio;
     }
-
+   
+    protected $fantasia = null;
+    public function getFantasia(){
+        if (!$this->fantasia || $this->get('titpo_item') != 2 || $this->fantasia->get('id') != $this->get('id_item')) {
+            if (Fantasia::exists((int) $this->get('id_item'), 'id')) {
+                $this->fantasia = Fantasia::load($this->get('id_item'));
+            } else {
+                $this->fantasia = new Fantasia();
+            }
+        }
+        return $this->fantasia;
+    }
 
     public static function validate($id_acessorio) {
     	global $request;
         $error = '';
         $id = $request->getInt('id');
         $paramAdd = 'AND id NOT IN('.$id.')';
+        
         if(!isset($_POST['id_aluguel']) || $_POST['id_aluguel'] == ''){
     		$error .= '<li>O campo "Aluguel" n&atilde;o foi informado</li>';
     	}
@@ -114,12 +148,11 @@ class ItemAluguel extends Flex {
                     $error .= '<li>A quantidade informada &eacute; inv&aacute;lida</li>';
                 }elseif(self::exists("id={$id_acessorio}")){
                     $obj = Acessorio::load($id_acessorio);
-                    
                     $qtd_ori = 0;
                     if($id > 0){
                         $objIA = ItemAluguel::load($id);
                         $qtd_ori = $objIA->get('qtd');
-                    } 
+                    }
                     if(($id == 0 && (int) $_POST['qtd'] > $obj->get('qtd_disp')) || ($id > 0 && (int)$_POST['qtd'] > $qtd_ori + $obj->get('qtd_disp'))){
                         $error .= '<li>A quantidade de itens n&atilde;o pode ser maior que a quantidade disponível</li>';
                     }
@@ -173,7 +206,7 @@ class ItemAluguel extends Flex {
 
             if($obj->get('tipo_item') == 1){
                 $objAcessorio = Acessorio::load($obj->get('id_item'));
-                if($id > 0 && (int) $_POST['qtd'] <= $objAcessorio->get('qtd_disp') + (int) $_POST['qtd']){
+                if($id > 0 && (int) $_POST['qtd'] <= $objAcessorio->get('qtd_disp') + $qtd_original){
                     $nova_qtd = (int) $_POST['qtd'] - $qtd_original;
                     $objAcessorio->set('qtd_disp', $objAcessorio->get('qtd_disp') - $nova_qtd);
                 }elseif($id == 0){

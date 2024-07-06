@@ -51,23 +51,49 @@ class Aluguel extends Flex {
         $valor = 0;
         $id = $tempId > 0 ? $tempId : $this->get('id'); 
         
+       
         $rs = ItemAluguel::search([
-            's' => 'id, id_item, tipo_item, qtd',
-            'w' => 'id_aluguel='.$id,
+            's' => "SUM((SELECT `acessorios`.preco FROM `acessorios` WHERE `acessorios`.id = `itensaluguel`.id_item) * `itensaluguel`.qtd) AS valor_total",
+            'w' => "`itensaluguel`.tipo_item=1 and id_aluguel={$id}",
+        ]);
+
+        $rs->next();
+
+        $valor += $rs->getNumber('valor_total');
+
+        $rs = ItemAluguel::search([
+            's' => "SUM((SELECT `fantasias`.preco FROM `fantasias` WHERE `fantasias`.id = `itensaluguel`.id_item) * `itensaluguel`.qtd) AS valor_total",
+            'w' => "`itensaluguel`.tipo_item=2 and id_aluguel={$id}",
+        ]);
+
+        $rs->next();
+
+        $valor += $rs->getNumber('valor_total');
+
+        return $valor;
+    }
+
+    public function getItensAluguel(){
+        $string = '';
+        $obj = null;
+        $rs = ItemAluguel::search([
+            's' => 'id',
+            'w' => 'id_aluguel='.$this->get('id'),
+            'o' => 'tipo_item',
         ]);
 
         while($rs->next()){
-            if($rs->getInt('tipo_item') == 1){
-                if(Acessorio::exists("id={$rs->getInt('id_item')}")){
-                    $valor += ((float) Acessorio::load($rs->getInt('id_item'))->get('preco') * (int) $rs->getInt('qtd'));
-                }
-            }elseif($rs->getInt('tipo_item') == 2){
-                if(Fantasia::exists("id={$rs->getInt('id_item')}")){
-                    $valor += (float) Fantasia::load($rs->getInt('id_item'))->get('preco'); 
-                }
-            }
+            $obj = ItemAluguel::load($rs->getInt('id'));
+            $nome = $obj->get('tipo_item') == 1 ? $obj->getAcessorio()->get('descricao') : $obj->getFantasia()->get('descricao');
+
+            $preco = $obj->get('tipo_item') == 1 ? $obj->getAcessorio()->get('preco') : $obj->getFantasia()->get('preco');
+            $string .= '
+            <div class="col-sm-4 col-lg-4 mb-2">
+                <p>&nbsp;&bull; '. ($obj->get('tipo_item') == 1 ? $obj->get('qtd').'x ' : '') . $nome .' - (R$) '. Utils::parseMoney($preco) .'</p>
+            </div>';
         }
-        return $valor;
+
+        return $string;
     }
 
     protected $pedido = null;
@@ -188,6 +214,7 @@ class Aluguel extends Flex {
         $obj = new $classe();
         $obj->set('id', $codigo);
 
+        $entrega = $request->getInt('entrega');
         if ($codigo > 0) {
             $obj = self::load($codigo);
         }else{
@@ -214,7 +241,7 @@ class Aluguel extends Flex {
         $string .= '
         <div class="col-sm-4 mb-3">
             <div class="form-floating">
-                <input class="form-control date" readonly type="text" name="dt_entrega" placeholder="" value="'.($obj->get('dt_entrega') != '' ? Utils::dateFormat($obj->get('dt_entrega'),'d/m/Y') : '').'">
+                <input class="form-control date" type="text" name="dt_entrega" placeholder="" value="'.($obj->get('dt_entrega') != '' ? Utils::dateFormat($obj->get('dt_entrega'),'d/m/Y') : '').'">
                 <label class="form-label">Entrega</label>
             </div>
         </div>';

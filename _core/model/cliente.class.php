@@ -98,9 +98,14 @@ class Cliente extends Flex {
         global $defaultPath;
         $classe = __CLASS__;
         $obj = new $classe();
+        $ret = 0;
 
-        Flex::dbDelete(new Pessoa(), "id IN(SELECT id_pessoa FROM {$obj->tableName} WHERE id IN({$ids}))");
-        return Flex::dbDelete($obj, "id IN({$ids})");
+        if(!Pedido::exists("id_cliente IN ({$ids})")){
+            Flex::dbDelete(new Pessoa(), "id IN(SELECT id_pessoa FROM {$obj->tableName} WHERE id IN({$ids}))");
+            return Flex::dbDelete($obj, "id IN({$ids})");
+        }
+
+        return $ret;
     }
 
     public static function form($codigo = 0){

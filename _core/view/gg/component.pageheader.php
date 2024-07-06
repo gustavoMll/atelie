@@ -18,6 +18,11 @@
         <button type="button" onclick="modalForm('<?=$view['modulo']?>',0,'',function(){ tableList('<?=$view['modulo']?>', window.location.search.substr(1), 'resultados', false); }); return false;" class="btn btn-sm btn-md-normal btn-secondary text-white">
             <i class="ti ti-plus"></i> <span class="d-none d-md-inline-block">Adicionar</span>
         </button>
+        <?php if($request->get('module') == 'pedidos'){?>
+            <button type="button" onclick="restaurarItens()" class="btn btn-sm btn-md-normal btn-success text-white">
+            <i class="ti ti-refresh"></i> <span class="d-none d-md-inline-block">Restaurar Itens</span>
+        </button>
+        <?php }?>
     </div>
 </div>
 
@@ -51,5 +56,22 @@
         } else {
             tAlert('','Favor selecionar ao menos um registro.','e');
         }
+    }
+
+    function restaurarItens(){
+        $.ajax({
+            url: '<?=__PATH__?>ajax/restaurar-itens',
+            dataType: `json`,
+            type: 'GET',
+            success: function(resp) {
+                if(resp.success) {
+                    MessageBox.success(resp.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                unblockUi();
+                MessageBox.error('Ocorreu um erro. Para detalhes pressione F12 e verifique no console.');
+            }
+        })
     }
 </script>
