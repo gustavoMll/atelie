@@ -35,7 +35,7 @@
 
     <ul class="dropdown-menu border-0 show w-100 bg-transparent rounded-0 d-flex flex-column flex-fill overflow-auto" id="menu-sidebar">
         <?php include dirname(__FILE__) . "/component.menu.php"; ?>
-        <li class="dropdown-item"><a href="<?=__PATH__?>" class="d-flex gap-2" onclick="logout()"><i class="ti ti-logout fs-3"></i> <span class="me-auto">Sair</a></li>
+        <li class="dropdown-item"><a class="d-flex gap-2" onclick="logout()"><i class="ti ti-logout fs-3"></i> <span class="me-auto">Sair</a></li>
     </ul>
 
 </nav>
