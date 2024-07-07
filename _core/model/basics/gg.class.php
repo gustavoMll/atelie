@@ -2,25 +2,38 @@
 
 class GG {
 
-    public static function getLinksTable($module, $id, $name, $changeHref=true, $showDelBtn = true){
+    public static function getLinksTable($module, $id, $name, $changeHref=true, $edit=true, $responsive=true){
+        $string = '';
 
-        $html = '';
-
-        $html .= '
-        <a 
-            class=""
+        if($edit) {
+            $string.= '<a 
+            class="text-uppercase text-reset"
             href="javascript:;" 
             onclick="'.($changeHref ? 'setHref(`'.$module.'/editar/id/'.$id.'`);' : '').'modalForm(`'. $module . '`, '.$id.', ``, function(){ getLine(\''.$module.'\', '.$id.'); '.($changeHref ? ' setHref(`'.$module.'`);' : '').' });" 
-            data-bs-toggle="tooltip"  
-            data-bs-placement="top" 
-            data-bs-title="Editar"
+            data-bs-toggle="" 
+            data-bs-placement="" 
+            data-bs-title=""
             data-bs-trigger="hover"
             aria-label="Edit Record"
-        >' . $name . '</a>';
-        
-        if($showDelBtn){
-        $html .='
-        <a 
+        >' . $name . '</a> ';
+        } else {
+            $string.= '<span>'.$name.'</span>';
+        }
+        if($responsive){
+            $string.= '<a 
+            href="javascript:;" 
+            onclick="delFormAction(`'.$module.'`, '.$id.', function(){ $(`#tr-'.$module.$id.'`).fadeOut(`slow`, function(){ $(this).remove(); }); });" 
+            style="z-index: 2;"
+            data-bs-toggle="tooltip" 
+            data-bs-placement="right" 
+            data-bs-title="Excluir"
+            data-bs-trigger="hover"
+            aria-label="Delete record"
+            class="position-absolute top-50 text-danger translate-middle-y fs-5" style="right: 6px;"
+        ><i class="ti ti-trash"></i></a>
+        ';
+        }else{
+            $string.= '<a 
             href="javascript:;" 
             onclick="delFormAction(`'.$module.'`, '.$id.', function(){ $(`#tr-'.$module.$id.'`).fadeOut(`slow`, function(){ $(this).remove(); }); });" 
             data-bs-toggle="tooltip" 
@@ -28,29 +41,32 @@ class GG {
             data-bs-title="Excluir"
             data-bs-trigger="hover"
             aria-label="Delete record"
-            class="position-absolute top-50 text-danger translate-middle-y fs-5" style="right: 6px;"
-        ><i class="ti ti-trash text-danger"></i></a>';
+            class="d-none d-sm-inline-block position-absolute top-50 end-0 translate-middle-y"
+        ><i class="ti ti-trash"></i></a>
+        ';
         }
 
-        return $html;
+
+
+        return $string;
+
     }
 
     public static function moduleLoadData($action, $text="Carregar dados"){
         return '
-        <div class="text-center">
-            <button class="btn btn-dark" type="button" onclick="'.$action.'">
-                <i class="ti ti-rotate"></i></span> '.$text.'
+            <button class="btn btn-outline-primary" type="button" onclick="'.$action.'">
+                <i class="ti ti-reload"></i></span> '.$text.'
             </button>
-        </div>
         ';
     }
 
     public static function getCheckboxHead(){
-        return '<input type="checkbox" class="form-check-input" placeholder="marcar checkbox" onclick="javascript:marcaCheckBoxGG(this);" />';
+        return '<input type="checkbox" id="checkboxhead" class="form-check-input" placeholder="marcar checkbox" onclick="javascript:marcaCheckBoxGG(this);" />';
     }
 
     public static function getCheckboxLine($id){
-        return '<input type="checkbox" placeholder="marcar checkbox" class="chkDel form-check-input" value="'.$id.'" onclick="javascript:controlDelButton();" />';
+        return '<input type="checkbox" id="checkboxline'.$id.'" placeholder="marcar checkbox" class="chkDel form-check-input" value="'.$id.'" onclick="javascript:controlDelButton();" />';
+
     }
 
     public static function getActiveControl($module, $id, $ativo=0){
@@ -61,7 +77,7 @@ class GG {
                 onclick="javascript: changeStatus(`'.$module.'`,'.$id.', '.($ativo==1?'0':'1').')"
             >
                 <span 
-                    class="ti ti-circle-check fs-5 text-'.($ativo==1? 'success' :'default').'" 
+                    class="ti ti-circle-check-filled text-'.($ativo==1? 'success' :'default').'" 
                     title="'.($ativo==1?'Desativar':'Ativar').'"
                 ></span>
             </a>
@@ -132,7 +148,7 @@ class GG {
                     </button>';
                     }
                     $string .= '<button id="btnchange_'.$nmImg.'_'.$obj->getTableName().'" type="button" class="btn btn-primary btn-sm" '.($nameImg != '' ? 'style="display:none;"' : '').' onclick="deletePreviewImage('.($nameImg != '' ? '`'.$sourceImage.'` ' : '``').', `'.$nmImg.'`, `'.$obj->getTableName().'`)">
-                        <i class="ti ti-x"></i>
+                        <i class="ti ti-circle-x-filled"></i>
                         Cancelar alteração
                     </button>
                 </div>';

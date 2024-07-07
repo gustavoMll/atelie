@@ -1,29 +1,40 @@
-<div class="d-flex align-items-center justify-content-around gap-5">
-    <div class="module-title">
-        <h2 class="fw-bold text-center text-md-start mb-0 lh-1">
-            <strong><?=$view['title']?></strong>
-        </h2>
-        <p class="fw-normal small mb-0 text-center text-md-start text-gray">Registros: <span data-model="<?=$view['modulo']?>" data-type="qtdRegistros"></span></p>
+
+<h2 class="mb-0 me-auto h4">
+    <?=$view['title']?>
+    <small class="opacity-50 fs-6">(<span data-model="<?=$view['modulo']?>" data-type="qtdRegistros"></span><span class="d-none d-md-inline"> registros</span>)</small>
+</h2>
+
+<div class="d-flex flex-grow-1 flex-xl-grow-0 gap-2 ms-auto">
+
+    <div class="btn-delete-selected" style="display:none;">
+        <button class="btn btn-danger text-white fw-bold p-2 px-lg-3" data-bs-toggle="tooltip" onclick="deletaRegitrosSelecionados('<?= $view['modulo'] ?>');" data-bs-placement="right" title="Apagar selecionado(s)" >
+            <i class="ti ti-trash"></i> 
+            <span class="d-none d-lg-inline-block">Apagar selecionados</span>
+        </button>
+    </div>
+
+    <?php if($request->get('module') == 'pessoas'){?>
+    <form class="flex-fill" onsubmit="$(`#filterNomefantasia`).val($(`#filterNome`).val()); return modalFilter(this, `pessoas`);"><input id="filterNome" type="text" placeholder="Pesquisar pelo nome (enter)" class="fw-normal form-control h-100" name="nomefantasia" value="<?=$request->query('nomefantasia')?>" /></form>
+    <?php } ?>
+
+    <?php if($view['list-filter'] != ''){ ?>
+    <div class="ms-auto">
+        <button type="button" id="btnSearchBase" onclick="$('#modalFilter').modal('show')" class="d-flex gap-2 align-items-center btn btn-light text-black-75 border-dark border-opacity-10 p-2 px-lg-3 text-nowrap">
+            <i class="ti ti-filter"></i> 
+            <span class="d-none d-lg-inline-block">Filtro</span> 
+            <span class="d-none d-lg-inline-block text-black-50 fw-normal small">F3</span>
+        </button>
+    </div>
+    <?php } ?>
+
+    <div>
+        <button type="button" id="btnAddBase" onclick="modalForm('<?=$view['modulo']?>',0,'',function(){ tableList('<?=$view['modulo']?>', window.location.search.substr(1), 'resultados', false); }); return false;" class="d-flex gap-2 align-items-center btn btn-secondary text-white fw-bold p-2 px-lg-3">
+            <i class="ti ti-plus"></i> 
+            <span class="d-none d-lg-inline-block">Adicionar</span> 
+            <span class="d-none d-lg-inline-block opacity-50 fw-normal small">F2</span>
+        </button>
     </div>
     
-    <div class="d-flex align-items-center gap-1 flex-wrap module-buttons">
-        <button class="btn btn-danger btn-sm btn-md-normal btn-delete-selected" data-toggle="tooltip" onclick="deletaRegitrosSelecionados('<?= $view['modulo'] ?>');" data-placement="top" title="Apagar selecionado(s)" style="display:none;" >
-            <i class="ti ti-trash"></i> <span class="d-none d-md-inline-block">Apagar selecionados</span>
-        </button>
-        <?php if($view['list-filter'] != ''){ ?>
-        <button type="button" onclick="$('#modalFilter').modal('show')" class="btn btn-sm btn-md-normal btn-dark">
-            <i class="ti ti-filter"></i> <span class="d-none d-md-inline-block">Filtro</span>
-        </button>
-        <?php } ?>
-        <button type="button" onclick="modalForm('<?=$view['modulo']?>',0,'',function(){ tableList('<?=$view['modulo']?>', window.location.search.substr(1), 'resultados', false); }); return false;" class="btn btn-sm btn-md-normal btn-secondary text-white">
-            <i class="ti ti-plus"></i> <span class="d-none d-md-inline-block">Adicionar</span>
-        </button>
-        <?php if($request->get('module') == 'pedidos'){?>
-            <button type="button" onclick="restaurarItens()" class="btn btn-sm btn-md-normal btn-success text-white">
-            <i class="ti ti-refresh"></i> <span class="d-none d-md-inline-block">Restaurar Itens</span>
-        </button>
-        <?php }?>
-    </div>
 </div>
 
 <script>
@@ -56,22 +67,5 @@
         } else {
             tAlert('','Favor selecionar ao menos um registro.','e');
         }
-    }
-
-    function restaurarItens(){
-        $.ajax({
-            url: '<?=__PATH__?>ajax/restaurar-itens',
-            dataType: `json`,
-            type: 'GET',
-            success: function(resp) {
-                if(resp.success) {
-                    MessageBox.success(resp.message);
-                }
-            },
-            error: function(xhr, status, error) {
-                unblockUi();
-                MessageBox.error('Ocorreu um erro. Para detalhes pressione F12 e verifique no console.');
-            }
-        })
     }
 </script>

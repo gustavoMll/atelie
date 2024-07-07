@@ -1,6 +1,6 @@
 <main class="bg-gradient-primary min-vh-100 py-5" id="page-404">
   <div class="container text-white d-flex flex-column align-items-center justify-content-center min-vh-100">
-    <i class="ti ti-file-unknown" style="font-size:64px;"></i>
+    <i class="ti ti-exclamation-circle" style="font-size:64px;"></i>
     <h1 class="fw-bold display-1 mb-0" style="font-size: 10rem;">404</h1>
     <h4 class="fw-bold mb-5 text-uppercase">p&aacute;gina n&atilde;o encontrada!</h4>
     <p class="mb-5">
@@ -15,7 +15,7 @@
       </article>
       <article class="col">
         <div class="card-gradient text-center d-flex flex-column align-items-center justify-content-center p-3" style="min-height: 110px;">
-          <i class="ti ti-typography-off h5 text-gradient"></i>
+          <i class="ti ti-text-caption h5 text-gradient"></i>
           Erro de digitação na URL
         </div>
       </article>

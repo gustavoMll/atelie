@@ -139,25 +139,24 @@ class Cliente extends Flex {
 
     public static function getTable($rs) {
         $string = '
-            <table class="table lev-table table-striped">
-                <thead>
+            <div class="table-responsive px-xs-0"><table class="table table-hover">
+            <thead>
                 <tr>
                     <th width="10">'.GG::getCheckboxHead().'</th>
                     <th class="col-sm-4">Nome</th>
                     <th class="col-sm-3">Telefone</th>
                     <th class="col-sm-5">Obs</th>
-                    <th width="10"></th>
                 </tr>
                 </thead>
                 <tbody>';
         
         while ($rs->next()) {
             $obj = self::load($rs->getInt('id'));
-            $string .= '<tr id="tr-'.$obj->getTableName().$obj->get('id').'">'.self::getLine($obj).'</tr>';
+            $string .= '<tr class="position-relative" id="tr-'.$obj->getTableName().$obj->get('id').'">'.self::getLine($obj).'</tr>';
         }
        
         $string .= '</tbody>
-              </table>
+              </table></div>
               ';
         
         return $string;
@@ -167,11 +166,11 @@ class Cliente extends Flex {
         return '
         <td>'.GG::getCheckboxLine($obj->get('id')).'</td>
         <td class="link-edit">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->getPessoa()->get('nome')).'</td>
-        '.GG::getResponsiveList([
+        <!--'.GG::getResponsiveList([
             'Nome' => $obj->getPessoa()->get('nome'),
             'Telefone' => $obj->getPessoa()->get('telefone1'),
             'Obs' => $obj->get('obs') != '' ?  $obj->get('obs') : '-', 
-        ], $obj).'
+        ], $obj).'-->
         <td>'.($obj->getPessoa()->get('telefone1') != '' ? $obj->getPessoa()->get('telefone1') : '-').'</td>
         <td>'.($obj->get('obs') != '' ?  Utils::subText($obj->get('obs'), 200) : '-').'</td>
         ';

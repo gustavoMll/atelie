@@ -1,15 +1,19 @@
 <?php
 
-global $defaultPath, $predefinedPath, $corePath, $mPath, $vPath, $cPath, $request, $view, $conn;
-
+global $defaultPath, $predefinedPath, $corePath, $mPath, $vPath, $cPath, $request, $view, $conn, $systemPath;
 $predefinedPath = array(
     'gg'=> array('folder'=>'gg/', 'path' => 'gg/'),
     ''=> array('folder'=>'site/', 'path' => ''),
 );
+$cPath      = __DIR__.'/controller/';
+$mPath      = __DIR__.'/model/';
+$vPath      = __DIR__.'/view/';
+$systemPath = __DIR__.'/../';
 
-$cPath      = $GLOBALS['corePath'].'controller/';
-$mPath      = $GLOBALS['corePath'].'model/';
-$vPath      = $GLOBALS['corePath'].'view/';
+if(!file_exists(__DIR__.'/.env'))
+die('<h1>Erro fatal</h1><p>Você precisa criar um arquivo com o nome ".env" dentro da pasta _core com as configurações. Utilize o .env.example como base.</p>');
+$envVars = parse_ini_file(__DIR__.'/.env');
+foreach($envVars as $key => $value) putenv("{$key}={$value}");
 
 ob_start();
 require __DIR__.'/autoload.php';
@@ -34,6 +38,7 @@ if(array_key_exists($pUrl[0], $predefinedPath)){
     $pagePath = $predefinedPath['']['path'];
 }
 define("__BASEPATH__", $serverPath);
+define("__SYSTEMPATH__", $AppPath);
 $param = $pagePath != '' ? Utils::replace("#^{$pagePath}?#i",'', $url) : $url;
 
 $request = new Request($param);

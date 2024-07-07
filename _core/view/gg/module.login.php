@@ -1,41 +1,47 @@
-<main id="loginPage" class="bg-gradient-animate p-0 min-vh-100 d-flex align-items-center">
+<main class="container-fluid bg-gradient-primary min-vh-100 d-flex align-items-center p-0">
 
-    <div class="container d-flex flex-column align-items-center justify-content-center p-0">
+    <div class="container position-relative min-vh-100 d-flex flex-column">
 
-        <div class="overflow-hidden border border-2 border-secondary shadow-lg col-md-6 col-xl-4 col-sm-12">
-            <div class="bg-primary">
-                <form class="d-flex flex-column justify-content-center p-5" onsubmit="return doLogin(this)">
+        <div class="col-12 col-xl-4 d-flex flex-column gap-3 my-auto">
 
-                    <div class="d-flex align-items-center pb-5">
-                        <img src="<?=__BASEPATH__?>img/brand-white.png" alt="" class="img-fluid" loading="lazy" width="100">
+            <form class="d-flex flex-column p-4" onsubmit="return doLogin(this)">
+
+                <!-- <div class="d-flex align-items-center">
+                    <img src="<?=__BASEPATH__?>img/brand.png" alt="" class="img-fluid" loading="lazy" width="100">
+                </div> -->
+                
+                <h4 class="text-white h1 fw-bold lh-1">Boas vindas!</h1>
+                <p class="text-white fs-5 mb-4">Acesse com seus dados abaixo.</p>
+
+                <div class="d-flex flex-column gap-3 mb-5">
+
+                    <div class="form-floating">
+                        <input type="text" name="login" placeholder="login" id="login" class="form-control" required>
+                        <label for="login" class="form-label">Login/E-mail/Telefone*</label>
                     </div>
-                    <h1 class="text-secondary h4 fw-bold lh-1">Área do cliente</h1>
-                    <p class="text-white small">Para acessar infome seus dados abaixo.</p>
-
-                    <div class="">
-                        <div class="form-floating mb-3">
-                            <input type="text" name="login" placeholder="login" id="login" class="form-control" required>
-                            <label for="login" class="form-label">Login/E-mail/Telefone*</label>
-                        </div>
-                        <div class="form-floating mb-2">
+                    <div>
+                        <div class="form-floating">
                             <input type="password" name="senha" placeholder="senha" id="senha" class="form-control" data-type="togglePassword" required>
                             <label for="senha" class="form-label">Senha*</label>
                         </div>
-                        
-                        <div class="text-end mb-3">
-                            <a href="<?=__PATH__?>esqueceu-senha" class="text-secondary  text-decoration-none">Recuperar senha</a>
-                        </div>
-                        
-                        <div class="d-flex flex-wrap-reverse flex-lg-nowrap align-items-center gap-3">
-                            <button type="submit" class="btn btn-outline-secondary flex-fill">Entrar</button>
-                        </div>
+                        <a href="<?=__PATH__?>esqueceu-senha" class="small d-block text-end mt-2 text-white-50 text-decoration-none">Recuperar senha</a>
                     </div>
+                    
+                    <button type="submit" class="btn btn-secondary fw-bold text-white flex-fill">Entrar</button>
+                </div>
 
-                </form>
-            </div>
+                <?php include 'inc.assinatura.php'; ?>
+
+
+            </form>
+
+
         </div>
-        <?php include 'inc.assinatura.php'; ?>
+
+
     </div>
+
+
 </main>
 
 <script>

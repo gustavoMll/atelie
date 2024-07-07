@@ -4,11 +4,12 @@
 
         <div class="overflow-hidden border border-2 border-secondary shadow-lg col-md-6 col-xl-4 col-sm-12" id="loginContent">
             <div class="d-flex flex-column p-5 bg-primary">
-                <div class="d-flex align-items-center pb-5">
-                    <img src="<?=__BASEPATH__?>img/brand-white.png" alt="" width="150" loading="lazy" >
+                <div class="d-flex align-items-center mb-5">
+                    <img src="<?=__BASEPATH__?>img/brand-white.png" alt="" width="100" loading="lazy" >
                 </div>
                 <slot id="changePassword">
                     <form onsubmit="return sendEmail(this);" method="post" class="d-flex flex-column justify-content-between h-100">
+            
                         <div>
                             <h4 class="text-secondary fw-bold lh-1">Recupera&ccedil;&atilde;o de senha</h4>
                             <p class="text-white">Informe seu dado no campo abaixo:</p>

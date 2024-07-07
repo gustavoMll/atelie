@@ -1,3 +1,5 @@
+CKEDITOR.config.extraPlugins = 'colorbutton';
+CKEDITOR.config.allowedContent = true;
 
 function errorFunction(err, textStatus, errorThrown) {
 	unblockUi();
@@ -86,6 +88,9 @@ function duplicateAction(module, id, callback) {
 					if (callback) {
 						callback();
 					}
+					setTimeout(function(){
+						window.location.reload();
+					}, 3000);
 				} else {
 					MessageBox.error(res.message);
 				}
@@ -126,7 +131,7 @@ function delFormAction(module, id, callback) {
 function changeStatus(module, id, to) {
 	let html = `
 		<a href="javascript:;" onclick="changeStatus('${module}',${id},${to == 1 ? '0' : '1'})">
-			<span class="ti ti-circle-check fs-5 text-${to == 1 ? 'success' : 'default'}" title="${to == 1 ? 'Desativar' : 'Ativar'}"></span>
+			<span class="ti ti-circle-check-filled text-${to == 1 ? 'success' : 'default'}" title="${to == 1 ? 'Desativar' : 'Ativar'}"></span>
 		</a>
 	`;
 
@@ -162,7 +167,7 @@ function deleteImage(module, id, imagem) {
 					$(`#btnchange_${imagem}_${module}`).replaceWith(
 						`
 					<button style='display:none;' id="btnchange_${imagem}_${module}" type="button" class="btn btn-primary btn-sm" onclick="deletePreviewImage('' , '${imagem}', '${module}')">
-                        <i class="ti ti-x"></i>
+                        <i class="ti ti-circle-x-filled"></i>
                         Cancelar alteração
                     </button>
 						`
@@ -237,7 +242,7 @@ function modalForm(module, id, params, callback, savebutton, closable) {
 		let form = modal.dialog.find(`form`).eq(0);
 
 		$(form).find(".ckeditor").each(function (key, textarea) {
-			window.CKEDITORS[textarea.id].updateSourceElement();
+			CKEDITOR.instances[textarea.id].updateElement();
 		});
 		
 		form.addClass('was-validated');
@@ -283,16 +288,16 @@ function modalForm(module, id, params, callback, savebutton, closable) {
 
 	if(closable){
 		modal.appendButton({
-			label: `<i class="ti ti-x"></i> Fechar`,
-			class: `btn btn-dark`,
+			label: `Cancelar`,
+			class: `order-2 btn border-transparent opacity-50 ms-auto`,
 			'data-bs-dismiss': 'modal',
 		});
 	}
 
 	if(idAtual > 0){
 		modal.appendButton({
-			label: `<i class="ti ti-trash"></i> Apagar`,
-			class: `btn btn-danger btn-del-record`,
+			label: `Apagar`,
+			class: `order-1 btn border-transparent opacity-50 text-danger-hover`,
 			onClick: () => {
 				delFormAction(module, idAtual, () => { 
 					modal.hide(); 
@@ -306,8 +311,8 @@ function modalForm(module, id, params, callback, savebutton, closable) {
 
 	if (savebutton) {
 		modal.appendButton({
-			label: `<i class="ti ti-device-floppy"></i> Salvar`,
-			class: `btn btn-secondary text-white`,
+			label: `Salvar`,
+			class: `order-3 btn btn-secondary fw-bold text-white`,
 			onClick: () => {
 				saveFunction(module, idAtual, params, callback);
 			},
@@ -377,11 +382,11 @@ function modalFilter(form, module) {
 	}
 	$('#modalFilter').modal('hide');
 	tableList(module, queryString, 'resultados', true);
-	return false;
+	return false; s
 }
 
 function tableList(model, query, selector, changePath) {
-	const imgLoading = '<img src="' + __BASEPATH__ + 'css/img/loading.gif" alt="loading" width="20px" />';
+	const imgLoading = '<img src="' + __SYSTEMPATH__ + 'css/img/loading.gif" alt="loading" width="20px" />';
 
 	changePath = changePath || false;
 	if (changePath) {
@@ -404,7 +409,9 @@ function tableList(model, query, selector, changePath) {
 			$(`[data-model="${model}"][data-type="qtdRegistros"]`).html(0);
 		}
 		const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-		const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+		const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl,{
+			trigger : 'hover'
+		}))
 		makeDragable();
 	});
 	return false;
@@ -511,7 +518,9 @@ function fieldFunctions() {
 	});
 
 	const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-	const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+	const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl,{
+		trigger : 'hover'
+	}))
 
 	$(".date").datepicker({
 		dateFormat: "dd/mm/yy",
@@ -633,16 +642,6 @@ function fieldFunctions() {
 		$(obj).autocomplete({
 			source: function (request, response) {
 				url = urlBase + "/term/" + encodeURI(request.term);
-				if($(obj).attr("input-aux")){
-					const inputs = ($(obj).attr("input-aux").split('/'));
-					url += "/input-aux/"+inputs[0];
-					for(let i = 1; i < inputs.length; i++){
-						url += ','+inputs[i];
-					}
-				}
-				if($(obj).attr("data-div")){
-					url += "/data-div/" + $(obj).attr("data-div");
-				}
 				if ($(obj).attr("data-name")) {
 					url += "/camponome/" + $(obj).attr("data-name");
 				}
@@ -659,16 +658,6 @@ function fieldFunctions() {
 				});
 			},
 			select: function (event, ui) {
-				if($(obj).attr("input-aux")){
-					const inputs = ($(obj).attr("input-aux").split('/'));
-					if(ui.item.campos.length == inputs.length +1){
-						console.log(inputs);
-						console.log(ui.item.campos)
-						for(var i = 0; i < inputs.length; i++){
-							$("#"+inputs[i]).val(ui.item.campos[i+1]);
-						}
-					}
-				}
 				$("#" + $(obj).attr("data-field")).val(ui.item.value);
 				$(obj).val(ui.item.label);
 				return false;
@@ -708,11 +697,12 @@ function fieldFunctions() {
 	});
 
 	$("div.required").each((i, obj) => {
-		if(!$(obj).find("label").text().includes("*"))
+		if($(obj).find("label").length > 0 && !$(obj).find("label").text().includes("*"))
 			$(obj).find("label").get(0).textContent += "*";
-		if(!$(obj).find("input, select").hasClass("required"))
+		if($(obj).find("input, select").length > 0 && !$(obj).find("input, select").hasClass("required")){
 			$(obj).find("input, select").addClass("required")
-		$(obj).find("input, select").attr('required', true);
+			$(obj).find("input, select").attr('required', true);
+		}
 	});
 
 	makeDragable();
@@ -782,27 +772,24 @@ $(function () {
 	fullHeight();
 
 	$("[data-toggle='sidebarCollapse']").on('click', function () {
-		if($('#sidebar').hasClass('active')) {
-			$('#sidebar').removeClass('active');
-			setTimeout(() => $('#sidebar').addClass('d-none'), 300);
-			
-		}
-		else{
-			$('#sidebar').removeClass('d-none')
-			setTimeout(() => $('#sidebar').addClass('active'), 50);
-		}
+		$('#sidebar').toggleClass('collapse');
+		$('#content').toggleClass('m-collapse-menu');
 	});
+
+	$(window).keydown(function(event) {
+		if(!$(`body`).hasClass('modal-open')){
+			if (event.which == 113) { //F2
+				if ($('#btnAddBase').length > 0) {
+					$(`#btnAddBase`).trigger('click');
+				}
+				return false;
+			}
+			else if (event.which == 114) { //F3
+				if ($('#btnSearchBase').length > 0) {
+					$(`#btnSearchBase`).trigger('click');
+				}
+				return false;
+			}
+		}
+    });
 });
-
-
-function calculaMovimentacao(sufixo) {
-    var valor = $('#valor'+sufixo).val().replace('.','').replace(',','.');
-    var juro = $('#juro'+sufixo).val().replace('.','').replace(',','.');
-    var multa = $('#multa'+sufixo).val().replace('.','').replace(',','.');
-    var desconto = $('#desconto'+sufixo).val().replace('.','').replace(',','.');
-    if(valor == '') valor = '0';
-    if(juro == '') juro = '0';
-    if(multa == '') multa = '0';
-    if(desconto == '') desconto = '0';
-    $('#total'+sufixo).val(number_format(parseFloat(valor) + parseFloat(juro) + parseFloat(multa) - parseFloat(desconto),2,',','.'));
-}

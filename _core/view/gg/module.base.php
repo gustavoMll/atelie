@@ -1,4 +1,4 @@
-<div class="<?= $view['modulo'] ?> overflow-auto">
+<div class="<?= $view['modulo'] ?>">
 
     
     <?php if($view['tab-adicional']!=''){ ?>

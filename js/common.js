@@ -16,8 +16,8 @@ const showTogglePassword = (input) => {
 	var parent = $(input).parent();
 	parent.addClass("position-relative");
 	$(`
-    <a href="javascript:;" aria-label="Show/Hide Password" class="text-primary text-decoration-none position-absolute top-50 translate-middle-y h5" data-type="togglePassword" style="right: 10px;" onclick="togglePasswordType(this);">
-      <i class="ti fs-4 ti-eye-off"></i>
+    <a href="javascript:;" aria-label="Show/Hide Password" class="text-primary position-absolute top-50 translate-middle-y h5" data-type="togglePassword" style="right: 10px;" onclick="togglePasswordType(this);">
+      <i class="ti ti-eye-off fs-4"></i>
     </a>
   `).insertAfter(input);
 }
@@ -41,6 +41,54 @@ jQuery.fn.preventDoubleSubmission = function () {
 
 function $$(s) {
 	return document.getElementById(s);
+}
+
+function validaForm(form) {
+    var seg = true;
+    var applyOnblur;
+    
+    for (var i = 0; i < form.elements.length; i++) {
+        applyOnblur = false;
+        var elem = form.elements[i];
+        elem.className = elem.className.replace(/(?:^|\s)error(?!\S)/, '');
+        
+        if (elem.className.search('ckEmail') > -1 && elem.className.search('required') > -1) {
+            if (!checkMail(elem.value)) {
+                elem.className += " error";
+                seg = false;
+                applyOnblur = true;
+            }
+
+        } else if (elem.className.search('ckDate') > -1 && elem.className.search('required') > -1) {
+            if (!validatedate(elem.value)) {
+                elem.className += " error";
+                seg = false;
+                applyOnblur = true;
+            }
+        } else {
+            if (elem.className.search('required') > -1 && elem.value.length < 1) {
+                elem.className += " error";
+                seg = false;
+                applyOnblur = true;
+            }
+        }
+        
+        if(applyOnblur){
+            if(elem && !elem.onblur || elem.getAttribute('onblur').search('removeErrorTag') < 0){
+                elem.setAttribute('onblur',elem.getAttribute('onblur')+';removeErrorTag(this);');
+            }
+        }
+    }
+    if(seg){
+        $('#'+form.id).preventDoubleSubmission();
+    }else{
+        BootstrapDialog.show({
+            title: 'Erro',
+            message: 'Alguns campos do formul&aacute;rio n&atilde;o foram preenchidos corretamente. Favor conferir.',
+            type: BootstrapDialog.TYPE_DANGER
+        });
+    }
+    return seg;
 }
 
 function MD5(string) {
@@ -432,25 +480,42 @@ function tAlert(title, message, type) {
 	}
 }
 
-function getAddress(idField, nameField) {
+function getCidades(id_estado, id_cidade){
+	let ret = $(`#selectCidades`);
+	$.ajax({
+		url: `${__PATH__}ajax/selecionar-cidades/id_estado/${id_estado}/id_cidade/${id_cidade}`,
+		type: `post`,
+		dataType: `json`,
+		success: function (resp) {
+			ret.html(resp.html);
+		},
+		error: function (resp) {
+			console.log(resp);
+			ret.html(`Ocorreu um erro`);
+		}
+	});
+	return false;
+}
 
-	var idField = idField || '';
+function getAddress(idField='') {
 
 	function getDataFromApi(cep) {
 		$.getJSON(
 			"https://viacep.com.br/ws/" + cep.replace(/[^0-9]/g, "") + "/json/",
 			function (data) {
 				if (data) {
-					console.log(data);
-					$(`#${idField}endereco`).val(unescape(data.logradouro));
-					$(`#${idField}bairro`).val(unescape(data.bairro));
-					if ($(`#${idField}id_cidade`)) $(`#${idField}id_cidade`).val(unescape(data.ibge));
-					$(`#${idField}cidade`).val(unescape(data.localidade));
+					$(`#${idField}endereco`).val(data.logradouro);
+					$(`#${idField}bairro`).val(data.bairro);
+					if ($(`#${idField}id_cidade`)) $(`#${idField}id_cidade`).val(data.ibge);
+					$(`#${idField}cidade`).val(data.localidade);
 					$(`#${idField}estado option`).each(function () {
-						if ($(this).val() == unescape(data.uf)) {
-							$(this).attr("selected", "selected");
+						if ($(this).val() == data.uf || $(this).data('uf') == data.uf) {
+							$(`#${idField}estado`).val($(this).val());		
 						}
 					});
+					if($(`#${idField}selectCidades`).length > 0){
+						getCidades($(`#${idField}estado`).val(), data.ibge);
+					}
 				}
 			}
 		);
@@ -505,11 +570,11 @@ function blockUiConfig(message) {
 }
 
 function blockUi() {
-	blockUiConfig('<img src="' +__BASEPATH__ +'css/img/loading.gif" width="20px" /> Aguarde...');
+	blockUiConfig('<img src="' +__SYSTEMPATH__ +'css/img/loading.gif" width="20px" /> Aguarde...');
 }
 
 function blockOnSubmit() {
-	blockUiConfig('<img src="' +__BASEPATH__ +'css/img/loading.gif" width="20px" /> <span id="progressPercent">0%</span>');
+	blockUiConfig('<img src="' +__SYSTEMPATH__ +'css/img/loading.gif" width="20px" /> <span id="progressPercent">0%</span>');
 }
 
 function blockUiMsg(message, timeout, callback) {
@@ -835,7 +900,7 @@ class LevModal {
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">
-					<h5 class="modal-title"></h5>
+					<h5 class="modal-title small text-uppercase"></h5>
 					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 				</div>
 				<div class="modal-body"></div>
@@ -924,7 +989,7 @@ class LevModal {
 
 			this.addEventListener('hidden.bs.modal', event => {
 				this.dialog.find(".ckeditor").each(function (key, textarea) {
-					window.CKEDITORS[textarea.id].destroy();
+					CKEDITOR.instances[textarea.id].destroy();
 				});
 				$(`#${this.props.id}`).remove();
 			});
@@ -935,30 +1000,7 @@ class LevModal {
 
 			this.addEventListener('shown.bs.modal', event => {
 				this.dialog.find(".ckeditor").each(function (key, textarea) {
-					
-					ClassicEditor
-						.create( textarea, {
-							htmlSupport: {
-								allow: [
-									{
-										name: /.*/,
-										attributes: true,
-										classes: true,
-										styles: true
-									}
-								]
-							},
-						}  )
-						.then( editor => {
-							if(window.CKEDITORS == undefined){
-								window.CKEDITORS = [];
-							}
-							
-							window.CKEDITORS[textarea.id] = editor;
-						} )
-						.catch( error => {
-							console.error( error );
-						} );
+					CKEDITOR.replace(textarea.id);
 				});
 			});
 			fieldFunctions();
@@ -1001,6 +1043,22 @@ class LevModal {
 	}
 }
 
+Date.isLeapYear = function (year) { 
+    return (((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0)); 
+};
+
+Date.getDaysInMonth = function (year, month) {
+    return [31, (Date.isLeapYear(year) ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month];
+};
+
+Date.prototype.isLeapYear = function () { 
+    return Date.isLeapYear(this.getFullYear()); 
+};
+
+Date.prototype.getDaysInMonth = function () { 
+    return Date.getDaysInMonth(this.getFullYear(), this.getMonth());
+};
+
 Date.prototype.addMonths = function (value) {
     var n = this.getDate();
     this.setDate(1);
@@ -1008,23 +1066,6 @@ Date.prototype.addMonths = function (value) {
     this.setDate(Math.min(n, this.getDaysInMonth()));
     return this;
 };
-
-Date.isLeapYear = function (year) { 
-    return (((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0)); 
-};
-
-Date.prototype.isLeapYear = function () { 
-    return Date.isLeapYear(this.getFullYear()); 
-};
-
-Date.getDaysInMonth = function (year, month) {
-    return [31, (Date.isLeapYear(year) ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month];
-};
-
-Date.prototype.getDaysInMonth = function () { 
-    return Date.getDaysInMonth(this.getFullYear(), this.getMonth());
-};
-
 
 $(document).ready(() => {
 	$('input[data-type="togglePassword"]').each((index, el) => {

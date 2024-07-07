@@ -1,12 +1,12 @@
 <?php
 
 global 
-    $EnderecoSite, $Dominio, $DBHost, $DBUser, $DBPassWord, $DBName, $AppName, 
+    $EnderecoSite, $Dominio, $DBHost, $DBUser, $DBPassWord, $DBName, $AppName, $SessaoS,
     $DBDriver, $Sessao, $Prefix, $EmailHost, $EmailPort, $EmailSMTPSecure, $CpanelUser,
     $EmailSMTPAuth, $EmailUsername, $EmailPassword, $EmailTipo, $Config, $Estados, $NmSN,
     $Modules, $DBCONN, $DBPREFIX, $DBPort, $xmlConfig, $objSession, $FlexId, $Language,
     $DBFPHost, $DBFPUser, $DBFPPassWord, $DBFPName, $Charset, $QtdRegistros, $DBCharset,
-    $EmailGCID, $EmailGCSecret;
+    $EmailGCID, $EmailGCSecret, $AppPath;
 
 $DBCONN             = null;
 $AppName            = getenv('APP_NAME');
@@ -20,7 +20,8 @@ $DBDriver           = getenv('DB_CONNECTION');
 $DBCharset          = getenv('DB_CHARSET');
 $DBHost             = getenv('DB_HOST');
 $DBPort             = getenv('DB_PORT');
-$DBName             = getenv('DB_DATABASE');
+if(!$DBName)
+    $DBName         = getenv('DB_DATABASE');
 $DBUser             = getenv('DB_USERNAME');
 $DBPassWord         = getenv('DB_PASSWORD');
 $Prefix             = getenv('DB_PREFIX');
@@ -35,11 +36,14 @@ $EmailPassword      = getenv('MAIL_PASSWORD');
 $EmailGCID          = getenv('MAIL_GOOGLE_CLIENT_ID');
 $EmailGCSecret      = getenv('MAIL_GOOGLE_CLIENT_SECRET');
 
+$AppPath            = getenv('APP_PATH');
+
 $Language           = getenv('LANG');
 
 $DBPREFIX           = '';
 
 $Sessao             = md5("@FP@".__DIR__);
+$SessaoS             = md5($Sessao);
 $Modules            = array();
 
 $QtdRegistros = array(25, 50, 100);
