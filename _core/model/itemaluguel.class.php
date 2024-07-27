@@ -372,7 +372,7 @@ class ItemAluguel extends Flex {
             <table class="table lev-table table-striped">
                 <thead>
                 <tr>
-                    <th width="10">'.GG::getCheckboxHead().'</th>
+                    <th width="10" class="p-3">'.GG::getCheckboxHead().'</th>
                     <th class="col-sm-3">Tipo</th>
                     <th class="col-sm-4">Descri&ccedil;&atilde;o</th>
                     <th class="col-sm-2 text-center">Quantidade</th>
@@ -395,7 +395,7 @@ class ItemAluguel extends Flex {
 
     public static function getLine($obj){
         return '
-        <td>'.GG::getCheckboxLine($obj->get('id')).'</td>
+        <td class="p-3">'.GG::getCheckboxLine($obj->get('id')).'</td>
         <td>'.self::$nm_tipos[$obj->get('tipo_item')].'</td>
         <td class="link-edit">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->getItem()->get('descricao'), false).'</td>
         <td class="text-center">'.$obj->get('qtd').'</td>

@@ -18,7 +18,7 @@ $objClass = new $Modules['class']();
 if(!$Modules['class']::delete($id)){
     $msg = 'Erro ao excluir registro.';
     if($Modules['class'] == 'Acessorio' || $Modules['class'] == 'Fantasia' || $Modules['class'] == 'Cliente'){
-        $msg .= ' Este registro está vinculado a um aluguel.';
+        $msg .= ' Um ou mais registros selecionados estão vinculados a um aluguel.';
     }
     Utils::jsonResponse($msg);
 }

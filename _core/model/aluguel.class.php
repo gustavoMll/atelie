@@ -295,7 +295,7 @@ class Aluguel extends Flex {
             <table class="table lev-table table-striped">
                 <thead>
                 <tr>
-                    <th width="10">'.GG::getCheckboxHead().'</th>
+                    <th width="10" class="p-3">'.GG::getCheckboxHead().'</th>
                     <th class="col-sm-4">Cliente</th>
                     <th class="col-sm-4">Prazo</th>
                     <th class="col-sm-4">Valor (R$)</th>
@@ -317,7 +317,7 @@ class Aluguel extends Flex {
 
     public static function getLine($obj){
         return '
-        <td>'.GG::getCheckboxLine($obj->get('id')).'</td>
+        <td class="p-3">'.GG::getCheckboxLine($obj->get('id')).'</td>
         <td>'.$obj->getPedido()->getCliente()->getPessoa()->get('nome').'</td>
         <td class="link-edit">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), Utils::dateFormat($obj->get('dt_prazo'), 'd/m/Y'), false).'</td>
         <td>'.Utils::parseMoney($obj->getValorAluguel()).'</td>

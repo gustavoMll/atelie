@@ -7,7 +7,7 @@ class GG {
 
         if($edit) {
             $string.= '<a 
-            class="text-uppercase text-reset"
+            class="text-uppercase text-reset text-decoration-underline"
             href="javascript:;" 
             onclick="'.($changeHref ? 'setHref(`'.$module.'/editar/id/'.$id.'`);' : '').'modalForm(`'. $module . '`, '.$id.', ``, function(){ getLine(\''.$module.'\', '.$id.'); '.($changeHref ? ' setHref(`'.$module.'`);' : '').' });" 
             data-bs-toggle="" 
