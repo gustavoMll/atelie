@@ -642,6 +642,17 @@ function fieldFunctions() {
 		$(obj).autocomplete({
 			source: function (request, response) {
 				url = urlBase + "/term/" + encodeURI(request.term);
+				if($(obj).attr("input-aux")){
+					const inputs = ($(obj).attr("input-aux").split('/'));
+					url += "/input-aux/"+inputs[0];
+					for(let i = 1; i < inputs.length; i++){
+						url += ','+inputs[i];
+					}
+				}
+				if($(obj).attr("data-div")){
+					url += "/data-div/" + $(obj).attr("data-div");
+				}
+
 				if ($(obj).attr("data-name")) {
 					url += "/camponome/" + $(obj).attr("data-name");
 				}
@@ -658,6 +669,16 @@ function fieldFunctions() {
 				});
 			},
 			select: function (event, ui) {
+				if($(obj).attr("input-aux")){
+					const inputs = ($(obj).attr("input-aux").split('/'));
+					if(ui.item.campos.length == inputs.length +1){
+						console.log(inputs);
+						console.log(ui.item.campos)
+						for(var i = 0; i < inputs.length; i++){
+							$("#"+inputs[i]).val(ui.item.campos[i+1]);
+						}
+					}
+				}
 				$("#" + $(obj).attr("data-field")).val(ui.item.value);
 				$(obj).val(ui.item.label);
 				return false;
