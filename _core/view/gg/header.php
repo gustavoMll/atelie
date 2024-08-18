@@ -1,19 +1,6 @@
 <nav class="position-relative" id="navHeader">
 
     <div class="d-flex gap-2 gap-md-3 align-items-center flex-wrap mb-3">
-
-        <a href="#" onclick="storeConfigSidebar();" class="lh-1" aria-label="Open Collapse" data-toggle="sidebarCollapse"><i class="ti ti-menu-2 fs-1"></i></a>
-        <script>
-            function storeConfigSidebar(){
-                localStorage.setItem('sidebarCollapse', $(`#sidebar`).hasClass('collapse') ? '' : 'collapse');
-            }
-            
-            if(localStorage.getItem('sidebarCollapse') == 'collapse'){
-                document.getElementById(`sidebar`).classList.add('collapse');
-                document.getElementById(`content`).classList.add('m-collapse-menu');
-            }
-
-        </script>
             
         <?php
         if ($view['hasHeader']) {
@@ -76,50 +63,6 @@
         <?php } ?>
 
 
-        <?php if($request->get('module')== 'relatorio-centros'){?>
-
-            <div class="ms-auto d-flex gap-3 align-items-center" role="tablist">
-                <!--
-                <select class="form-select"> 
-                    <option>Selecione um centro</option>
-                    <option>TODOS</option>
-                    <option>OPERACIONAL</option>
-                    <option>ADMINISTRATIVO</option>
-                </select>
-                <div class="dropdown">
-                    <a href="#" role="button" data-bs-toggle="dropdown" aria-expanded="true" class="d-flex gap-2 align-items-center btn btn-light text-black-75 border-dark border-opacity-10 p-2 px-lg-3 text-nowrap dropdown-toggle">Esse mês</a>
-                    <div class="dropdown-menu dropdown-menu-end">
-                        <a class="dropdown-item" href="" onclick="">Hoje</a>
-                        <a class="dropdown-item" href="" onclick="">Essa semana</a>
-                        <a class="dropdown-item" href="" onclick="">Esse mês</a>
-                        <a class="dropdown-item" href="" onclick="">Esse ano</a>
-                        <a class="dropdown-item" href="" onclick="">Todo o período</a>
-                        <hr class="dropdown-divider">
-                        <form id="formFiltraAtendimento" onsubmit="" class="px-3 py-1 d-flex gap-1 flex-column">
-                            <small class="opacity-50 text-uppercase">Período</small>
-                            <input name="" id="" type="date" class="form-control form-control-sm" value="2024-04-18">
-                            <input name="" id="" type="date" class="form-control form-control-sm" value="2024-04-18">
-                            <button class="btn btn-sm btn-outline-primary">Filtrar</button>
-                        </form>
-                    </div>
-                </div> -->
-                <div class="d-flex gap-3 justify-content-center d-none d-md-inline-flex">
-                    <a href="<?=$url?>?ano=<?=($ano-1)?>"><i class="ti ti-arrow-left"></i></a>            
-                    <div class="dropdown">
-                        <a class="dropdown-toggle text-decoration-none" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                            <?=$ano?>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuLink">
-                            <li><a class="dropdown-item" href="javascript:;">Esse mês</a></li>
-                            <li><a class="dropdown-item" href="javascript:;">Esse ano</a></li>
-                        </ul>
-                    </div>
-                    <a href="<?=$url?>?ano=<?=($ano+1)?>"><i class="ti ti-arrow-right"></i></a>
-                </div>
-            </div>
-
-        <?php } ?>
-
 
         <?php if($request->get('module')== ''){?>
 
@@ -134,8 +77,8 @@
                     <hr class="dropdown-divider">
                     <form id="formFiltraAtendimento" onsubmit="" class="px-3 py-1 d-flex gap-1 flex-column">
                         <small class="opacity-50 text-uppercase">Período</small>
-                        <input name="" id="" type="date" class="form-control form-control-sm" value="2024-04-18">
-                        <input name="" id="" type="date" class="form-control form-control-sm" value="2024-04-18">
+                        <input name="" id="dt_beg" type="date" class="form-control form-control-sm" value="2024-04-18">
+                        <input name="" id="dt_end" type="date" class="form-control form-control-sm" value="2024-04-18">
                         <button class="btn btn-sm btn-outline-primary">Filtrar</button>
                     </form>
                 </div>
@@ -144,67 +87,6 @@
 
     </div>
 </nav>
-<!-- 
-<nav class="position-relative d-block d-sm-none" id="navSmHeader">
-
-    <div class="py-3 px-5">
-
-        <div class="px-3 px-md-5 d-flex justify-content-center justify-content-sm-start gap-3">
-
-            <a href="#" class="d-block position-absolute" aria-label="Open Collapse" data-toggle="sidebarCollapse">
-                <i class="ti ti-menu-2 fs-1"></i>
-            </a>
-
-            <?php if ($view['hasHeader']) {
-                include dirname(__FILE__) . "/component.pageheader.php";
-            }else{
-
-                switch ($request->get('module')) {
-                    case 'configuracoes':
-                        echo '<h2 class="mb-0 h4 mb-0 fw-bold text-primary">Configurações Gerais</h2>';
-                        break;
-                    case '':
-                    case 'home':
-                        echo '<h2 class="mb-0 h4 mb-0 fw-bold text-primary">Dashboard</h2>';
-                        break;
-                    case 'contaspr':
-                        echo '<h2 class="mb-0 h4 mb-0 fw-bold text-primary">Contas</h2>';
-                        break;
-                    case 'contas-receber':
-                        echo '<h2 class="mb-0 h4 mb-0 fw-bold text-primary">Contas a receber</h2>';
-                        break;
-                    case 'contas-pagar':
-                        echo '<h2 class="mb-0 h4 mb-0 fw-bold text-primary">Contas a pagar</h2>';
-                        break;
-                    case 'movimentacao-financeira':
-                        echo '<div class="d-flex gap-3">
-                        <h2 class="mb-0 h4 mb-0 fw-bold text-primary">Movimentação financeira</h2>
-                        </div>';
-                        break;
-                    case 'acompanhamento-financeiro':
-                        echo '<h2 class="mb-0 h4 mb-0 fw-bold text-primary">Acompanhamento financeiro</h2>';
-                        break;
-                    case 'fluxo-caixa':
-                        echo '<h2 class="mb-0 h4 mb-0 fw-bold text-primary">Fluxo de caixa</h2>';
-                        break;
-                    case 'relatorio-vendedores':
-                        echo '<h2 class="mb-0 h4 mb-0 fw-bold text-primary">Relatório de vendedores</h2>';
-                        break;
-                    case 'pagamento-banco-inter':
-                        echo '<h2 class="mb-0 h4 mb-0 fw-bold text-primary">Sistema de Pagamento Integrado ao banco inter</h2>';
-                        break;
-                    case 'extrato-banco-inter':
-                        echo '<h2 class="mb-0 h4 mb-0 fw-bold text-primary">Extrato Banco inter</h2>';
-                        break;
-                    case 'financeiro':
-                        echo '<h2 class="mb-0 h4 mb-0 fw-bold text-primary">Financeiro</h2>';
-                        break;
-                }
-
-            } ?>
-        </div>
-    </div>
-</nav> -->
 <script>
     function logout() {
         const title = 'Logout';
