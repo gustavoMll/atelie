@@ -127,7 +127,6 @@ class ItemAluguel extends Flex {
         $error = '';
         $id = $request->getInt('id');
         $paramAdd = 'AND id NOT IN('.$id.')';
-        
         if(!isset($_POST['id_aluguel']) || $_POST['id_aluguel'] == ''){
     		$error .= '<li>O campo "Aluguel" n&atilde;o foi informado</li>';
     	}
@@ -146,7 +145,7 @@ class ItemAluguel extends Flex {
                     $error .= '<li>O campo "Quantidade de Item" n&atilde;o foi informado</li>';
                 }elseif((int) $_POST['qtd'] <= 0){
                     $error .= '<li>A quantidade informada &eacute; inv&aacute;lida</li>';
-                }elseif(self::exists("id={$id_acessorio}")){
+                }elseif(Acessorio::exists("id={$id_acessorio}")){
                     $obj = Acessorio::load($id_acessorio);
                     $qtd_ori = 0;
                     if($id > 0){

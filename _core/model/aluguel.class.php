@@ -295,9 +295,8 @@ class Aluguel extends Flex {
             <table class="table lev-table table-striped">
                 <thead>
                 <tr>
-                    <th class="col-sm-4 p-3">Cliente</th>
-                    <th class="col-sm-4">Prazo</th>
-                    <th class="col-sm-4">Valor (R$)</th>
+                    <th class="col-sm-6">Prazo</th>
+                    <th class="col-sm-6">Valor (R$)</th>
                 </tr>
                 </thead>
                 <tbody>';
@@ -316,11 +315,9 @@ class Aluguel extends Flex {
 
     public static function getLine($obj){
         return '
-        <td class="p-3">'.$obj->getPedido()->getCliente()->getPessoa()->get('nome').'</td>
         <td class="link-edit">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), Utils::dateFormat($obj->get('dt_prazo'), 'd/m/Y'), false).'</td>
         <td>'.Utils::parseMoney($obj->getValorAluguel()).'</td>
         '.GG::getResponsiveList([
-            'Data' => $obj->getPedido()->getCliente()->getPessoa()->get('nome'),
             'Prazo' => Utils::dateFormat($obj->get('dt_prazo'), 'd/m/Y'),
             'Valor' => Utils::parseMoney($obj->getValorAluguel()),
         ], $obj).'
