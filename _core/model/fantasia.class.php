@@ -58,9 +58,9 @@ class Fantasia extends Flex {
     
     public function getTipo()
     {
-        if (!$this->tipo_fantasia || $this->tipo_fantasia->get('id') != $this->get('id')) {
+        if (!$this->tipo_fantasia || $this->tipo_fantasia->get('id') != $this->get('id_tipo')) {
             if (Tipo::exists((int) $this->get('id'), 'id')) {
-                $this->tipo_fantasia = Tipo::load($this->get('id'));
+                $this->tipo_fantasia = Tipo::load($this->get('id_tipo'));
             } else {
                 $this->tipo_fantasia = new Tipo();
                 $this->tipo_fantasia->set('nome', '');
@@ -277,7 +277,6 @@ class Fantasia extends Flex {
         if($img != ''){
             $ret = '<img src="'.($img!=''?$img:__BASEPATH__.'/img/no-pic.jpg').'" class="imgPreviewList"/>';
         }
-        
         return '
         <td>'.GG::getCheckboxLine($obj->get('id')).'</td>
         <td class="text-center">
@@ -286,12 +285,7 @@ class Fantasia extends Flex {
             </span>
         </td>
         <td class="link-edit">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->get('descricao')).'</td>
-        '.GG::getResponsiveList([
-            'Descri&ccedil;&atilde;o' => $obj->get('descricao'),
-            'Tipo' => $obj->getTipo()->get('descricao'),
-            'Pre&ccedil;o' => Utils::parseMoney($obj->get('preco')),
-        ], $obj).'
-        <td>'.$obj->getTipo()->get('descricao').'</td>
+        <td>'.$obj->getTipo()->get('nome').'</td>
         <td>'.Utils::parseMoney($obj->get('preco')).'</td>
         ';
     }

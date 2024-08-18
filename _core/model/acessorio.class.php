@@ -60,9 +60,9 @@ class Acessorio extends Flex {
     
     public function getTipo()
     {
-        if (!$this->tipo_acessorio || $this->tipo_acessorio->get('id') != $this->get('id')) {
+        if (!$this->tipo_acessorio || $this->tipo_acessorio->get('id') != $this->get('id_tipo')) {
             if (Tipo::exists((int) $this->get('id'), 'id')) {
-                $this->tipo_acessorio = Tipo::load($this->get('id'));
+                $this->tipo_acessorio = Tipo::load($this->get('id_tipo'));
             } else {
                 $this->tipo_acessorio = new Tipo();
                 $this->tipo_acessorio->set('nome', '');
@@ -288,11 +288,8 @@ class Acessorio extends Flex {
 
     public static function getLine($obj){
         $img = $obj->getImage('t'); 
-        $ret = '<i class="ti ti-photo"></i>';        
         
-        if($img != ''){
-            $ret = '<img src="'.($img!=''?$img:__BASEPATH__.'/img/no-pic.jpg').'" class="imgPreviewList"/>';
-        }
+        $ret = '<img src="'.($img!=''?$img : __BASEPATH__.'img/image-folder.jpg').'" class="imgPreviewList"/>';
         
         return '
         <td>'.GG::getCheckboxLine($obj->get('id')).'</td>
@@ -302,14 +299,8 @@ class Acessorio extends Flex {
             </span>
         </td>
         <td class="link-edit">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->get('descricao')).'</td>
-        '.GG::getResponsiveList([
-            'Descri&ccedil;&atilde;o' => $obj->get('descricao'),
-            'Tipo' => $obj->getTipo()->get('descricao'),
-            'Pre&ccedil;o' => Utils::parseMoney($obj->get('preco')),
-        ], $obj).'
-        <td>'.$obj->getTipo()->get('descricao').'</td>
-        <td>'.Utils::parseMoney($obj->get('preco')).'</td>
-        ';
+        <td>'.$obj->getTipo()->get('nome').'</td>
+        <td>'.Utils::parseMoney($obj->get('preco')).'</td>';
     }
 
     public static function filter($request) {
