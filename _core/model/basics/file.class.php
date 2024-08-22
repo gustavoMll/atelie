@@ -13,7 +13,7 @@ class File {
         
         self::deleteFile($id, $dest, $fileBefore);
         $dest = $defaultPath."uploads/".$dest.($dest[(strlen($dest)-1)] == '/'?'':'/');
-        $nameFile = $dest.str_pad($id+0, 7, '0',STR_PAD_LEFT).'_';
+        $nameFile = $dest.str_pad($id, 7, '0',STR_PAD_LEFT).'_';
         $extesion = Utils::getFileExtension($upFile["name"]);
         $newName = self::configureName($upFile["name"]);
         if(!is_dir($dest)){
@@ -30,7 +30,7 @@ class File {
     public static function deleteFile($id, $dest, $file){
         global $defaultPath;
         $dest = $defaultPath."uploads/".$dest.($dest[(strlen($dest)-1)] == '/'?'':'/');
-        $nameFile = $dest.str_pad($id+0, 7, '0',STR_PAD_LEFT).'_'.$file;
+        $nameFile = $dest.str_pad($id, 7, '0',STR_PAD_LEFT).'_'.$file;
         if(file_exists($nameFile)){
             unlink($nameFile);
         }

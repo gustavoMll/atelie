@@ -1,3 +1,4 @@
+
 <?php
 
 class Documento extends Flex {
@@ -5,65 +6,62 @@ class Documento extends Flex {
     protected $tableName = 'documentos';
     protected $mapper = array(
         'id' => 'int',
+        'nome' => 'string',
         'descricao' => 'string',
-        'obrigatorio' => 'int',
-        'arquivo' => 'string',
+        'pdf'=> 'string',
+        'ativo' => 'int',
+        'usr_cad' => 'string',
+        'dt_cad' => 'sql',
+        'usr_ualt' => 'string',
+        'dt_ualt' => 'sql',
     );
 
     protected $primaryKey = array('id');
-    
+
     public static $configGG = array(
         'nome' => 'Documentos',
         'class' => __CLASS__,
-        'ordenacao' => 'descricao ASC',
+        'ordenacao' => 'nome ASC',
         'envia-arquivo' => true,
-        'show-menu' => true,
-        'icon' => 'ti ti-file',
     );
 
     public static function createTable(){
-        return "
+        return '
         DROP TABLE IF EXISTS `documentos`;
         CREATE TABLE `documentos` (
             `id` int(11) NOT NULL AUTO_INCREMENT,
-            `descricao` VARCHAR(255) NOT NULL,
-            `obrigatorio` INT(1) DEFAULT 1,
-            `arquivo` VARCHAR(255) NOT NULL,
+            `nome` varchar(100) DEFAULT NULL,
+            `descricao` text DEFAULT NULL,
+            `pdf` varchar(100) DEFAULT NULL,
+            `ativo` int(1) DEFAULT 1,
             `usr_cad` varchar(20) NOT NULL,
             `dt_cad` datetime NOT NULL,
             `usr_ualt` varchar(20) NOT NULL,
             `dt_ualt` datetime NOT NULL,
             PRIMARY KEY(`id`)
-        ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4;
-        ";
+        ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4;';
     }
-
-
-    public static function getDocs($params = 'descricao'){
-        return self::search([
-            's' => 'id,'.$params,
-            'o' => 'descricao'
-        ]);
-    }
-
+    
+    
     public static function validate() {
         global $request;
         $error = '';
         $id = $request->getInt('id');
         $paramAdd = 'AND id NOT IN('.$id.')';
-
-        if(!isset($_POST['descricao']) || $_POST['descricao'] == ''){
+       
+        if($_POST['nome'] == ''){
+            $error .= '<li>O campo "Nome" n&atilde;o foi informado</li>';
+        }
+        if($_POST['descricao'] == ''){
             $error .= '<li>O campo "Descri&ccedil;&atilde;o" n&atilde;o foi informado</li>';
         }
-        
-        if(!isset($_POST['obrigatorio']) || $_POST['obrigatorio'] == ''){
-            $error .= '<li>O campo "Obrigat&oacute;rio" n&atilde;o foi informado</li>';
-        }
-        
-        if(!isset($_FILES['arquivo']) || $_FILES['arquivo']['name'] == ''){
-            $error .= '<li>O campo "Arquivo" n&atilde;o foi informado</li>';
-        }
 
+        if (isset($_FILES['pdf']) && $_FILES['pdf']['name'] != '') {
+            if($_FILES['pdf']['error'] != 0){
+                $error .= '<li>PDF inv&aacute;lido;</li>';
+            }
+        }
+        
         if($error==''){
             return true;
         }else{
@@ -81,18 +79,31 @@ class Documento extends Flex {
             $id = $request->getInt('id');
             $obj = new $classe(array($id));
 
-            if ($id > 0) {
+            if ($id == 0) {
+                $obj->set('ativo', 1);
+            } else {
                 $obj = self::load($id);
             }
-
+            
+            $obj->set('nome', $_POST['nome']);
             $obj->set('descricao', $_POST['descricao']);
-            $obj->set('obrigatorio', $_POST['obrigatorio']);
-            $obj->set('arquivo', $_FILES['arquivo']['name']);
-
-            $obj->save();
+            
             $id = $obj->get('id');
-
+            $fileBefore = '';
+            if (isset($_FILES['pdf']) && $_FILES['pdf']['name'] != '') {
+                $fileBefore = $obj->get('pdf');
+                $obj->set('pdf', File::configureName($_FILES['pdf']['name']));
+            }
+            
+            $obj->save();
+            
+            if (isset($_FILES['pdf']) && $_FILES['pdf']['name'] != '') {
+                File::saveFromUpload($fileBefore, 'pdf', $id, $obj->getTableName());
+            }
+            
             echo 'Registro salvo com sucesso!';
+
+            Utils::generateSitemap();
 
             $ret['success'] = true;
             $ret['obj'] = $obj;   
@@ -101,18 +112,29 @@ class Documento extends Flex {
         return $ret;
     }
 
-
     public static function delete($ids) {
         global $defaultPath;
         $classe = __CLASS__;
         $obj = new $classe();
 
-        Flex::dbDelete(new Pessoa(), "id IN({$ids})");
-        return Flex::dbDelete($obj, "id IN({$ids})");
+        $arrIds = (substr_count($ids, ',') > 0 ? explode(',', $ids) : array($ids));
+
+        
+        $ret = $obj->dbDelete($obj, 'id IN('.$ids.')');
+        Utils::generateSitemap();
+        return $ret;
+        }
+
+    public static function deleteFile($id, $dest='pdf'){
+        $obj = self::load($id);
+        // print_r($obj);
+        // exit;
+        File::deleteFile($id, $obj->getTableName(), $obj->get('pdf'));
+        unset($obj);
     }
 
-    public static function form($codigo = 0){
-        global $request, $objSession;
+    public static function form($codigo = 0) {
+        global $request;
         $string = '';
         $classe = __CLASS__;
         $obj = new $classe();
@@ -126,46 +148,50 @@ class Documento extends Flex {
         }
         
         $string .= '
-        <div class="col-sm-8 mb-3 required">
-            <div class="form-floating">
-                <input name="descricao" id="descricao" maxlength="255" type="text" placeholder="seu dado aqui" class="form-control" value="'.$obj->get('descricao').'"/>
-                <label for="descricao" class="form-label">Descri&ccedil;&atilde;o</label>
-            </div>
-        </div>';
+            <div class="col-sm-6 required">
+                <div class="form-floating">
+                <input name="nome" id="nome" maxlength="255" type="text" class="form-control" placeholder="Doc" value="'.$obj->get('nome').'" required/>
+                <label for="">Nome</label>
+                </div>
+            </div>';
         
-        $string .= '
-        <div class="col-sm-4 mb-3 required">
-            <div class="form-floating">
-                <select class="form-select" name="obrigatorio" required>
-                    <option value="1" selected>Sim</option>
-                    <option value="0" '.($obj->get('obrigatorio') == 0 ? 'selected' : '').'>N&atilde;o</option>
-                </select>
-                <label for="obrigatorio" class="form-label">Obriga&oacute;rio?</label>
-            </div>
-        </div>';
+            $string .= '
+            <div class="col-sm-6">
+                <div class="form-floating">
+                    <div class="input-group">
+                        <span class="input-group-addon" placeholder="Doc"><span class="glyphicon glyphicon-file"></span></span>
+                        <input name="pdf" type="file" class="form-control" value=""/>
+                    </div>
+                </div>
+            </div>';
 
-        $string .= '
-        <div class="col-sm-12 mb-3 required">
-            <div class="form-floating">
-                <input name="arquivo" id="arquivo" maxlength="255" type="file" class="form-control" value="'.$obj->get('arquivo').'"/>
-                <label for="arquivo" class="form-label">Arquivo</label>
-            </div>
-        </div>';
+            if ($obj->get('pdf') != '') {
+                $string .= GG::showFile($obj, 'Arquivo atual', 'pdf');
+            }
+
+           
+
+            $string .= '
+            <div class="form-group col-sm-12">
+                <label for="">Descri&ccedil;&atilde;o</label>
+                <textarea class="form-control ckeditor" name="descricao" id="descricao">'.$obj->get('descricao').'</textarea>
+            </div>';
         
+         
         return $string;
     }
 
     public static function getTable($rs) {
         $string = '
-            <table class="table lev-table table-striped">
-                <thead>
-                <tr>
-                    <th width="10">'.GG::getCheckboxHead().'</th>
-                    <th class="col-sm-8">Descri&ccedil;&atilde;o</th>
-                    <th class="col-sm-4">Obrigat&oacute;rio?</th>
-                </tr>
-                </thead>
-                <tbody>';
+            <table class="table table-responsive table-striped">
+            <thead>
+              <tr>
+                <th width="10">'.GG::getCheckboxHead().'</th>
+                <th class="col-sm-12">Nome</th>
+                <th width="10"></th>
+              </tr>
+            </thead>
+            <tbody>';
         
         while ($rs->next()) {
             $obj = self::load($rs->getInt('id'));
@@ -173,8 +199,7 @@ class Documento extends Flex {
         }
        
         $string .= '</tbody>
-              </table>
-              ';
+              </table>';
         
         return $string;
     }
@@ -182,32 +207,17 @@ class Documento extends Flex {
     public static function getLine($obj){
         return '
         <td>'.GG::getCheckboxLine($obj->get('id')).'</td>
-        <td class="link-edit">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->get('descricao')).'</td>
-        '.GG::getResponsiveList([
-            'Descri&ccedil;&atilde;o' => $obj->get('descricao'),
-            'Obrigat&oacute?' => ($obj->get('obrigatorio') ? 'Sim' : 'N&atildeo')
-        ], $obj).'
-        <td>'.($obj->get('obrigatorio') ? 'Sim' : 'N&atildeo').'</td>
+                <td class="link-edit">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->get('nome')).'</td>
+        '.GG::getActiveControl($obj->getTableName(), $obj->get('id'), $obj->get('ativo')).'
         ';
     }
 
     public static function filter($request) {
         $paramAdd = '1=1';
-
-        if($request->query('descricao') != ''){
-            $paramAdd .= " AND `descricao` LIKE '%{$request->query('descricao')}%'";
-        }
-        
-        if($request->query('obrigatoriedade') != ''){
-            $paramAdd .= " AND `obrigatorio` = {$request->query('obrigatoriedade')}";
-        }
-        
-        if(Utils::dateValid($request->query('inicio'))){
-            $paramAdd .= " AND DATE(`dt_cad`) >= '".Utils::dateFormat($request->query('inicio'),'Y-m-d')."' ";
-        }
-
-        if(Utils::dateValid($request->query('fim'))){
-            $paramAdd .= " AND DATE(`dt_cad`) <= '".Utils::dateFormat($request->query('fim'),'Y-m-d')."' ";
+        foreach(['nome'] as $key){
+            if($request->query($key) != ''){
+                $paramAdd .= " AND `{$key}` like '%{$request->query($key)}%' ";
+            }
         }
 
         return $paramAdd;
@@ -215,53 +225,20 @@ class Documento extends Flex {
 
     public static function searchForm($request) {
         global $objSession;
-        
-        $string = '';
-
+        $string = ''; 
         $string .= '
-        <div class="col-sm-8 mb-3">
-            <div class="form-floating">
-                <input name="descricao" id="filterDescricao" type="text" class="form-control" value="'.$request->query('descricao').'" placeholder="seu dado aqui" />
-                <label for="filterDescricao" class="form-label">Descri&ccedil;&atilde;o</label>
-            </div>
+        <div class="form-group col-sm-4">
+            <label for="">Nome</label>
+            <input name="nome" type="text" class="form-control" value="'.$request->query('nome').'"/>
         </div>';
 
         $string .= '
-        <div class="col-sm-4 mb-3">
-            <div class="form-floating">
-                <select class="form-select" name="obrigatoriedade">
-                    <option value="">Todos</option>
-                    <option value="1">Obrigat&oacute;rios</option>
-                    <option value="0">N&atilde;o obrigat&oacute;rios</option>
-                </select>
-                <label for="obrigatoriedade">Obrigatoriedade</label>
-            </div>
-        </div>
-        ';
-
-        $string .= '
-        <div class="col-sm-6 col-lg-3 mb-3">
-            <div class="form-floating">
-                <input name="inicio" id="filterInicio" type="text" class="form-control date" value="'.$request->query('inicio').'" placeholder="seu dado aqui" />
-                <label for="filterInicio">Cadastrados desde</label>
-            </div>
-        </div>';
-        
-        $string .= '
-        <div class="col-sm-6 col-lg-3 mb-3">
-            <div class="form-floating">
-                <input name="fim" id="filterFim" type="text" class="form-control date" value="'.$request->query('fim').'" placeholder="seu dado aqui" />
-                <label for="filteFim" class="form-label">Cadastrados at&eacute;</label>
-            </div>
-        </div>';
-
-        $string .= '
-        <div class="col-sm-6 col-lg-3 mb-3">
-            <div class="form-floating">
-                <select class="form-select" name="order" id="order">';
+            <div class="form-group col-sm-3">
+                <label for="">Ordem</label>
+                <select class="form-control" name="order">';
                 foreach([
-                    'descricao' => 'A-Z',
-                    'descricao desc' => 'Z-A',
+                    'nome' => 'A-Z',
+                    'nome desc' => 'Z-A',
                     'id' => 'Mais antigo primeiro',
                     'id desc' => 'Mais recente primeiro',
                 ] as $key => $value){
@@ -269,25 +246,19 @@ class Documento extends Flex {
                 }
         $string .= '
                 </select>
-                <label for="order" class="form-label">Ordem</label>
-            </div>
-        </div>    
-        ';
+            </div>';
         
         $string .= '
-        <div class="col-sm-6 col-lg-3 mb-3">
-            <div class="form-floating">
-                <select class="form-select" name="offset" id="offset">';
+            <div class="form-group col-sm-3">
+                <label for="">Registros</label>
+                <select class="form-control" name="offset">';
                 foreach($GLOBALS['QtdRegistros'] as $key){
                     $string .= '<option value="'.$key.'"'.($request->query('offset') == $key ? ' selected':'').'>'.$key.' registros</option>';
                 }
         $string .= '
                 </select>
-                <label for="offset" class="form-label">Registros</label>
-            </div>
-        </div>';
+            </div>';
 
-        
         return $string;
     }
 }
