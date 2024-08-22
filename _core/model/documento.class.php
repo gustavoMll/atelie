@@ -40,7 +40,14 @@ class Documento extends Flex {
         ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4;';
     }
     
-    
+    public static function getDocs($params = 'descricao'){
+        return self::search([
+            's' => 'id,'.$params,
+            'o' => 'descricao'
+        ]);
+    }
+
+
     public static function validate() {
         global $request;
         $error = '';

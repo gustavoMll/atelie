@@ -267,8 +267,17 @@ class ItemAluguel extends Flex {
         <div class="col-md-9 mb-3 '.($obj->get('tipo_item') == 1 || $obj->get('tipo_item') == '' ? 'd-none' : '').'" id="div_fantasia" >
             <input type="hidden" name="id_fantasia" id="id_fantasia" value="' . $obj->get('id_item') . '"/>
             <div class="form-floating">
-                <input id="nome_fantasia" type="text" placeholder="seu dado aqui" class="form-control autocomplete" data-table="fantasias" data-name="descricao-preco" data-field="id_fantasia" value="'.$obj->getItem()->get('descricao') .'"/>
+                <input id="nome_fantasia" type="text" placeholder="seu dado aqui" class="form-control autocomplete" data-table="fantasias" data-name="descricao-preco" input-aux="preco-fantasia" data-field="id_fantasia" value="'.$obj->getItem()->get('descricao') .'"/>
                 <label for="id_fantasia">Fantasia</label>
+            </div>
+        </div>
+        ';
+
+        $string .='
+        <div class="col-md-3 mb-3 '.($obj->get('tipo_item') == 1 || $obj->get('tipo_item') == '' ? 'd-none' : '').'" id="div_preco-fantasia" >
+            <div class="form-floating">
+                <input type="number" readonly id="preco-fantasia" value="'.$obj->getItem()->get('preco').'" class="form-control">
+                <label for="preco-fantasia">Pre&ccedil;o</label>
             </div>
         </div>
         ';
