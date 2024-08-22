@@ -9,7 +9,6 @@ class Documento extends Flex {
         'nome' => 'string',
         'descricao' => 'string',
         'pdf'=> 'string',
-        'ativo' => 'int',
         'usr_cad' => 'string',
         'dt_cad' => 'sql',
         'usr_ualt' => 'string',
@@ -33,7 +32,6 @@ class Documento extends Flex {
             `nome` varchar(100) DEFAULT NULL,
             `descricao` text DEFAULT NULL,
             `pdf` varchar(100) DEFAULT NULL,
-            `ativo` int(1) DEFAULT 1,
             `usr_cad` varchar(20) NOT NULL,
             `dt_cad` datetime NOT NULL,
             `usr_ualt` varchar(20) NOT NULL,
@@ -79,15 +77,11 @@ class Documento extends Flex {
             $id = $request->getInt('id');
             $obj = new $classe(array($id));
 
-            if ($id == 0) {
-                $obj->set('ativo', 1);
-            } else {
+            if ($id > 0) {
                 $obj = self::load($id);
             }
             
             $obj->set('nome', $_POST['nome']);
-            $obj->set('descricao', $_POST['descricao']);
-            
             $id = $obj->get('id');
             $fileBefore = '';
             if (isset($_FILES['pdf']) && $_FILES['pdf']['name'] != '') {
@@ -148,7 +142,7 @@ class Documento extends Flex {
         }
         
         $string .= '
-            <div class="col-sm-6 required">
+            <div class="col-sm-12 mb-3 required">
                 <div class="form-floating">
                 <input name="nome" id="nome" maxlength="255" type="text" class="form-control" placeholder="Doc" value="'.$obj->get('nome').'" required/>
                 <label for="">Nome</label>
@@ -156,7 +150,7 @@ class Documento extends Flex {
             </div>';
         
             $string .= '
-            <div class="col-sm-6">
+            <div class="col-sm-12 mb-3">
                 <div class="form-floating">
                     <div class="input-group">
                         <span class="input-group-addon" placeholder="Doc"><span class="glyphicon glyphicon-file"></span></span>
@@ -186,7 +180,7 @@ class Documento extends Flex {
             <table class="table table-responsive table-striped">
             <thead>
               <tr>
-                <th width="10">'.GG::getCheckboxHead().'</th>
+                <th width="10" class="p-3">'.GG::getCheckboxHead().'</th>
                 <th class="col-sm-12">Nome</th>
                 <th width="10"></th>
               </tr>
@@ -206,9 +200,8 @@ class Documento extends Flex {
 
     public static function getLine($obj){
         return '
-        <td>'.GG::getCheckboxLine($obj->get('id')).'</td>
-                <td class="link-edit">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->get('nome')).'</td>
-        '.GG::getActiveControl($obj->getTableName(), $obj->get('id'), $obj->get('ativo')).'
+        <td class="p-3">'.GG::getCheckboxLine($obj->get('id')).'</td>
+        <td class="link-edit">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->get('nome')).'</td>
         ';
     }
 

@@ -265,7 +265,7 @@ class Acessorio extends Flex {
             <table class="table lev-table table-striped">
                 <thead>
                 <tr>
-                    <th width="10">'.GG::getCheckboxHead().'</th>
+                    <th width="10" class="p-3">'.GG::getCheckboxHead().'</th>
                     <th class="col-sm-3">Foto</th>
                     <th class="col-sm-5">Descri&ccedil;&atilde;o</th>
                     <th class="col-sm-2">Tipo</th>
@@ -292,7 +292,7 @@ class Acessorio extends Flex {
         $ret = '<img src="'.($img!=''?$img : __BASEPATH__.'img/image-folder.jpg').'" class="imgPreviewList"/>';
         
         return '
-        <td>'.GG::getCheckboxLine($obj->get('id')).'</td>
+        <td class="p-3">'.GG::getCheckboxLine($obj->get('id')).'</td>
         <td class="text-center">
             <span class="ratio ratio-1x1">
               '.$ret.'  
