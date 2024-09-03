@@ -21,7 +21,7 @@ class Aluguel extends Flex {
     public static $configGG = array(
         'nome' => 'Alugueis',
         'class' => __CLASS__,
-        'ordenacao' => 'dt_entrega ASC',
+        'ordenacao' => 'dt_prazo ASC',
         'envia-arquivo' => false,
         'show-menu'=> false,
         'icon' => 'ti ti-plus'
@@ -88,12 +88,31 @@ class Aluguel extends Flex {
 
             $preco = $obj->get('tipo_item') == 1 ? $obj->getAcessorio()->get('preco') : $obj->getFantasia()->get('preco');
             $string .= '
-            <div class="col-sm-4 col-lg-4 mb-2">
                 <p>&nbsp;&bull; '. ($obj->get('tipo_item') == 1 ? $obj->get('qtd').'x ' : '') . $nome .' - (R$) '. Utils::parseMoney($preco) .'</p>
-            </div>';
+            ';
         }
 
         return $string;
+    }
+
+    public static $arr_situacoes = [
+        'atraso' => 'bg bg-danger fw-bold',
+        'atencao'=> 'bg bg-warning fw-bold',
+    ];
+
+    public function getStatus(){
+        if(!Utils::dateValid($this->get('dt_entrega'))){
+            $dtPrazo = strtotime($this->get('dt_prazo'));
+            $dataAtual = strtotime(date('Y/m/d'));
+            $diferencaDias = ($dtPrazo - $dataAtual) / (60 * 60 * 24);
+            
+            if($diferencaDias < 0){
+                return $this::$arr_situacoes['atraso'];
+            }elseif($diferencaDias <=7){
+                return $this::$arr_situacoes['atencao'];
+            }
+            return "";
+        }
     }
 
     protected $pedido = null;
@@ -295,15 +314,17 @@ class Aluguel extends Flex {
             <table class="table lev-table table-striped">
                 <thead>
                 <tr>
-                    <th class="col-sm-6">Prazo</th>
-                    <th class="col-sm-6">Valor (R$)</th>
+                    <th class="col-sm-3 p-3">Cliente</th>
+                    <th class="col-sm-3 text-center">Prazo</th>
+                    <th class="col-sm-3 text-center">Devolu&ccedil;&atilde;o</th>
+                    <th class="col-sm-3 text-center">Valor (R$)</th>
                 </tr>
                 </thead>
                 <tbody>';
         
         while ($rs->next()) {
             $obj = self::load($rs->getInt('id'));
-            $string .= '<tr id="tr-'.$obj->getTableName().$obj->get('id').'">'.self::getLine($obj).'</tr>';
+            $string .= '<tr id="tr-'.$obj->getTableName().$obj->get('id').'"">'.self::getLine($obj).'</tr>';
         }
        
         $string .= '</tbody>
@@ -315,8 +336,10 @@ class Aluguel extends Flex {
 
     public static function getLine($obj){
         return '
-        <td class="link-edit">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), Utils::dateFormat($obj->get('dt_prazo'), 'd/m/Y'), false).'</td>
-        <td>'.Utils::parseMoney($obj->getValorAluguel()).'</td>
+        <td class="link-edit p-3">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->getPedido()->getCliente()->getPessoa()->get('nome'), false).'</td>
+        <td class="text-center '.$obj->getStatus().'">'.Utils::dateFormat($obj->get('dt_prazo'), 'd/m/Y').'</td>
+        <td class="text-center">'.(Utils::dateValid($obj->get('dt_entrega')) ? Utils::dateFormat($obj->get('dt_entrega'), 'd/m/Y') : ' - ').'</td>
+        <td class="text-center">'.Utils::parseMoney($obj->getValorAluguel()).'</td>
         '.GG::getResponsiveList([
             'Prazo' => Utils::dateFormat($obj->get('dt_prazo'), 'd/m/Y'),
             'Valor' => Utils::parseMoney($obj->getValorAluguel()),
