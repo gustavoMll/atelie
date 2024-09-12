@@ -100,7 +100,7 @@ class Cliente extends Flex {
         $obj = new $classe();
         $ret = 0;
 
-        if(!Pedido::exists("id_cliente IN ({$ids})")){
+        if(!Aluguel::exists("id_cliente IN ({$ids})")){
             Flex::dbDelete(new Pessoa(), "id IN(SELECT id_pessoa FROM {$obj->tableName} WHERE id IN({$ids}))");
             return Flex::dbDelete($obj, "id IN({$ids})");
         }
@@ -128,11 +128,34 @@ class Cliente extends Flex {
         $string .= Pessoa::form($id_pessoa);
         $string .= '
         <div class="col-sm-12 my-3">
-            <div class="form-group">
+            <div class="d-flex justify-content-start gap-2">
                 <label for="">Observa&ccedil;&atilde;o</label>
+                <a class="d-flex" style="align-items: center;" id="btn_mostrar">
+                    <i class="ti ti-eye-off" style="cursor: pointer" onclick="mduarVisibilidade()" data-toggle="tooltip" data-bs-placement="top" title="Mostrar"></i>
+                </a>
+            </div>
+            <div class="form-group" style="display: none" id="div_obs">
                 <textarea class="form-control ckeditor" name="obs" id="obs'.$obj->getTableName().'">'.$obj->get('obs').'</textarea>
             </div>
         </div>';
+
+        $string .= '
+        <script>
+            function mduarVisibilidade(){
+                var icon = $("#btn_mostrar i");
+                icon.toggleClass("ti-eye-off ti-eye");
+
+                if(icon.hasClass("ti-eye")){
+                    icon.attr("title", "Esconder");
+                    $(`#div_obs`).fadeIn(`slow`)
+                } else {
+                    icon.attr("title", "Mostrar");
+                    $(`#div_obs`).fadeOut(`slow`)
+                }
+                
+            }
+        </script>
+        ';
         
         return $string;
     }
@@ -145,7 +168,7 @@ class Cliente extends Flex {
                     <th width="10">'.GG::getCheckboxHead().'</th>
                     <th class="col-sm-4">Nome</th>
                     <th class="col-sm-3">Telefone</th>
-                    <th class="col-sm-5">Obs</th>
+                    <th class="col-sm-5">Endere&ccedil;o</th>
                 </tr>
                 </thead>
                 <tbody>';
@@ -169,10 +192,10 @@ class Cliente extends Flex {
         <!--'.GG::getResponsiveList([
             'Nome' => $obj->getPessoa()->get('nome'),
             'Telefone' => $obj->getPessoa()->get('telefone1'),
-            'Obs' => $obj->get('obs') != '' ?  $obj->get('obs') : '-', 
+            'Endere&ccedil;o' => $obj->getPessoa()->getAddress(), 
         ], $obj).'-->
-        <td>'.($obj->getPessoa()->get('telefone1') != '' ? $obj->getPessoa()->get('telefone1') : '-').'</td>
-        <td>'.($obj->get('obs') != '' ?  Utils::subText($obj->get('obs'), 200) : '-').'</td>
+        <td>'.($obj->getPessoa()->get('telefone1') != '' ? Utils::mask($obj->getPessoa()->get('telefone1'), "(##) #####-####"): '-').'</td>
+        <td>'.$obj->getPessoa()->getAddress().'</td>
         ';
     }
 

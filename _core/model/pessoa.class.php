@@ -66,6 +66,11 @@ class Pessoa extends Flex {
         ";
     }
 
+    public function getAddress(){
+       return $this->get('endereco') . ', '. ($this->get('numero') > 0 ? $this->get('numero') . ', ' : ', ') . ($this->get('complemento') != '' ? $this->get('complemento') .', ' : '') . ($this->get('referencia') != '' ? $this->get('referencia') . ', ' : '') . $this->get('bairro') . ($this->get('cidade') != '' ? ' - ' .$this->get('cidade') : '') . ($this->get('estado') != '' ? '/'.$this->get('estado') : '') .'. ' . ($this->get('cep') != '' ? 'CEP: '.Utils::mask($this->get('cep'), '##.###-###') : '');
+       
+    }
+
     public static function validate() {
         global $request;
         $error = '';

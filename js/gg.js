@@ -672,14 +672,13 @@ function fieldFunctions() {
 				if($(obj).attr("input-aux")){
 					const inputs = ($(obj).attr("input-aux").split('/'));
 					if(ui.item.campos.length == inputs.length +1){
-						console.log(inputs);
-						console.log(ui.item.campos)
 						for(var i = 0; i < inputs.length; i++){
 							$("#"+inputs[i]).val(ui.item.campos[i+1]);
 						}
 					}
 				}
 				$("#" + $(obj).attr("data-field")).val(ui.item.value);
+				$("#" + $(obj).attr("data-edit")).val(ui.item.value);
 				$(obj).val(ui.item.label);
 				return false;
 			},

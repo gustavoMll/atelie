@@ -4,8 +4,9 @@ class Aluguel extends Flex {
     protected $tableName = 'alugueis';
     protected $mapper = array(
         'id' => 'int',
-        'id_pedido' => 'int',
+        'id_cliente' => 'int',
         'dt_uso' => 'string',
+        'dt_coleta' => 'string',
         'dt_prazo' => 'string',
         'dt_entrega' => 'string',
         'local_uso' => 'string',
@@ -23,7 +24,7 @@ class Aluguel extends Flex {
         'class' => __CLASS__,
         'ordenacao' => 'dt_prazo ASC',
         'envia-arquivo' => false,
-        'show-menu'=> false,
+        'show-menu'=> true,
         'icon' => 'ti ti-plus'
     );
 
@@ -32,8 +33,9 @@ class Aluguel extends Flex {
         DROP TABLE IF EXISTS `alugueis`;
         CREATE TABLE `alugueis` (
             `id` int(11) NOT NULL AUTO_INCREMENT,
-            `id_pedido` int(11) NOT NULL,
+            `id_cliente` int(11) NOT NULL,
             `dt_uso` DATE NOT NULL,
+            `dt_coleta` DATE NOT NULL,
             `dt_prazo` DATE NOT NULL,
             `dt_entrega` DATE NOT NULL,
             `local_uso` VARCHAR(255) NOT NULL,
@@ -43,7 +45,7 @@ class Aluguel extends Flex {
             `usr_ualt` varchar(20) NOT NULL,
             `dt_ualt` datetime NOT NULL,
             PRIMARY KEY(`id`),
-            FOREIGN KEY (id_pedido) REFERENCES pedidos(id)
+            FOREIGN KEY (id_cliente) REFERENCES clientes(id)
         ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4;';
     }
     
@@ -115,17 +117,18 @@ class Aluguel extends Flex {
         }
     }
 
-    protected $pedido = null;
-    public function getPedido(){
-        if (!$this->pedido || $this->pedido->get('id') != $this->get('id_pedido')) {
-            if (Pedido::exists((int) $this->get('id_pedido'), 'id')) {
-                $this->pedido = Pedido::load($this->get('id_pedido'));
+    protected $cliente = null;
+    public function getCliente(){
+        if (!$this->cliente || $this->cliente->get('id') != $this->get('id_cliente')) {
+            if (Cliente::exists((int) $this->get('id_cliente'), 'id')) {
+                $this->cliente = Cliente::load($this->get('id_cliente'));
             } else {
-                $this->pedido = new Pedido();
+                $this->cliente = new Cliente();
             }
         }
-        return $this->pedido;
+        return $this->cliente;
     }
+
 
     public static function validate() {
     	global $request;
@@ -136,6 +139,10 @@ class Aluguel extends Flex {
         if(!isset($_POST['dt_prazo']) || $_POST['dt_prazo'] == '' || !Utils::dateValid($_POST['dt_prazo'])){
     		$error .= '<li>O campo "Prazo de Devolu&ccedil;&atilde;o" n&atilde;o foi informado</li>';
     	}
+
+        if(isset($_POST['id_cliente']) && !Cliente::exists("id={$_POST['id_cliente']}")){
+            $error .= '<li>O cliente informado n&atilde;o existe</li>';
+        }
 
         if($error==''){
             return true;
@@ -158,7 +165,7 @@ class Aluguel extends Flex {
                 $obj = self::load($id);
             }
 
-			$obj->set('id_pedido', (int) $_POST['id_pedido']);
+			$obj->set('id_cliente', (int) $_POST['id_cliente']);
 			$obj->set('dt_uso', Utils::dateFormat($_POST['dt_uso'], 'Y-m-d'));
 			$obj->set('dt_prazo', Utils::dateFormat($_POST['dt_prazo'], 'Y-m-d'));
 			$obj->set('dt_entrega', Utils::dateFormat($_POST['dt_entrega'], 'Y-m-d'));
@@ -240,8 +247,27 @@ class Aluguel extends Flex {
         	$codigo = time();
         	$string = '<input name="tempId" type="hidden" value="'.$codigo.'"/>';
         }
-       
-        $string .= '<input name="id_pedido" type="hidden" value="'.($obj->get('id_pedido') != '' ? $obj->get('id_pedido') : $request->getInt('id_pedido')).'"/>';
+        
+        $string .= '
+        <div class="col-sm-12 mb-3 required">
+            <input type="hidden" name="id_cliente" id="id_cliente" value="' . $obj->get('id_cliente') . '"/>
+            <div class="input-group">
+                <div class="form-floating">
+                    <input id="nome_fantasia" type="text" placeholder="seu dado aqui" class="form-control autocomplete" data-table="pessoas" data-name="nome-cpf" data-div="()" data-field="id_cliente" data-edit="btn_edit" value="'.$obj->getCliente()->getPessoa()->get('nome').'"/>
+                <label for="id_cliente">Cliente</label>
+                </div>
+                <div class="d-flex">
+                    <a type="button" class="btn btn-light btn-sm px-3" id="btn_edit" onclick="javascript:modalForm(`clientes`, this.value);" style="filter: contrast(0.5);" value="">
+                        <i class="ti ti-eye"></i>
+                    </a>
+                    <a type="button" class="btn btn-secondary btn-sm px-3" onclick="javascript:modalForm(`clientes`,0);">
+                        <i class="ti ti-plus"></i>
+                    </a>
+                </div>
+                
+            </div>
+        </div>';
+        
     	$string .= '
         <div class="col-sm-4 mb-3">
             <div class="form-floating">
@@ -336,7 +362,7 @@ class Aluguel extends Flex {
 
     public static function getLine($obj){
         return '
-        <td class="link-edit p-3">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->getPedido()->getCliente()->getPessoa()->get('nome'), false).'</td>
+        <td class="link-edit p-3">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->getCliente()->getPessoa()->get('nome'), false).'</td>
         <td class="text-center '.$obj->getStatus().'">'.Utils::dateFormat($obj->get('dt_prazo'), 'd/m/Y').'</td>
         <td class="text-center">'.(Utils::dateValid($obj->get('dt_entrega')) ? Utils::dateFormat($obj->get('dt_entrega'), 'd/m/Y') : ' - ').'</td>
         <td class="text-center">'.Utils::parseMoney($obj->getValorAluguel()).'</td>
@@ -350,8 +376,8 @@ class Aluguel extends Flex {
     public static function filter($request) {
         $paramAdd = '1=1';
         
-        if($request->query('id_pedido') != ''){
-            $paramAdd .= " AND `id_pedido` = {$request->query('id_pedido')}";
+        if($request->query('id_cliente') != ''){
+            $paramAdd .= " AND `id_cliente` = {$request->query('id_cliente')}";
         }
 
         foreach(['descricao', 'tamanho'] as $key){
