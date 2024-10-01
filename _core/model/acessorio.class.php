@@ -430,4 +430,9 @@ class Acessorio extends Flex {
 
         return $string;
     }
+
+    public function restaurarQtdItens($qtd){
+        $this->set('qtd_disp', $this->get('qtd_disp') + $qtd);
+        $this->save();
+    }
 }

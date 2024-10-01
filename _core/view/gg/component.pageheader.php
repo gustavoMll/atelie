@@ -17,6 +17,14 @@
     <form class="flex-fill" onsubmit="$(`#filterNomefantasia`).val($(`#filterNome`).val()); return modalFilter(this, `pessoas`);"><input id="filterNome" type="text" placeholder="Pesquisar pelo nome (enter)" class="fw-normal form-control h-100" name="nomefantasia" value="<?=$request->query('nomefantasia')?>" /></form>
     <?php } ?>
 
+   
+    <?php if(in_array($request->get('module'), ['', 'home', 'alugueis'])){?>
+        <button class="d-flex gap-2 align-items-center btn btn-light text-black-75 border-dark border-opacity-10 p-2 px-lg-3 text-nowrap" data-bs-toggle="tooltip" data-bs-placement="right" title="Restaurar Itens" onclick="restaurarItens()">
+            <i class="ti ti-reload"></i> 
+            <span class="d-none d-lg-inline-block">Restaurar Itens</span>
+        </button>
+    <?php }?>
+
     <?php if($view['list-filter'] != ''){ ?>
     <div class="ms-auto">
         <button type="button" id="btnSearchBase" onclick="$('#modalFilter').modal('show')" class="d-flex gap-2 align-items-center btn btn-light text-black-75 border-dark border-opacity-10 p-2 px-lg-3 text-nowrap">
@@ -67,5 +75,9 @@
         } else {
             tAlert('','Favor selecionar ao menos um registro.','e');
         }
+    }
+
+    function restaurarItens(){
+        //
     }
 </script>

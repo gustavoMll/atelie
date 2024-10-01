@@ -6,6 +6,7 @@ class ItemAluguel extends Flex {
         'id' => 'int',
         'id_item' => 'int',
         'id_aluguel' => 'int',
+        'dt_coleta' => 'string',
         'tipo_item' => 'int',
         'qtd' => 'int',
         'modificar' => 'int',
@@ -34,6 +35,7 @@ class ItemAluguel extends Flex {
             `id` int(11) NOT NULL AUTO_INCREMENT,
             `id_item` int(11) NOT NULL,
             `id_aluguel` int(11) NOT NULL,
+            `dt_coleta` DATE NOT NULL,
             `tipo_item` int(11) NOT NULL,
             `qtd` int(11) NOT NULL,
             `modificar` int(1) DEFAULT 0,
@@ -134,6 +136,10 @@ class ItemAluguel extends Flex {
         if(!isset($_POST['tipo_item']) || $_POST['tipo_item'] == '' || !in_array($_POST['tipo_item'], [1,2])){
     		$error .= '<li>O campo "Tipo de Item" n&atilde;o foi informado</li>';
     	}
+
+        if(!isset($_POST['dt_coleta']) || $_POST['dt_coleta'] == '' || !Utils::dateValid($_POST['dt_coleta'])){
+    		$error .= '<li>O campo "Data de Coleta" n&atilde;o foi informado</li>';
+    	}
         
         if(isset($_POST['tipo_item']) && $_POST['tipo_item'] == 1){
             if(!isset($_POST['id_acessorio']) || $_POST['id_acessorio'] == ''){
@@ -201,6 +207,7 @@ class ItemAluguel extends Flex {
 			$obj->set('id_aluguel', (int) $_POST['id_aluguel']);
 			$obj->set('qtd', (int) $_POST['tipo_item'] == 1 ? (int) $_POST['qtd'] : 1);
 			$obj->set('modificar', (int) $_POST['modificar']);
+            $obj->set('dt_coleta', Utils::dateFormat($_POST['dt_coleta'], 'Y-m-d'));
 			$obj->set('obs', $_POST['obs']);
 
             if($obj->get('tipo_item') == 1){
@@ -240,7 +247,7 @@ class ItemAluguel extends Flex {
         $classe = __CLASS__;
         $obj = new $classe();
         $obj->set('id', $codigo);
-
+       
         if ($codigo > 0) {
             $obj = self::load($codigo);
         }else{
@@ -248,10 +255,18 @@ class ItemAluguel extends Flex {
         	$string = '<input name="tempId" type="hidden" value="'.$codigo.'"/>';
         }
 
-        $string = '<input name="id_aluguel" type="hidden" value="'.($obj->get('id_aluguel') != '' ? $obj->get('id_aluguel') : $request->getInt('id_aluguel')).'"/>';
+        $string .= '<input name="id_aluguel" type="hidden" value="'.($obj->get('id_aluguel') != '' ? $obj->get('id_aluguel') : $request->getInt('id_aluguel')).'"/>';
+        
+        $string .= '
+        <div class="col-sm-6 mb-3 required">
+            <div class="form-floating">
+                <input class="form-control date" type="text" name="dt_coleta" placeholder="" value="'.(Utils::dateValid($obj->get('dt_coleta')) ? Utils::dateFormat($obj->get('dt_coleta'),'d/m/Y') : '').'" required onchange="setarData(this.value)">
+                <label class="form-label">Data de Coleta</label>
+            </div>
+        </div>';
 
         $string .= '
-        <div class="col-md-3 mb-3 required">
+        <div class="col-md-6 mb-3 required">
             <div class="form-floating">
                 <select class="form-select" id="tipo_item" name="tipo_item" onchange="mudarTipo(this.value)">';
                     foreach(self::$nm_tipos as $k => $v){
@@ -267,7 +282,7 @@ class ItemAluguel extends Flex {
         <div class="col-md-9 mb-3 '.($obj->get('tipo_item') == 1 || $obj->get('tipo_item') == '' ? 'd-none' : '').'" id="div_fantasia" >
             <input type="hidden" name="id_fantasia" id="id_fantasia" value="' . $obj->get('id_item') . '"/>
             <div class="form-floating">
-                <input id="nome_fantasia" type="text" placeholder="seu dado aqui" class="form-control autocomplete" data-table="fantasias" data-name="descricao-preco" input-aux="preco-fantasia" data-field="id_fantasia" value="'.$obj->getItem()->get('descricao') .'"/>
+                <input id="nome_fantasia" type="text" placeholder="seu dado aqui" class="form-control autocomplete" data-table="fantasias" data-search="" data-name="descricao-preco" input-aux="preco_fantasia" data-field="id_fantasia" data-aux="dt_coleta" value="'.$obj->getItem()->get('descricao') .'"/>
                 <label for="id_fantasia">Fantasia</label>
             </div>
         </div>
@@ -276,7 +291,7 @@ class ItemAluguel extends Flex {
         $string .='
         <div class="col-md-3 mb-3 '.($obj->get('tipo_item') == 1 || $obj->get('tipo_item') == '' ? 'd-none' : '').'" id="div_preco-fantasia" >
             <div class="form-floating">
-                <input type="number" readonly id="preco-fantasia" value="'.$obj->getItem()->get('preco').'" class="form-control">
+                <input type="number" readonly id="preco_fantasia" value="'.$obj->getItem()->get('preco').'" class="form-control">
                 <label for="preco-fantasia">Pre&ccedil;o</label>
             </div>
         </div>
@@ -287,8 +302,8 @@ class ItemAluguel extends Flex {
             <input type="hidden" name="id_acessorio" id="id_acessorio" value="' . $obj->get('id_item') . '"/>
             <div class="form-floating">
                 <div class="form-floating">
-                    <input id="nomeAcessorio" name="desc_acessorio" type="text" placeholder="seu dado aqui" class="form-control autocomplete" autocomplete="off" data-table="acessorios" data-name="descricao-qtd_disp-preco" input-aux="qtd-disp/preco-acessorio" data-field="id_acessorio" value="'.$obj->getItem()->get('descricao').'"/>
-                    <label for="id_acessorio">Acessorio</label>
+                    <input id="nomeAcessorio" name="desc_acessorio" type="text" placeholder="seu dado aqui" class="form-control autocomplete" autocomplete="off" data-table="acessorios" data-name="descricao-qtd_disp-preco" input-aux="qtd-disp/preco-acessorio" data-field="id_acessorio" data-search="" value="'.$obj->getItem()->get('descricao').'"/>
+                    <label for="id_acessorio">Acess&oacute;rio</label>
                 </div>
             </div>
         </div>
@@ -343,6 +358,12 @@ class ItemAluguel extends Flex {
 
         $string .='
         <script>
+            function setarData(data){
+                console.log(data);
+                $(`#nome_fantasia`).attr(`data-search`, `AAAA`);
+                $(`#nome_acessorio`).attr(`data-search`, `AAA`);
+            } 
+
             function mudarTipo(tipo){
                 if(tipo == 1){
                     $(`#div_fantasia`).addClass(`d-none`);

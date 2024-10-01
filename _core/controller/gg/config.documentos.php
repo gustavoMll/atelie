@@ -1,2 +1,0 @@
-<?php
-$Modules = Documento::$configGG;

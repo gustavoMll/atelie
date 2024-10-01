@@ -656,6 +656,11 @@ function fieldFunctions() {
 				if ($(obj).attr("data-name")) {
 					url += "/camponome/" + $(obj).attr("data-name");
 				}
+				
+				if ($(obj).attr("data-aux")) {
+					url += "/campoaux/" + $(obj).attr("data-aux");
+				}
+				
 				if ($(obj).attr("data-filter")) {
 					url += "?" + $(obj).attr("data-filter");
 				}

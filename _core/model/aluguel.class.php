@@ -6,7 +6,6 @@ class Aluguel extends Flex {
         'id' => 'int',
         'id_cliente' => 'int',
         'dt_uso' => 'string',
-        'dt_coleta' => 'string',
         'dt_prazo' => 'string',
         'dt_entrega' => 'string',
         'local_uso' => 'string',
@@ -35,7 +34,6 @@ class Aluguel extends Flex {
             `id` int(11) NOT NULL AUTO_INCREMENT,
             `id_cliente` int(11) NOT NULL,
             `dt_uso` DATE NOT NULL,
-            `dt_coleta` DATE NOT NULL,
             `dt_prazo` DATE NOT NULL,
             `dt_entrega` DATE NOT NULL,
             `local_uso` VARCHAR(255) NOT NULL,
@@ -139,7 +137,7 @@ class Aluguel extends Flex {
         if(!isset($_POST['dt_prazo']) || $_POST['dt_prazo'] == '' || !Utils::dateValid($_POST['dt_prazo'])){
     		$error .= '<li>O campo "Prazo de Devolu&ccedil;&atilde;o" n&atilde;o foi informado</li>';
     	}
-
+        
         if(isset($_POST['id_cliente']) && !Cliente::exists("id={$_POST['id_cliente']}")){
             $error .= '<li>O cliente informado n&atilde;o existe</li>';
         }
@@ -267,18 +265,18 @@ class Aluguel extends Flex {
                 
             </div>
         </div>';
-        
-    	$string .= '
+    	
+        $string .= '
         <div class="col-sm-4 mb-3">
             <div class="form-floating">
-                <input class="form-control date" type="text" name="dt_uso" placeholder="" value="'.($obj->get('dt_uso') != '' ? Utils::dateFormat($obj->get('dt_uso'),'d/m/Y') : '').'">
+                <input class="form-control date" type="text" name="dt_uso" placeholder="" value="'.(Utils::dateValid($obj->get('dt_uso')) ? Utils::dateFormat($obj->get('dt_uso'),'d/m/Y') : '').'">
                 <label class="form-label">Data de Uso</label>
             </div>
         </div>';
     	$string .= '
         <div class="col-sm-4 mb-3 required">
             <div class="form-floating">
-                <input class="form-control date" type="text" name="dt_prazo" placeholder="Data" required value="'.($obj->get('dt_prazo') != '' ? Utils::dateFormat($obj->get('dt_prazo'),'d/m/Y') : '').'">
+                <input class="form-control date" type="text" name="dt_prazo" placeholder="Data" required value="'.(Utils::dateValid($obj->get('dt_prazo')) ? Utils::dateFormat($obj->get('dt_prazo'),'d/m/Y') : '').'">
                 <label class="form-label">Prazo de Devolução</label>
             </div>
         </div>';
@@ -286,7 +284,7 @@ class Aluguel extends Flex {
         $string .= '
         <div class="col-sm-4 mb-3">
             <div class="form-floating">
-                <input class="form-control date" type="text" name="dt_entrega" placeholder="" value="'.($obj->get('dt_entrega') != '' ? Utils::dateFormat($obj->get('dt_entrega'),'d/m/Y') : '').'">
+                <input class="form-control date" type="text" name="dt_entrega" placeholder="" value="'.(Utils::dateValid($obj->get('dt_entrega')) ? Utils::dateFormat($obj->get('dt_entrega'),'d/m/Y') : '').'">
                 <label class="form-label">Entrega</label>
             </div>
         </div>';
@@ -340,10 +338,10 @@ class Aluguel extends Flex {
             <table class="table lev-table table-striped">
                 <thead>
                 <tr>
-                    <th class="col-sm-3 p-3">Cliente</th>
+                    <th class="col-sm-4 p-3">Cliente</th>
                     <th class="col-sm-3 text-center">Prazo</th>
                     <th class="col-sm-3 text-center">Devolu&ccedil;&atilde;o</th>
-                    <th class="col-sm-3 text-center">Valor (R$)</th>
+                    <th class="col-sm-2 text-center">Valor (R$)</th>
                 </tr>
                 </thead>
                 <tbody>';
@@ -513,5 +511,39 @@ class Aluguel extends Flex {
         </div>';
 
         return $string;
+    }
+
+    public function realizarDevolucao($dt_devolucao){
+        if(!self::exists($this->get('id'))){
+            return [
+                'msg' => "Aluguel inválido",
+                'success' => false
+            ];
+        }
+
+        if(!Utils::dateValid($dt_devolucao)){
+            return [
+                'msg' => "Data de devolução inválida",
+                'success' => false,
+            ];
+        }
+
+        $this->set('dt_entrega', Utils::dateFormat($dt_devolucao, 'Y-m-d'));
+        $this->save();
+
+        $rs = ItemAluguel::search([
+            's' => 'id, id_item, qtd',
+            'w' => "id_aluguel = {$this->get('id')} AND tipo_item = 1",
+        ]);
+
+        while($rs->next()){
+            $obj = Acessorio::load($rs->getInt('id_item'));
+            $obj->restaurarQtdItens($rs->getInt('qtd'));
+        }
+
+        return [
+            'msg' => "Devolução realizada com sucesso",
+            'success' => true,
+        ];
     }
 }

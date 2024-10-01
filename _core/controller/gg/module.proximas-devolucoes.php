@@ -5,8 +5,8 @@ $view['alugueis'] = $view['itens-aluguel'] = array();
 
 $rs = Aluguel::search([
     's' => 'id',
-    'w' => "dt_entrega = '0000-00-00'",
-    'o' => 'dt_entrega'
+    'w' => "dt_prazo >= DATE(NOW()) OR dt_entrega IS NULL OR dt_entrega = '0000-00-00'",
+    'o' => 'dt_prazo'
 ]);
 
 while($rs->next()){
