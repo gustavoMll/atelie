@@ -21,7 +21,6 @@
     <div class="d-flex align-items-center p-3" id="headerSidebar">
 
         <div class="d-flex align-items-center gap-2 me-auto" id="brandMenu" href="<?= __PATH__ ?>">
-            <a href="#" data-toggle="sidebarCollapse" class="d-inline-block d-md-none text-white lh-1"><i class="ti ti-menu-2 fs-1"></i></a>
             <a href="" class="h4 fw-bold lh-1 m-0 text-white text-decoration-none"><?=$Config->get('nome') != '' ? $Config->get('nome') : 'Sistema'?></a>
         </div>
         

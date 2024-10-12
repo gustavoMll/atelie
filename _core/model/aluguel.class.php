@@ -5,6 +5,7 @@ class Aluguel extends Flex {
     protected $mapper = array(
         'id' => 'int',
         'id_cliente' => 'int',
+        'dt_coleta' => 'string',
         'dt_uso' => 'string',
         'dt_prazo' => 'string',
         'dt_entrega' => 'string',
@@ -33,6 +34,7 @@ class Aluguel extends Flex {
         CREATE TABLE `alugueis` (
             `id` int(11) NOT NULL AUTO_INCREMENT,
             `id_cliente` int(11) NOT NULL,
+            `dt_coleta` DATE NOT NULL,
             `dt_uso` DATE NOT NULL,
             `dt_prazo` DATE NOT NULL,
             `dt_entrega` DATE NOT NULL,
@@ -258,7 +260,7 @@ class Aluguel extends Flex {
                     <a type="button" class="btn btn-light btn-sm px-3" id="btn_edit" onclick="javascript:modalForm(`clientes`, this.value);" style="filter: contrast(0.5);" value="">
                         <i class="ti ti-eye"></i>
                     </a>
-                    <a type="button" class="btn btn-secondary btn-sm px-3" onclick="javascript:modalForm(`clientes`,0);">
+                    <a type="button" class="btn btn-secondary btn-sm px-3 text-white fw-bold" onclick="javascript:modalForm(`clientes`,0);">
                         <i class="ti ti-plus"></i>
                     </a>
                 </div>
@@ -267,22 +269,29 @@ class Aluguel extends Flex {
         </div>';
     	
         $string .= '
-        <div class="col-sm-4 mb-3">
+        <div class="col-sm-6 mb-3">
+            <div class="form-floating">
+                <input class="form-control date" type="text" name="dt_coleta" id="dt_coleta" placeholder="" onchage="atualizarDtColeta(this.value)" value="'.(Utils::dateValid($obj->get('dt_coleta')) ? Utils::dateFormat($obj->get('dt_coleta'),'d/m/Y') : '').'">
+                <label class="form-label">Data de Coleta</label>
+            </div>
+        </div>';
+        $string .= '
+        <div class="col-sm-6 mb-3">
             <div class="form-floating">
                 <input class="form-control date" type="text" name="dt_uso" placeholder="" value="'.(Utils::dateValid($obj->get('dt_uso')) ? Utils::dateFormat($obj->get('dt_uso'),'d/m/Y') : '').'">
                 <label class="form-label">Data de Uso</label>
             </div>
         </div>';
     	$string .= '
-        <div class="col-sm-4 mb-3 required">
+        <div class="col-sm-6 mb-3 required">
             <div class="form-floating">
-                <input class="form-control date" type="text" name="dt_prazo" placeholder="Data" required value="'.(Utils::dateValid($obj->get('dt_prazo')) ? Utils::dateFormat($obj->get('dt_prazo'),'d/m/Y') : '').'">
+                <input class="form-control date" type="text" name="dt_prazo"  id="dt_prazo" placeholder="Data" required value="'.(Utils::dateValid($obj->get('dt_prazo')) ? Utils::dateFormat($obj->get('dt_prazo'),'d/m/Y') : '').'">
                 <label class="form-label">Prazo de Devolução</label>
             </div>
         </div>';
     	
         $string .= '
-        <div class="col-sm-4 mb-3">
+        <div class="col-sm-6 mb-3">
             <div class="form-floating">
                 <input class="form-control date" type="text" name="dt_entrega" placeholder="" value="'.(Utils::dateValid($obj->get('dt_entrega')) ? Utils::dateFormat($obj->get('dt_entrega'),'d/m/Y') : '').'">
                 <label class="form-label">Entrega</label>
@@ -295,19 +304,31 @@ class Aluguel extends Flex {
                 <div class="card-body">
                     <div class="d-flex justify-content-between"> 
                         <h5 class="card-title">Itens do Aluguel</h5>
-                        <a type="button" class="btn btn-secondary btn-sm px-3" onclick="javascript:modalForm(`itensaluguel`,0, `/id_aluguel/'.$codigo.'`, loadItens);">
+                        <a type="button" class="btn btn-secondary btn-sm px-3 text-white fw-bold" onclick="javascript:atualizarDtColeta();">
                             <i class="ti ti-plus"></i>Adicionar Itens
                         </a>
                     </div>
 
-                    <div>
-                        <script> 
-                            function loadItens(resp){ 
-                                tableList(`itensaluguel`, `id_aluguel='.$codigo.'&offset=10`, `txt_itens`, false);
-                            } 
-                            loadItens();
-                        </script>
-                        <div class="form-group col-sm-12" id="txt_itens">'.GG::moduleLoadData('loadItens();').'</div>    
+                <div>
+                    <script> 
+                        function atualizarDtColeta(){
+                            let dt_coleta = $(`#dt_coleta`).val();
+                            let dt_coleta_formatada = dt_coleta.replace(/\//g, `-`); 
+                            let dt_prazo = $(`#dt_prazo`).val();
+                            let dt_prazo_formatada = dt_prazo.replace(/\//g, `-`); 
+                            console.log(dt_coleta_formatada);
+                            console.log(dt_prazo_formatada);
+                            modalForm(`itensaluguel`,0, `/id_aluguel/'.$codigo.'/dt_coleta/`+ dt_coleta_formatada + `/dt_prazo/`+ dt_prazo_formatada, loadItens)
+                        }
+
+                        function loadItens(resp){
+
+                            let dt_coleta = atualizarDtColeta();
+                            tableList(`itensaluguel`, `id_aluguel='.$codigo.'&dt_coleta=${dt_coleta}offset=10`, `txt_itens`, false);
+                        } 
+                        loadItens();
+                    </script>
+                    <div class="form-group col-sm-12" id="txt_itens">'.GG::moduleLoadData('loadItens();').'</div>    
                     </div>
                 </div>
             </div>

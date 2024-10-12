@@ -66,7 +66,7 @@
 
         <?php if($request->get('module')== ''){?>
 
-            <div class="dropdown ms-4">
+            <!-- <div class="dropdown ms-4">
                 <a href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" class="text-decoration-none dropdown-toggle">Hoje</a>
                 <div class="dropdown-menu" style="">
                     <a class="dropdown-item" href="" onclick="">Hoje</a>
@@ -82,7 +82,7 @@
                         <button class="btn btn-sm btn-outline-primary">Filtrar</button>
                     </form>
                 </div>
-            </div>
+            </div> -->
         <?php } ?>
 
     </div>

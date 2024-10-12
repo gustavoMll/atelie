@@ -256,14 +256,8 @@ class ItemAluguel extends Flex {
         }
 
         $string .= '<input name="id_aluguel" type="hidden" value="'.($obj->get('id_aluguel') != '' ? $obj->get('id_aluguel') : $request->getInt('id_aluguel')).'"/>';
-        
-        $string .= '
-        <div class="col-sm-6 mb-3 required">
-            <div class="form-floating">
-                <input class="form-control date" type="text" name="dt_coleta" placeholder="" value="'.(Utils::dateValid($obj->get('dt_coleta')) ? Utils::dateFormat($obj->get('dt_coleta'),'d/m/Y') : '').'" required onchange="setarData(this.value)">
-                <label class="form-label">Data de Coleta</label>
-            </div>
-        </div>';
+        $string .= '<input name="dt_coleta" type="hidden" value="'.$request->get('dt_coleta').'"/>';
+        $string .= '<input name="dt_prazo" type="hidden" value="'.$request->get('dt_prazo').'"/>';
 
         $string .= '
         <div class="col-md-6 mb-3 required">
@@ -282,7 +276,7 @@ class ItemAluguel extends Flex {
         <div class="col-md-9 mb-3 '.($obj->get('tipo_item') == 1 || $obj->get('tipo_item') == '' ? 'd-none' : '').'" id="div_fantasia" >
             <input type="hidden" name="id_fantasia" id="id_fantasia" value="' . $obj->get('id_item') . '"/>
             <div class="form-floating">
-                <input id="nome_fantasia" type="text" placeholder="seu dado aqui" class="form-control autocomplete" data-table="fantasias" data-search="" data-name="descricao-preco" input-aux="preco_fantasia" data-field="id_fantasia" data-aux="dt_coleta" value="'.$obj->getItem()->get('descricao') .'"/>
+                <input id="nome_fantasia" type="text" placeholder="seu dado aqui" class="form-control autocomplete" data-filter="dt_coleta='.$request->get('dt_coleta').'&dt_prazo='.$request->get('dt_prazo').'" data-table="fantasias" data-search="" data-name="descricao-preco" input-aux="preco_fantasia" data-field="id_fantasia" data-aux="dt_coleta" value="'.$obj->getItem()->get('descricao') .'"/>
                 <label for="id_fantasia">Fantasia</label>
             </div>
         </div>

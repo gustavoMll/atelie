@@ -296,7 +296,7 @@ class Usuario extends Pessoa {
             <table class="table lev-table table-striped">
                 <thead>
                 <tr>
-                    <th width="10">'.GG::getCheckboxHead().'</th>
+                    <th width="10" class="p-2">'.GG::getCheckboxHead().'</th>
                     <th class="col-sm-3">Nome</th>
                     <th class="col-sm-3">Email</th>
                     <th class="col-sm-3">Login</th>
@@ -319,7 +319,7 @@ class Usuario extends Pessoa {
 
     public static function getLine($obj){
         return '
-        <td>'.GG::getCheckboxLine($obj->get('id')).'</td>
+        <td class="p-2">'.GG::getCheckboxLine($obj->get('id')).'</td>
         <td class="link-edit">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->getPessoa()->get('nome')).'</td>
         '.GG::getResponsiveList([
             'Nome' => $obj->getPessoa()->get('nome'),

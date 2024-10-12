@@ -36,7 +36,7 @@
     <?php } ?>
 
     <div>
-        <button type="button" id="btnAddBase" onclick="modalForm('<?=$view['modulo']?>',0,'',function(){ tableList('<?=$view['modulo']?>', window.location.search.substr(1), 'resultados', false); }); return false;" class="d-flex gap-2 align-items-center btn btn-secondary text-white fw-bold p-2 px-lg-3">
+        <button type="button" id="btnAddBase" onclick="modalForm('<?=$view['modulo']?>',0,'',function(){ tableList('<?=$view['modulo']?>', window.location.search.substr(1), 'resultados', false); }); return false;" class="d-flex gap-2 align-items-center btn btn-primary text-white fw-bold p-2 px-lg-3">
             <i class="ti ti-plus"></i> 
             <span class="d-none d-lg-inline-block">Adicionar</span> 
             <span class="d-none d-lg-inline-block opacity-50 fw-normal small">F2</span>
