@@ -5,7 +5,6 @@ class Fantasia extends Flex {
     protected $mapper = array(
         'id' => 'int',
 		'descricao' => 'string',
-		'id_tipo' => 'int',
 		'preco' => 'float',
 		'tamanho' => 'string',
 		'img' => 'string',
@@ -33,7 +32,6 @@ class Fantasia extends Flex {
         CREATE TABLE `fantasias` (
             `id` int(11) NOT NULL AUTO_INCREMENT,
             `descricao` VARCHAR(100) NOT NULL,
-            `id_tipo` INT(2) NOT NULL,
             `preco` FLOAT(11, 2) NOT NULL,
             `tamanho` VARCHAR(50) NOT NULL,
             `img` VARCHAR(255) NULL,
@@ -42,8 +40,7 @@ class Fantasia extends Flex {
             `dt_cad` datetime NOT NULL,
             `usr_ualt` varchar(20) NOT NULL,
             `dt_ualt` datetime NOT NULL,
-            PRIMARY KEY(`id`),
-            FOREIGN KEY (id_tipo) REFERENCES tipos(id)
+            PRIMARY KEY(`id`)
         ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4;';
     }
 
@@ -53,21 +50,6 @@ class Fantasia extends Flex {
         'regular' => array('w'=>992,'h'=>992),
         'zoom' => array('w'=>1400,'h'=>1400),
     );
-
-    protected $tipo_fantasia = null;
-    
-    public function getTipo()
-    {
-        if (!$this->tipo_fantasia || $this->tipo_fantasia->get('id') != $this->get('id_tipo')) {
-            if (Tipo::exists((int) $this->get('id'), 'id')) {
-                $this->tipo_fantasia = Tipo::load($this->get('id_tipo'));
-            } else {
-                $this->tipo_fantasia = new Tipo();
-                $this->tipo_fantasia->set('nome', '');
-            }
-        }
-        return $this->tipo_fantasia;
-    }
 
 
     public static function validate() {
@@ -79,11 +61,7 @@ class Fantasia extends Flex {
     	if(!isset($_POST['descricao']) || $_POST['descricao'] == ''){
     		$error .= '<li>O campo "Descrição" n&atilde;o foi informado</li>';
     	}
-    	
-        if(!isset($_POST['tipo']) || $_POST['tipo'] == '' || !Tipo::exists((int) $_POST['tipo'])){
-    		$error .= '<li>O campo "Tipo" n&atilde;o foi informado</li>';
-    	}
-       
+    
         if(!isset($_POST['preco']) || $_POST['preco'] == ''){
     		$error .= '<li>O campo "Preço" n&atilde;o foi informado</li>';
     	}
@@ -116,7 +94,6 @@ class Fantasia extends Flex {
             }
             
 			$obj->set('descricao', $_POST['descricao']);
-			$obj->set('id_tipo', (int) $_POST['tipo']);
 			$obj->set('preco', Utils::parseFloat($_POST['preco']));
 			$obj->set('tamanho', $_POST['tamanho']);
             $imgBefore = '';
@@ -205,21 +182,6 @@ class Fantasia extends Flex {
         </div>';
     	
         $string .= '
-        <div class="col-sm-4 mb-3 required">
-            <div class="form-floating">
-                <select class="form-select" id="tipo" name="tipo">
-                    <option value="">Selecione</option>';
-                    $tipos = Tipo::getTipos();
-                    while($tipos->next()){
-                        $string .= '<option value="'.$tipos->getInt('id').'" '.($tipos->getInt('id') == $obj->get('id_tipo') ? 'selected' : '').'>'.$tipos->getString('nome').'</option>';
-                    }
-            $string .='
-                </select>
-                <label class="form-label">Tipo</label>
-            </div>
-        </div>';
-
-        $string .= '
             <div class="col-sm-4 mb-3 required">
                 <div class="form-floating">
                     <input class="form-control money" name="preco" placeholder="" value="'.($obj->get('preco') != '' ? Utils::parseMoney($obj->get('preco')) : '').'">
@@ -299,10 +261,6 @@ class Fantasia extends Flex {
             }
         }
         
-        if($request->query('tipo') != ''){
-            $paramAdd .= " AND `id_tipo` = {$request->query('tipo')}";
-        }
-        
         if($request->query('preco_min') != ''){
             $paramAdd .= " AND `preco` >= {$request->query('preco_min')} ";
         }
@@ -334,22 +292,7 @@ class Fantasia extends Flex {
                 <label for="filterDescricao" class="form-label">Descri&ccedil;&atilde;o</label>
             </div>
         </div>';
-        
-        $string .= '
-        <div class="col-sm-4 mb-3">
-            <div class="form-floating">
-                <select class="form-select" name="tipo" id="tipo">
-                <option value="">Selecione</option>';
-                $tipos = Tipo::getTipos();
-                while($tipos->next()){
-                    $string .= '<option value="'.$tipos->getInt('id').'" '.($tipos->getInt('id') == $request->query('tipo') ? 'selected' : '').'>'.$tipos->getString('nome').'</option>';
-                }
-                $string.='
-                </select>
-                <label for="tipo" class="form-label">Tipo</label>
-            </div>
-        </div>
-        ';
+    
 
         $string .= '
         <div class="col-sm-6 col-lg-5 mb-3">

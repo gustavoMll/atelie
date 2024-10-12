@@ -477,22 +477,6 @@ class Aluguel extends Flex {
                 <label for="filterDescricao" class="form-label">Descri&ccedil;&atilde;o</label>
             </div>
         </div>';
-        
-        $string .= '
-        <div class="col-sm-4 col-lg-2 mb-3">
-            <div class="form-floating">
-                <select class="form-select" name="tipo" id="tipo">
-                <option value="">Selecione</option>';
-                $tipos = Tipo::getTipos();
-                while($tipos->next()){
-                    $string .= '<option value="'.$tipos->getInt('id').'" '.($tipos->getInt('id') == $request->query('tipo') ? 'selected' : '').'>'.$tipos->getString('nome').'</option>';
-                }
-                $string.='
-                </select>
-                <label for="tipo" class="form-label">Tipo</label>
-            </div>
-        </div>
-        ';
 
         $string .= '
         <div class="col-sm-6 col-lg-5 mb-3">

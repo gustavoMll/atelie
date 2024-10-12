@@ -416,7 +416,8 @@ class ItemAluguel extends Flex {
                     <th class="col-sm-3 p-3">Tipo</th>
                     <th class="col-sm-4">Descri&ccedil;&atilde;o</th>
                     <th class="col-sm-2 text-center">Quantidade</th>
-                    <th class="col-sm-3">Pre&ccedil;o (R$)</th>
+                    <th class="col-sm-2">Pre&ccedil;o (R$)</th>
+                    <th class="col-sm-1">Modificado</th>
                 </tr>
                 </thead>
                 <tbody>';
@@ -439,6 +440,7 @@ class ItemAluguel extends Flex {
         <td class="link-edit">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->getItem()->get('descricao'), false).'</td>
         <td class="text-center">'.$obj->get('qtd').'</td>
         <td>'.$obj->getItem()->get('preco').'</td>
+        <td>'.($obj->get('modificar') ? 'Sim' : 'Não').'</td>
         '.GG::getResponsiveList([
             'Tipo' => self::$nm_tipos[$obj->get('tipo_item')],
             'Descri&ccedil;&atilde;o' => $obj->getItem()->get('descricao'),

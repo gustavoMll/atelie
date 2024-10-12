@@ -1,2 +1,0 @@
-<?php
-$Modules = Tipo::$configGG;

@@ -23,7 +23,7 @@
                     <tr class="position-relative">
                         <td class="text-left p-3"><a style="text-decoration: underline; cursor: pointer;" onclick="modalForm('alugueis', <?=$aluguel->get('id')?>)"><strong>#<?=str_pad($aluguel->get('id'), 7, "0", STR_PAD_LEFT)?></strong> - <?=$aluguel->getCliente()->getPessoa()->get('nome')?></a>
                         <?php if($aluguel->getModificacoesPendentes()){?>
-                          <span class="badge bg-primary position-absolute start-50 top-0 translate-middle" style="z-index: 10;">Modifica&ccedil;&otilde;es Pendentes</span>
+                          <span class="badge bg-danger position-absolute start-50 top-0 translate-middle" style="z-index: 10;">Modifica&ccedil;&otilde;es Pendentes</span>
                         <?php }?> 
                       </td>
                         <td><?=$aluguel->getItensAluguel()?></td>
