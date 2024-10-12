@@ -11,6 +11,7 @@ class Aluguel extends Flex {
         'dt_entrega' => 'string',
         'local_uso' => 'string',
         'valor_aluguel' => 'float',
+        'status' => 'int',
         'usr_cad' => 'string',
         'dt_cad' => 'sql',
         'usr_ualt' => 'string',
@@ -40,6 +41,7 @@ class Aluguel extends Flex {
             `dt_entrega` DATE NOT NULL,
             `local_uso` VARCHAR(255) NOT NULL,
             `valor_aluguel` FLOAT(11,2) NOT NULL,
+            `status` INT(1) NOT NULL DEFAULT 1,
             `usr_cad` varchar(20) NOT NULL,
             `dt_cad` datetime NOT NULL,
             `usr_ualt` varchar(20) NOT NULL,
@@ -47,6 +49,18 @@ class Aluguel extends Flex {
             PRIMARY KEY(`id`),
             FOREIGN KEY (id_cliente) REFERENCES clientes(id)
         ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4;';
+    }
+
+    public function getModificacoesPendentes(){
+        $rs = ItemAluguel::search([
+            's' => 'id',
+            'w' => "modificar = 1 AND id_aluguel = {$this->get('id')}"  
+        ]);
+
+        if($rs->next()){
+            return 1;
+        }
+        return 0;
     }
     
     public function getValorAluguel($tempId = 0){
@@ -102,6 +116,12 @@ class Aluguel extends Flex {
         'atencao'=> 'bg bg-warning fw-bold',
     ];
 
+    public static $arr_status = [
+        1 => 'Aguardando coleta',
+        2 => 'Coletado',
+        3 => 'Devolvido'
+    ];
+
     public function getStatus(){
         if(!Utils::dateValid($this->get('dt_entrega'))){
             $dtPrazo = strtotime($this->get('dt_prazo'));
@@ -113,8 +133,8 @@ class Aluguel extends Flex {
             }elseif($diferencaDias <=7){
                 return $this::$arr_situacoes['atencao'];
             }
-            return "";
         }
+        return "";
     }
 
     protected $cliente = null;
@@ -141,7 +161,11 @@ class Aluguel extends Flex {
     	}
         
         if(isset($_POST['id_cliente']) && !Cliente::exists("id={$_POST['id_cliente']}")){
-            $error .= '<li>O cliente informado n&atilde;o existe</li>';
+            $error .= '<li>O Cliente informado n&atilde;o existe</li>';
+        }
+
+        if(!isset($_POST['status']) || !isset(self::$arr_status[$_POST['status']])){
+            $error .= '<li>O Status informado n&atilde;o existe</li>';
         }
 
         if($error==''){
@@ -166,11 +190,13 @@ class Aluguel extends Flex {
             }
 
 			$obj->set('id_cliente', (int) $_POST['id_cliente']);
+			$obj->set('dt_coleta', Utils::dateFormat($_POST['dt_coleta'], 'Y-m-d'));
 			$obj->set('dt_uso', Utils::dateFormat($_POST['dt_uso'], 'Y-m-d'));
 			$obj->set('dt_prazo', Utils::dateFormat($_POST['dt_prazo'], 'Y-m-d'));
 			$obj->set('dt_entrega', Utils::dateFormat($_POST['dt_entrega'], 'Y-m-d'));
 			$obj->set('local_uso', $_POST['local_uso']);
 			$obj->set('valor_aluguel', Utils::parseFloat($id > 0 ? $obj->getValorAluguel() : $obj->getValorAluguel($_POST['tempId'])));
+            $obj->set('status', $_POST['status']);
             
             $obj->save();
 
@@ -257,7 +283,7 @@ class Aluguel extends Flex {
                 <label for="id_cliente">Cliente</label>
                 </div>
                 <div class="d-flex">
-                    <a type="button" class="btn btn-light btn-sm px-3" id="btn_edit" onclick="javascript:modalForm(`clientes`, this.value);" style="filter: contrast(0.5);" value="">
+                    <a type="button" class="btn btn-light btn-sm px-3" id="btn_edit" onclick="javascript:modalForm(`clientes`, '.$obj->getCliente()->get('id').');" style="filter: contrast(0.5);" value="'.$obj->getCliente()->getPessoa()->get('id').'">
                         <i class="ti ti-eye"></i>
                     </a>
                     <a type="button" class="btn btn-secondary btn-sm px-3 text-white fw-bold" onclick="javascript:modalForm(`clientes`,0);">
@@ -316,17 +342,13 @@ class Aluguel extends Flex {
                             let dt_coleta_formatada = dt_coleta.replace(/\//g, `-`); 
                             let dt_prazo = $(`#dt_prazo`).val();
                             let dt_prazo_formatada = dt_prazo.replace(/\//g, `-`); 
-                            console.log(dt_coleta_formatada);
-                            console.log(dt_prazo_formatada);
                             modalForm(`itensaluguel`,0, `/id_aluguel/'.$codigo.'/dt_coleta/`+ dt_coleta_formatada + `/dt_prazo/`+ dt_prazo_formatada, loadItens)
                         }
 
                         function loadItens(resp){
-
                             let dt_coleta = atualizarDtColeta();
-                            tableList(`itensaluguel`, `id_aluguel='.$codigo.'&dt_coleta=${dt_coleta}offset=10`, `txt_itens`, false);
+                            tableList(`itensaluguel`, `id_aluguel='.$codigo.'&dt_coleta='.$obj->get('dt_coleta').'&dt_prazo='.$obj->get('dt_prazo').'&offset=10`, `txt_itens`, false);
                         } 
-                        loadItens();
                     </script>
                     <div class="form-group col-sm-12" id="txt_itens">'.GG::moduleLoadData('loadItens();').'</div>    
                     </div>
@@ -336,7 +358,20 @@ class Aluguel extends Flex {
         ';
     	
         $string .= '
-            <div class="col-sm-9 mb-3 required">
+        <div class="col-sm-4 mb-3 required">
+            <div class="form-floating">
+                <select class="form-select" name="status">';
+                foreach (self::$arr_status as $k => $v){
+                    $string .= '<option value="'.$k.'" '.($k == $obj->get('status') ? 'selected' : '').'>'.$v.'</option>';    
+                }
+                $string .='
+                </select>
+                <label>Status</label>
+            </div>
+        </div>        
+        ';
+        $string .= '
+            <div class="col-sm-5 mb-3 required">
                 <div class="form-floating">
                     <input class="form-control" maxlength="255" name="local_uso" placeholder="" value="'.$obj->get('local_uso').'">
                     <label class="form-label">Local de Uso</label>
@@ -360,8 +395,9 @@ class Aluguel extends Flex {
                 <thead>
                 <tr>
                     <th class="col-sm-4 p-3">Cliente</th>
-                    <th class="col-sm-3 text-center">Prazo</th>
-                    <th class="col-sm-3 text-center">Devolu&ccedil;&atilde;o</th>
+                    <th class="col-sm-2 text-center">Coleta</th>
+                    <th class="col-sm-2 text-center">Prazo</th>
+                    <th class="col-sm-2 text-center">Devolu&ccedil;&atilde;o</th>
                     <th class="col-sm-2 text-center">Valor (R$)</th>
                 </tr>
                 </thead>
@@ -382,7 +418,8 @@ class Aluguel extends Flex {
     public static function getLine($obj){
         return '
         <td class="link-edit p-3">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->getCliente()->getPessoa()->get('nome'), false).'</td>
-        <td class="text-center '.$obj->getStatus().'">'.Utils::dateFormat($obj->get('dt_prazo'), 'd/m/Y').'</td>
+        <td class="text-center">'.(Utils::dateValid($obj->get('dt_coleta')) ? Utils::dateFormat($obj->get('dt_coleta'), 'd/m/Y') : ' - ').'</td>
+        <td class="text-center '.$obj->getStatus().'">'.(Utils::dateValid($obj->get('dt_coleta')) ? Utils::dateFormat($obj->get('dt_prazo'), 'd/m/Y') : ' - ').'</td>
         <td class="text-center">'.(Utils::dateValid($obj->get('dt_entrega')) ? Utils::dateFormat($obj->get('dt_entrega'), 'd/m/Y') : ' - ').'</td>
         <td class="text-center">'.Utils::parseMoney($obj->getValorAluguel()).'</td>
         '.GG::getResponsiveList([

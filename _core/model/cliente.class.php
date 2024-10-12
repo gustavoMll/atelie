@@ -188,7 +188,7 @@ class Cliente extends Flex {
     public static function getLine($obj){
         return '
         <td>'.GG::getCheckboxLine($obj->get('id')).'</td>
-        <td class="link-edit">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->getPessoa()->get('nome')).'</td>
+        <td class="link-edit">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->getPessoa()->get('nome')).($obj->get('obs') != '' ? '*' : '').'</td>
         <!--'.GG::getResponsiveList([
             'Nome' => $obj->getPessoa()->get('nome'),
             'Telefone' => $obj->getPessoa()->get('telefone1'),

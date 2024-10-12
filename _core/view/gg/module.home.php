@@ -5,7 +5,6 @@
         </div>
         <div class="d-flex justify-content-between gap-3">
           <a class="btn btn-primary" onclick="modalForm('alugueis', 0)"><i class="ti ti-plus"></i> Novo Aluguel</a>
-          <a class="btn btn-light border-dark" data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="tableList(`alugueis`, `offset=10`, `txtalugueis`, false);"><i class="ti ti-clipboard-list fs-4"></i>Ver Todos</a>
         </div>
     </div>
     <?php if(count($view['alugueis']) > 0){ ?>
@@ -21,10 +20,14 @@
             <tbody>
                 <?php 
                 foreach($view['alugueis'] as $aluguel) {?>
-                    <tr>
-                        <td class="text-left p-3"><a style="text-decoration: underline; cursor: pointer;" onclick="modalForm('clientes', <?=$aluguel->getCliente()->get('id')?>)"><strong>#<?=str_pad($aluguel->get('id'), 7, "0", STR_PAD_LEFT)?></strong> - <?=$aluguel->getCliente()->getPessoa()->get('nome')?></a></td>
+                    <tr class="position-relative">
+                        <td class="text-left p-3"><a style="text-decoration: underline; cursor: pointer;" onclick="modalForm('alugueis', <?=$aluguel->get('id')?>)"><strong>#<?=str_pad($aluguel->get('id'), 7, "0", STR_PAD_LEFT)?></strong> - <?=$aluguel->getCliente()->getPessoa()->get('nome')?></a>
+                        <?php if($aluguel->getModificacoesPendentes()){?>
+                          <span class="badge bg-primary position-absolute start-50 top-0 translate-middle" style="z-index: 10;">Modifica&ccedil;&otilde;es Pendentes</span>
+                        <?php }?> 
+                      </td>
                         <td><?=$aluguel->getItensAluguel()?></td>
-                        <td class="text-center  <?=$aluguel->getStatus()?>"><?=Utils::dateValid($aluguel->get('dt_coleta'))? Utils::dateFormat($aluguel->get('dt_prazo'), 'd/m/Y'): '-'?></td>
+                        <td class="text-center"><?=Utils::dateValid($aluguel->get('dt_coleta'))? Utils::dateFormat($aluguel->get('dt_coleta'), 'd/m/Y'): '-'?></td>
                     </tr>
                 <?php } ?>
             </tbody>

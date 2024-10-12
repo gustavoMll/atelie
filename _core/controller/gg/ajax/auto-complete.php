@@ -1,4 +1,7 @@
 <?php
+
+use FacebookAds\Object\Album;
+
 Utils::ajaxHeader();
 
 $module = $request->get('class');
@@ -6,6 +9,9 @@ $term = urldecode($request->get('term'));
 $data_div = $request->get('data-div');
 $input_aux = $request->get('input-aux');
 $fields = $request->get('camponome','nome');
+$filter = $request->query('dt_coleta');
+$dt_coleta = ($request->query('dt_coleta'));
+$dt_prazo = ($request->query('dt_prazo'));
 
 if (!file_exists(__DIR__. "/../config.{$module}.php")) {
     echo json_encode(['value' => '', 'label' => 'M&oacute;dulo n&atilde;o instalado. Contate o suporte t&eacute;cnico.']);
@@ -34,9 +40,29 @@ if($Modules['class'] == 'Pessoa'){
     $paramAdd .= " AND id IN (SELECT id_pessoa FROM clientes)";
 }
 
+$where = '';
+if ($dt_coleta != '' || $dt_prazo != ''){
+    $tipo = 1;
+    $parts_coleta = explode('-',$dt_coleta);
+    $parts_prazo = explode('-',$dt_prazo);
+    if( $Modules['class'] == 'Fantasia'){
+        $tipo = 2;
+    }
+    $dt_coleta = $parts_coleta[2] .'-'.$parts_coleta[1].'-'.$parts_coleta[0];
+    $dt_prazo = $parts_prazo[2] .'-'.$parts_prazo[1].'-'.$parts_prazo[0];
+
+    $objIA = new ItemAluguel();
+    $objA = new Aluguel();
+    $where = " AND id NOT IN (
+        SELECT id_item FROM {$objIA->getTableName()} WHERE tipo_item = {$tipo} AND id_aluguel IN 
+        (
+            SELECT id FROM {$objA->getTableName()} WHERE dt_coleta >= '{$dt_coleta}' AND dt_prazo <= '{$dt_prazo}'
+        )
+    )";
+}
 $rs = $Modules['class']::search([
     's' => "{$objClass->getPk()[0]},{$name}",
-    'w' => "{$paramAdd}",
+    'w' => "{$paramAdd} {$where}",
     'a' => $term,
     'o' => '2',
 ]);

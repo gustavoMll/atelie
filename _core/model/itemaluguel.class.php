@@ -6,7 +6,6 @@ class ItemAluguel extends Flex {
         'id' => 'int',
         'id_item' => 'int',
         'id_aluguel' => 'int',
-        'dt_coleta' => 'string',
         'tipo_item' => 'int',
         'qtd' => 'int',
         'modificar' => 'int',
@@ -35,7 +34,6 @@ class ItemAluguel extends Flex {
             `id` int(11) NOT NULL AUTO_INCREMENT,
             `id_item` int(11) NOT NULL,
             `id_aluguel` int(11) NOT NULL,
-            `dt_coleta` DATE NOT NULL,
             `tipo_item` int(11) NOT NULL,
             `qtd` int(11) NOT NULL,
             `modificar` int(1) DEFAULT 0,
@@ -70,6 +68,19 @@ class ItemAluguel extends Flex {
         2 => 'Fantasia'
     ];
     
+    protected $aluguel = null;
+    public function getAluguel()
+    {
+        if (!$this->aluguel || $this->aluguel->get('id') != $this->get('id_aluguel')) {
+            if (Aluguel::exists((int) $this->get('id_aluguel'), 'id')) {
+                $this->aluguel = Aluguel::load($this->get('id_aluguel'));
+            } else {
+                $this->aluguel = new Aluguel();
+            }
+        }
+        return $this->aluguel;
+    }
+
     public function getItem(){
         if($this->get('tipo_item') != 1 && $this->get('tipo_item') != 2 ){
             return new Fantasia();
@@ -133,12 +144,16 @@ class ItemAluguel extends Flex {
     		$error .= '<li>O campo "Aluguel" n&atilde;o foi informado</li>';
     	}
         
+        if(!isset($_POST['dt_coleta']) || $_POST['dt_coleta'] == ''){
+            $error .= '<li>O campo "Data de Coleta" n&atilde;o foi informado</li>';
+        }
+        
+        if(!isset($_POST['dt_prazo']) || $_POST['dt_prazo'] == ''){
+            $error .= '<li>O campo "Prazo de Devolu&ccedil;&atilde;o" n&atilde;o foi informado</li>';
+        }
+
         if(!isset($_POST['tipo_item']) || $_POST['tipo_item'] == '' || !in_array($_POST['tipo_item'], [1,2])){
     		$error .= '<li>O campo "Tipo de Item" n&atilde;o foi informado</li>';
-    	}
-
-        if(!isset($_POST['dt_coleta']) || $_POST['dt_coleta'] == '' || !Utils::dateValid($_POST['dt_coleta'])){
-    		$error .= '<li>O campo "Data de Coleta" n&atilde;o foi informado</li>';
     	}
         
         if(isset($_POST['tipo_item']) && $_POST['tipo_item'] == 1){
@@ -207,7 +222,6 @@ class ItemAluguel extends Flex {
 			$obj->set('id_aluguel', (int) $_POST['id_aluguel']);
 			$obj->set('qtd', (int) $_POST['tipo_item'] == 1 ? (int) $_POST['qtd'] : 1);
 			$obj->set('modificar', (int) $_POST['modificar']);
-            $obj->set('dt_coleta', Utils::dateFormat($_POST['dt_coleta'], 'Y-m-d'));
 			$obj->set('obs', $_POST['obs']);
 
             if($obj->get('tipo_item') == 1){
@@ -247,20 +261,24 @@ class ItemAluguel extends Flex {
         $classe = __CLASS__;
         $obj = new $classe();
         $obj->set('id', $codigo);
-       
+        $dt_coleta = $request->get('dt_coleta');
+        $dt_prazo = $request->get('dt_prazo');
+
         if ($codigo > 0) {
             $obj = self::load($codigo);
+            $dt_coleta = $obj->getAluguel()->get('dt_coleta');
+            $dt_prazo = $obj->getAluguel()->get('dt_prazo');
         }else{
         	$codigo = time();
         	$string = '<input name="tempId" type="hidden" value="'.$codigo.'"/>';
         }
 
         $string .= '<input name="id_aluguel" type="hidden" value="'.($obj->get('id_aluguel') != '' ? $obj->get('id_aluguel') : $request->getInt('id_aluguel')).'"/>';
-        $string .= '<input name="dt_coleta" type="hidden" value="'.$request->get('dt_coleta').'"/>';
-        $string .= '<input name="dt_prazo" type="hidden" value="'.$request->get('dt_prazo').'"/>';
+        $string .= '<input name="dt_coleta" type="hidden" value="'.$dt_coleta.'"/>';
+        $string .= '<input name="dt_prazo" type="hidden" value="'.$dt_prazo.'"/>';
 
         $string .= '
-        <div class="col-md-6 mb-3 required">
+        <div class="col-md-4 mb-3 required">
             <div class="form-floating">
                 <select class="form-select" id="tipo_item" name="tipo_item" onchange="mudarTipo(this.value)">';
                     foreach(self::$nm_tipos as $k => $v){
@@ -273,10 +291,10 @@ class ItemAluguel extends Flex {
         </div>';
 
         $string .= '
-        <div class="col-md-9 mb-3 '.($obj->get('tipo_item') == 1 || $obj->get('tipo_item') == '' ? 'd-none' : '').'" id="div_fantasia" >
+        <div class="col-md-8 mb-3 '.($obj->get('tipo_item') == 1 || $obj->get('tipo_item') == '' ? 'd-none' : '').'" id="div_fantasia" >
             <input type="hidden" name="id_fantasia" id="id_fantasia" value="' . $obj->get('id_item') . '"/>
             <div class="form-floating">
-                <input id="nome_fantasia" type="text" placeholder="seu dado aqui" class="form-control autocomplete" data-filter="dt_coleta='.$request->get('dt_coleta').'&dt_prazo='.$request->get('dt_prazo').'" data-table="fantasias" data-search="" data-name="descricao-preco" input-aux="preco_fantasia" data-field="id_fantasia" data-aux="dt_coleta" value="'.$obj->getItem()->get('descricao') .'"/>
+                <input id="nome_fantasia" type="text" placeholder="seu dado aqui" class="form-control autocomplete" data-filter="dt_coleta='.$request->get('dt_coleta').'&dt_prazo='.$request->get('dt_prazo').'" data-table="fantasias" data-search="" data-name="descricao-preco" input-aux="preco_fantasia" data-field="id_fantasia" value="'.$obj->getItem()->get('descricao') .'"/>
                 <label for="id_fantasia">Fantasia</label>
             </div>
         </div>
@@ -292,11 +310,11 @@ class ItemAluguel extends Flex {
         ';
         
         $string .= '
-        <div class="col-md-6 mb-3 '.($obj->get('tipo_item') == 2 ? 'd-none' : '').'" id="div_acessorio" >
+        <div class="col-md-8 mb-3 '.($obj->get('tipo_item') == 2 ? 'd-none' : '').'" id="div_acessorio" >
             <input type="hidden" name="id_acessorio" id="id_acessorio" value="' . $obj->get('id_item') . '"/>
             <div class="form-floating">
                 <div class="form-floating">
-                    <input id="nomeAcessorio" name="desc_acessorio" type="text" placeholder="seu dado aqui" class="form-control autocomplete" autocomplete="off" data-table="acessorios" data-name="descricao-qtd_disp-preco" input-aux="qtd-disp/preco-acessorio" data-field="id_acessorio" data-search="" value="'.$obj->getItem()->get('descricao').'"/>
+                    <input id="nomeAcessorio" name="desc_acessorio" type="text" placeholder="seu dado aqui" class="form-control autocomplete" autocomplete="off" data-table="acessorios" data-filter="dt_coleta='.$request->get('dt_coleta').'&dt_prazo='.$request->get('dt_prazo').'" data-name="descricao-qtd_disp-preco" input-aux="qtd-disp/preco-acessorio" data-field="id_acessorio" data-search="" value="'.$obj->getItem()->get('descricao').'"/>
                     <label for="id_acessorio">Acess&oacute;rio</label>
                 </div>
             </div>
@@ -304,7 +322,7 @@ class ItemAluguel extends Flex {
         ';
 
         $string .='
-        <div class="col-md-3 mb-3 '.($obj->get('tipo_item') == 2 ? 'd-none' : '').'" id="div_preco-acessorio" >
+        <div class="col-md-4 mb-3 '.($obj->get('tipo_item') == 2 ? 'd-none' : '').'" id="div_preco-acessorio" >
             <div class="form-floating">
                 <input type="number" readonly id="preco-acessorio" value="'.$obj->getItem()->get('preco').'" class="form-control">
                 <label for="preco-acessorio">Pre&ccedil;o</label>
@@ -313,7 +331,7 @@ class ItemAluguel extends Flex {
         ';
         
         $string .='
-        <div class="col-md-3 mb-3 '.($obj->get('tipo_item') == 2 ? 'd-none' : '').'" id="div_qtd-disp" >
+        <div class="col-md-4 mb-3 '.($obj->get('tipo_item') == 2 ? 'd-none' : '').'" id="div_qtd-disp" >
             <div class="form-floating">
                 <input type="number" readonly id="qtd-disp" name="qtd_disp" value="'.$obj->getItem()->get('qtd_disp').'" class="form-control">
                 <label for="qtd">Quantidade Disponível</label>
@@ -322,7 +340,7 @@ class ItemAluguel extends Flex {
         ';
 
         $string .='
-        <div class="col-md-3 mb-3 '.($obj->get('tipo_item') == 2 ? 'd-none' : '').'" id="div_qtd" >
+        <div class="col-md-4 mb-3 '.($obj->get('tipo_item') == 2 ? 'd-none' : '').'" id="div_qtd" >
             <div class="form-floating">
                 <input type="number" name="qtd" id="qtd" value="'.$obj->get('qtd').'" class="form-control">
                 <label for="qtd">Quantidade</label>

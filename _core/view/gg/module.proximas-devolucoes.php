@@ -5,7 +5,6 @@
         </div>
         <div class="d-flex justify-content-between gap-3">
           <a class="btn btn-primary" onclick="modalForm('alugueis', 0)"><i class="ti ti-plus"></i> Novo Aluguel</a>
-          <a class="btn btn-light border-dark" data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="tableList(`alugueis`, `offset=10`, `txtalugueis`, false);"><i class="ti ti-clipboard-list fs-4"></i>Ver Todos</a>
         </div>
     </div>
     <?php if(count($view['alugueis']) > 0){ ?>

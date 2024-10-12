@@ -1,12 +1,12 @@
 <?php 
 
-$view['title'] = 'Home - '.$view['title'];
+$view['title'] = $view['title'];
 $view['alugueis'] = $view['itens-aluguel'] = array();
 
 $rs = Aluguel::search([
     's' => 'id',
-    'w' => "dt_entrega = '0000-00-00'",
-    'o' => 'dt_entrega'
+    'w' => "status <> 2 ",
+    'o' => 'dt_coleta'
 ]);
 
 while($rs->next()){
