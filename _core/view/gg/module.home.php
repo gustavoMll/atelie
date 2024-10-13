@@ -4,7 +4,7 @@
           <h3>Pr&oacute;ximas Coletas</h3>
         </div>
         <div class="d-flex justify-content-between gap-3">
-          <a class="btn btn-primary" onclick="modalForm('alugueis', 0)"><i class="ti ti-plus"></i> Novo Aluguel</a>
+          <a class="btn btn-primary" onclick="modalForm('alugueis', 0, ``, function(){ location.reload(); })"><i class="ti ti-plus"></i> Novo Aluguel</a>
         </div>
     </div>
     <?php if(count($view['alugueis']) > 0){ ?>
@@ -21,13 +21,13 @@
                 <?php 
                 foreach($view['alugueis'] as $aluguel) {?>
                     <tr class="position-relative">
-                        <td class="text-left p-3"><a style="text-decoration: underline; cursor: pointer;" onclick="modalForm('alugueis', <?=$aluguel->get('id')?>)"><strong>#<?=str_pad($aluguel->get('id'), 7, "0", STR_PAD_LEFT)?></strong> - <?=$aluguel->getCliente()->getPessoa()->get('nome')?></a>
+                        <td class="text-left p-3"><a style="text-decoration: underline; cursor: pointer;" onclick="modalForm('alugueis', <?=$aluguel->get('id')?>, ``, function(){ location.reload(); })"><strong><?=$aluguel->getCliente()->getPessoa()->get('nome')?></strong></a>
                         <?php if($aluguel->getModificacoesPendentes()){?>
                           <span class="badge bg-danger position-absolute start-50 top-0 translate-middle" style="z-index: 10;">Modifica&ccedil;&otilde;es Pendentes</span>
                         <?php }?> 
                       </td>
                         <td><?=$aluguel->getItensAluguel()?></td>
-                        <td class="text-center"><?=Utils::dateValid($aluguel->get('dt_coleta'))? Utils::dateFormat($aluguel->get('dt_coleta'), 'd/m/Y'): '-'?></td>
+                        <td class="text-center <?=$aluguel->getStatus($aluguel->get('dt_coleta'))?>"><?=Utils::dateValid($aluguel->get('dt_coleta'))? Utils::dateFormat($aluguel->get('dt_coleta'), 'd/m/Y'): '-'?></td>
                     </tr>
                 <?php } ?>
             </tbody>

@@ -135,6 +135,22 @@ class ItemAluguel extends Flex {
         return $this->fantasia;
     }
 
+    public static function restaurarItens($id_aluguel){
+        $rs = self::search([
+            's' => 'id',
+            'w' => "id_aluguel <> {$id_aluguel} AND id_aluguel NOT IN (SELECT id FROM alugueis)",
+        ]);
+
+        while($rs->next()){
+            $obj = self::load($rs->getInt('id'));
+            if($obj->get('tipo_item') == 1){
+                $objA = Acessorio::load($obj->get('id_item'));
+                $objA->set('qtd_disp', $objA->get('qtd_disp') + $obj->get('qtd'));
+                $objA->save();
+            }
+            self::delete($obj->get('id'));
+        }
+    }
     public static function validate($id_acessorio) {
     	global $request;
         $error = '';
@@ -264,6 +280,8 @@ class ItemAluguel extends Flex {
         $dt_coleta = $request->get('dt_coleta');
         $dt_prazo = $request->get('dt_prazo');
 
+        
+
         if ($codigo > 0) {
             $obj = self::load($codigo);
             $dt_coleta = $obj->getAluguel()->get('dt_coleta');
@@ -273,7 +291,10 @@ class ItemAluguel extends Flex {
         	$string = '<input name="tempId" type="hidden" value="'.$codigo.'"/>';
         }
 
-        $string .= '<input name="id_aluguel" type="hidden" value="'.($obj->get('id_aluguel') != '' ? $obj->get('id_aluguel') : $request->getInt('id_aluguel')).'"/>';
+        $id_aluguel = $obj->get('id_aluguel') != '' ? $obj->get('id_aluguel') : $request->getInt('id_aluguel');
+        self::restaurarItens($id_aluguel);
+        
+        $string .= '<input name="id_aluguel" type="hidden" value="'.$id_aluguel.'"/>';
         $string .= '<input name="dt_coleta" type="hidden" value="'.$dt_coleta.'"/>';
         $string .= '<input name="dt_prazo" type="hidden" value="'.$dt_prazo.'"/>';
 
@@ -314,7 +335,7 @@ class ItemAluguel extends Flex {
             <input type="hidden" name="id_acessorio" id="id_acessorio" value="' . $obj->get('id_item') . '"/>
             <div class="form-floating">
                 <div class="form-floating">
-                    <input id="nomeAcessorio" name="desc_acessorio" type="text" placeholder="seu dado aqui" class="form-control autocomplete" autocomplete="off" data-table="acessorios" data-filter="dt_coleta='.$request->get('dt_coleta').'&dt_prazo='.$request->get('dt_prazo').'" data-name="descricao-qtd_disp-preco" input-aux="qtd-disp/preco-acessorio" data-field="id_acessorio" data-search="" value="'.$obj->getItem()->get('descricao').'"/>
+                    <input id="nomeAcessorio" name="desc_acessorio" type="text" placeholder="seu dado aqui" class="form-control autocomplete" autocomplete="off" data-table="acessorios" data-name="descricao-qtd_disp-preco" input-aux="qtd-disp/preco-acessorio" data-field="id_acessorio" data-search="" value="'.$obj->getItem()->get('descricao').'"/>
                     <label for="id_acessorio">Acess&oacute;rio</label>
                 </div>
             </div>
@@ -340,9 +361,9 @@ class ItemAluguel extends Flex {
         ';
 
         $string .='
-        <div class="col-md-4 mb-3 '.($obj->get('tipo_item') == 2 ? 'd-none' : '').'" id="div_qtd" >
+        <div class="col-md-4 mb-3 '.($obj->get('tipo_item') == 2 ? 'd-none' : '').'" id="div_qtd" min="1">
             <div class="form-floating">
-                <input type="number" name="qtd" id="qtd" value="'.$obj->get('qtd').'" class="form-control">
+                <input type="number" name="qtd" id="qtd" value="'.($obj->get('qtd') > 0 ? $obj->get('qtd') : '1').'" class="form-control">
                 <label for="qtd">Quantidade</label>
             </div>
         </div>

@@ -229,10 +229,9 @@ class Acessorio extends Flex {
                 <thead>
                 <tr>
                     <th width="10" class="p-3">'.GG::getCheckboxHead().'</th>
-                    <th class="col-sm-3">Foto</th>
+                    <th class="col-sm-4">Foto</th>
                     <th class="col-sm-5">Descri&ccedil;&atilde;o</th>
-                    <th class="col-sm-2">Tipo</th>
-                    <th class="col-sm-2">Pre&ccedil;o (R$)</th>
+                    <th class="col-sm-3">Pre&ccedil;o (R$)</th>
                 </tr>
                 </thead>
                 <tbody>';
@@ -251,8 +250,11 @@ class Acessorio extends Flex {
 
     public static function getLine($obj){
         $img = $obj->getImage('t'); 
+        $ret = '<img src="'.__BASEPATH__.'/img/no-image-default.jpg'.'"/ class="imgPreviewList">';        
         
-        $ret = '<img src="'.($img!=''?$img : __BASEPATH__.'img/image-folder.jpg').'" class="imgPreviewList"/>';
+        if($img != ''){
+            $ret = '<img src="'.$img.'" class="imgPreviewList"/>';
+        }
         
         return '
         <td class="p-3">'.GG::getCheckboxLine($obj->get('id')).'</td>
@@ -262,7 +264,6 @@ class Acessorio extends Flex {
             </span>
         </td>
         <td class="link-edit">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->get('descricao')).'</td>
-        <td>'.$obj->getTipo()->get('nome').'</td>
         <td>'.Utils::parseMoney($obj->get('preco')).'</td>';
     }
 

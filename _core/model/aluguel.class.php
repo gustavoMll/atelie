@@ -11,6 +11,8 @@ class Aluguel extends Flex {
         'dt_entrega' => 'string',
         'local_uso' => 'string',
         'valor_aluguel' => 'float',
+        'valor_entrada' => 'float',
+        'valor_restante' => 'float',
         'status' => 'int',
         'usr_cad' => 'string',
         'dt_cad' => 'sql',
@@ -41,6 +43,8 @@ class Aluguel extends Flex {
             `dt_entrega` DATE NOT NULL,
             `local_uso` VARCHAR(255) NOT NULL,
             `valor_aluguel` FLOAT(11,2) NOT NULL,
+            `valor_entrada` FLOAT(11,2) NOT NULL,
+            `valor_restante` FLOAT(11,2) NOT NULL,
             `status` INT(1) NOT NULL DEFAULT 1,
             `usr_cad` varchar(20) NOT NULL,
             `dt_cad` datetime NOT NULL,
@@ -67,7 +71,6 @@ class Aluguel extends Flex {
         $valor = 0;
         $id = $tempId > 0 ? $tempId : $this->get('id'); 
         
-       
         $rs = ItemAluguel::search([
             's' => "SUM((SELECT `acessorios`.preco FROM `acessorios` WHERE `acessorios`.id = `itensaluguel`.id_item) * `itensaluguel`.qtd) AS valor_total",
             'w' => "`itensaluguel`.tipo_item=1 and id_aluguel={$id}",
@@ -122,11 +125,11 @@ class Aluguel extends Flex {
         3 => 'Devolvido'
     ];
 
-    public function getStatus(){
-        if(!Utils::dateValid($this->get('dt_entrega'))){
-            $dtPrazo = strtotime($this->get('dt_prazo'));
+    public function getStatus($data){
+        if($this->get('status') == 1){
+            $dtComparacao = strtotime($data);
             $dataAtual = strtotime(date('Y/m/d'));
-            $diferencaDias = ($dtPrazo - $dataAtual) / (60 * 60 * 24);
+            $diferencaDias = ($dtComparacao - $dataAtual) / (60 * 60 * 24);
             
             if($diferencaDias < 0){
                 return $this::$arr_situacoes['atraso'];
@@ -136,6 +139,8 @@ class Aluguel extends Flex {
         }
         return "";
     }
+
+    
 
     protected $cliente = null;
     public function getCliente(){
@@ -189,6 +194,7 @@ class Aluguel extends Flex {
                 $obj = self::load($id);
             }
 
+
 			$obj->set('id_cliente', (int) $_POST['id_cliente']);
 			$obj->set('dt_coleta', Utils::dateFormat($_POST['dt_coleta'], 'Y-m-d'));
 			$obj->set('dt_uso', Utils::dateFormat($_POST['dt_uso'], 'Y-m-d'));
@@ -196,8 +202,13 @@ class Aluguel extends Flex {
 			$obj->set('dt_entrega', Utils::dateFormat($_POST['dt_entrega'], 'Y-m-d'));
 			$obj->set('local_uso', $_POST['local_uso']);
 			$obj->set('valor_aluguel', Utils::parseFloat($id > 0 ? $obj->getValorAluguel() : $obj->getValorAluguel($_POST['tempId'])));
+            $obj->set('valor_entrada', Utils::parseFloat($_POST['valor_entrada']));
             $obj->set('status', $_POST['status']);
-            
+            $obj->set('valor_restante', $obj->get('valor_aluguel'));
+            if($id > 0){
+                $obj->set('valor_restante', Utils::parseFloat($_POST['valor_restante']));
+            }
+            // print_r($obj); exit;
             $obj->save();
 
             $rs = ItemAluguel::search([
@@ -246,15 +257,20 @@ class Aluguel extends Flex {
             'w' => "id_aluguel NOT IN (SELECT id FROM alugueis)"
         ]);
 
+        $rs = ItemAluguel::search([
+            's' => 'id',
+            'w' => "id_aluguel IN($ids)"
+        ]);
+
         while($rs->next()){
             $objIA = ItemAluguel::load($rs->getInt('id'));
-            if($rs->getInt('tipo_item') == 1){
-                $objA = Acessorio::load($rs->getInt('id_item'));
+            if($objIA->get('tipo_item') == 1){
+                $objA = Acessorio::load($objIA->get('id_item'));
                 $objA->set('qtd_disp', $objA->get('qtd_disp') + $objIA->get('qtd'));
+                $objA->save();
             }
-            $objIA->dbDelete($objIA, "id={$objIA->get('id')}");
+            ItemAluguel::delete($objIA->get('id'));
         }
-
         $ret = $obj->dbDelete($obj, 'id IN('.$ids.')');
         return $ret;
     }
@@ -265,14 +281,18 @@ class Aluguel extends Flex {
         $classe = __CLASS__;
         $obj = new $classe();
         $obj->set('id', $codigo);
-
-        $entrega = $request->getInt('entrega');
+        $edit = 0;
+        $valor_restante = 0;
         if ($codigo > 0) {
             $obj = self::load($codigo);
+            $valor_restante = (float)$obj->get('valor_restante');
         }else{
         	$codigo = time();
         	$string = '<input name="tempId" type="hidden" value="'.$codigo.'"/>';
         }
+
+        // echo $codigo; exit;
+        // echo $edit; exit;
         
         $string .= '
         <div class="col-sm-12 mb-3 required">
@@ -295,10 +315,10 @@ class Aluguel extends Flex {
         </div>';
     	
         $string .= '
-        <div class="col-sm-6 mb-3">
+        <div class="col-sm-6 mb-3 required">
             <div class="form-floating">
-                <input class="form-control date" type="text" name="dt_coleta" id="dt_coleta" placeholder="" onchage="atualizarDtColeta(this.value)" value="'.(Utils::dateValid($obj->get('dt_coleta')) ? Utils::dateFormat($obj->get('dt_coleta'),'d/m/Y') : '').'">
-                <label class="form-label">Data de Coleta</label>
+                <input class="form-control date" type="text" name="dt_coleta" id="dt_coleta" placeholder="" onchage="atualizarDtColeta(this.value)" value="'.(Utils::dateValid($obj->get('dt_coleta')) ? Utils::dateFormat($obj->get('dt_coleta'),'d/m/Y') : '').'" required>
+                <label class="form-label">Data de Coleta*</label>
             </div>
         </div>';
         $string .= '
@@ -358,7 +378,7 @@ class Aluguel extends Flex {
         ';
     	
         $string .= '
-        <div class="col-sm-4 mb-3 required">
+        <div class="col-sm-6 mb-3 required">
             <div class="form-floating">
                 <select class="form-select" name="status">';
                 foreach (self::$arr_status as $k => $v){
@@ -371,7 +391,7 @@ class Aluguel extends Flex {
         </div>        
         ';
         $string .= '
-            <div class="col-sm-5 mb-3 required">
+            <div class="col-sm-6 mb-3 required">
                 <div class="form-floating">
                     <input class="form-control" maxlength="255" name="local_uso" placeholder="" value="'.$obj->get('local_uso').'">
                     <label class="form-label">Local de Uso</label>
@@ -379,10 +399,25 @@ class Aluguel extends Flex {
         </div>';
 
         $string .= '
-            <div class="col-sm-3 mb-3">
+            <div class="col-sm-4 mb-3">
                 <div class="form-floating">
                     <input class="form-control money" readonly name="valor_aluguel" placeholder="" value="'.($obj->get('valor_aluguel') != '' ? Utils::parseMoney($obj->getValorAluguel()) : '').'">
                     <label class="form-label">Valor do Aluguel</label>
+                </div>
+        </div>';
+       
+        $string .= '
+            <div class="col-sm-4 mb-3">
+                <div class="form-floating">
+                    <input class="form-control money" name="valor_entrada" placeholder="" value="'.($obj->get('valor_entrada') != '' ? Utils::parseMoney($obj->get('valor_entrada')) : '').'">
+                    <label class="form-label">Valor de Entrada</label>
+                </div>
+        </div>';
+        $string .= '
+            <div class="col-sm-4 mb-3">
+                <div class="form-floating">
+                    <input class="form-control money" name="valor_restante" placeholder="" value="'. Utils::parseMoney($valor_restante).'">
+                    <label class="form-label">Valor Restante</label>
                 </div>
         </div>';
         
@@ -418,8 +453,8 @@ class Aluguel extends Flex {
     public static function getLine($obj){
         return '
         <td class="link-edit p-3">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->getCliente()->getPessoa()->get('nome'), false).'</td>
-        <td class="text-center">'.(Utils::dateValid($obj->get('dt_coleta')) ? Utils::dateFormat($obj->get('dt_coleta'), 'd/m/Y') : ' - ').'</td>
-        <td class="text-center '.$obj->getStatus().'">'.(Utils::dateValid($obj->get('dt_coleta')) ? Utils::dateFormat($obj->get('dt_prazo'), 'd/m/Y') : ' - ').'</td>
+        <td class="text-center '.$obj->getStatus($obj->get('dt_coleta')).'">'.(Utils::dateValid($obj->get('dt_coleta')) ? Utils::dateFormat($obj->get('dt_coleta'), 'd/m/Y') : ' - ').'</td>
+        <td class="text-center '.$obj->getStatus($obj->get('dt_prazo')).'">'.(Utils::dateValid($obj->get('dt_coleta')) ? Utils::dateFormat($obj->get('dt_prazo'), 'd/m/Y') : ' - ').'</td>
         <td class="text-center">'.(Utils::dateValid($obj->get('dt_entrega')) ? Utils::dateFormat($obj->get('dt_entrega'), 'd/m/Y') : ' - ').'</td>
         <td class="text-center">'.Utils::parseMoney($obj->getValorAluguel()).'</td>
         '.GG::getResponsiveList([

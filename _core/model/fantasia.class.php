@@ -212,10 +212,9 @@ class Fantasia extends Flex {
                 <thead>
                 <tr>
                     <th width="10" class="p-2">'.GG::getCheckboxHead().'</th>
-                    <th class="col-sm-3 p-2">Foto</th>
+                    <th class="col-sm-4 p-2">Foto</th>
                     <th class="col-sm-5 p-2">Descri&ccedil;&atilde;o</th>
-                    <th class="col-sm-2 p-2">Tipo</th>
-                    <th class="col-sm-2 p-2">Pre&ccedil;o (R$)</th>
+                    <th class="col-sm-3 p-2">Pre&ccedil;o (R$)</th>
                 </tr>
                 </thead>
                 <tbody>';
@@ -234,20 +233,19 @@ class Fantasia extends Flex {
 
     public static function getLine($obj){
         $img = $obj->getImage('t'); 
-        $ret = '<i class="ti ti-photo"></i>';        
+        $ret = '<img src="'.__BASEPATH__.'/img/no-image-default.jpg'.'"/ class="imgPreviewList">';        
         
         if($img != ''){
-            $ret = '<img src="'.($img!=''?$img:__BASEPATH__.'/img/no-pic.jpg').'" class="imgPreviewList"/>';
+            $ret = '<img src="'.$img.'" class="imgPreviewList"/>';
         }
         return '
         <td class="p-2">'.GG::getCheckboxLine($obj->get('id')).'</td>
-        <td class="text-center ">
-            <span class="ratio ratio-1x1">
+        <td class="text-center">
+            <span class="ratio ratio-1x1" style="max-width: 200px">
               '.$ret.'  
             </span>
         </td>
         <td class="link-edit">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->get('descricao')).'</td>
-        <td>'.$obj->getTipo()->get('nome').'</td>
         <td>'.Utils::parseMoney($obj->get('preco')).'</td>
         ';
     }

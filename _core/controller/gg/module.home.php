@@ -5,7 +5,7 @@ $view['alugueis'] = $view['itens-aluguel'] = array();
 
 $rs = Aluguel::search([
     's' => 'id',
-    'w' => "status <> 2 ",
+    'w' => "status = 1",
     'o' => 'dt_coleta'
 ]);
 

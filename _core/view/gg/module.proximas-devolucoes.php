@@ -15,28 +15,17 @@
                     <th class="col-sm-3 text-center p-3"><i class="ti ti-user"></i>Cliente</th>
                     <th class="col-sm-5 text-center"><i class="ti ti-hanger-2"></i>Itens</th>
                     <th class="col-sm-2 text-center"><i class="ti ti-calendar-event"></i> Data Previs&atilde;o</th>
-                    <th class="col-sm-2 text-center"><i class="ti ti-calendar-event"></i> Data Devolu&ccedil;&atilde;o</th>
+                    <th class="col-sm-2 text-center"><i class="ti ti-coin"></i>Valor Restante</th>
                 </tr>
             </thead>
             <tbody>
                 <?php 
                 foreach($view['alugueis'] as $aluguel) {?>
                     <tr>
-                        <td class="text-left p-3"><a style="text-decoration: underline; cursor: pointer;" onclick="modalForm('clientes', <?=$aluguel->getCliente()->get('id')?>)"><strong>#<?=str_pad($aluguel->get('id'), 7, "0", STR_PAD_LEFT)?></strong> - <?=$aluguel->getCliente()->getPessoa()->get('nome')?></a></td>
+                        <td class="text-left p-3"><a style="text-decoration: underline; cursor: pointer;" onclick="modalForm('alugueis', <?=$aluguel->get('id')?>, ``, function(){ location.reload(); })"><strong><?=$aluguel->getCliente()->getPessoa()->get('nome')?></strong></a></td>
                         <td><?=$aluguel->getItensAluguel()?></td>
-                        <td class="text-center  <?=$aluguel->getStatus()?>"><?=Utils::dateValid($aluguel->get('dt_prazo'))? Utils::dateFormat($aluguel->get('dt_prazo'), 'd/m/Y'): '-'?></td>
-                        <td class="text-center">
-                            <?=Utils::dateValid($aluguel->get('dt_entrega')) ?
-                            '<a style="cursor: pointer" onclick="modalForm(`alugueis`, '.$aluguel->get('id').', ``, function(){setTimeout(function() {
-                                    window.location.reload();
-                            }, 1000); });">'.Utils::dateFormat($aluguel->get('dt_entrega'),'d/m/Y').' <i class="ti ti-pencil"></i></a>'
-                            :
-                            '<a class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalDevolucao" onclick="$(`#id_aluguel`).val('.$aluguel->get('id').')">
-                            <i class="ti ti-plus"></i>
-                            </a>'; 
-                            ?>
-                           
-                        </td>
+                        <td class="text-center <?=$aluguel->getStatus($aluguel->get('dt_prazo'))?>"><?=Utils::dateFormat($aluguel->get('dt_prazo'), 'd/m/Y')?></td>
+                        <td class="text-center">R$ <?=Utils::parseMoney($aluguel->get('valor_restante'))?></td>
                     </tr>
                 <?php } ?>
             </tbody>
