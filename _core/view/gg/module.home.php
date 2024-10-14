@@ -33,6 +33,10 @@
             </tbody>
         </table>
     </div>
+    <?php }else{?>
+      <div class="alert alert-primary" role="alert">
+        Nenhuma coleta encontrada
+      </div>
     <?php }?>
 </div>
     

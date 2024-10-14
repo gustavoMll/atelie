@@ -12,5 +12,10 @@ if(!Utils::dateValid($data)){
 }
 
 $obj = Aluguel::load($id);
-$ret = $obj->realizarDevolucao($data);
+$valor_pago = $request->get('valor');
+if($valor_pago > $obj->get('valor_restante')){
+    Utils::jsonResponse("Valor inválido", false);
+}
+// echo $valor_pago; exit;
+$ret = $obj->realizarDevolucao($data, $valor_pago);
 Utils::jsonResponse($ret['msg'], $ret['success']);

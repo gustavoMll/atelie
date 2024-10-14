@@ -590,7 +590,7 @@ class Aluguel extends Flex {
         return $string;
     }
 
-    public function realizarDevolucao($dt_devolucao){
+    public function realizarDevolucao($dt_devolucao, $valor_pago){
         if(!self::exists($this->get('id'))){
             return [
                 'msg' => "Aluguel inválido",
@@ -604,9 +604,20 @@ class Aluguel extends Flex {
                 'success' => false,
             ];
         }
+        
+        if($valor_pago > $this->get('valor_restante')){
+            return [
+                'msg' => "Valor Restante de devolução inválido",
+                'success' => false,
+            ];
+        }
 
+        // echo $valor_pago;exit;
         $this->set('dt_entrega', Utils::dateFormat($dt_devolucao, 'Y-m-d'));
+        $this->set('valor_restante', Utils::parseMoney((float)$this->get('valor_restante') - (float)$valor_pago));
+        $this->set('status', 3);
         $this->save();
+        print_r($this); exit;
 
         $rs = ItemAluguel::search([
             's' => 'id, id_item, qtd',

@@ -23,8 +23,6 @@
         <div class="d-flex align-items-center gap-2 me-auto" id="brandMenu" href="<?= __PATH__ ?>">
             <a href="" class="h4 fw-bold lh-1 m-0 text-white text-decoration-none"><?=$Config->get('nome') != '' ? $Config->get('nome') : 'Sistema'?></a>
         </div>
-        
-        <a href="javascript:;" aria-label="ver perfil" data-bs-toggle="modal" data-bs-target="#perfil" class="ratio ratio-1x1 rounded-circle" style="width:32px"><img src="<?=($objSession->get('img') != '' ? $objSession->getImage() : __BASEPATH__.'img/default-image.png')?>" alt="perfil" class="img-fluid"></a>
            
     </div>
 

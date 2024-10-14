@@ -15,7 +15,7 @@
                     <th class="col-sm-3 text-center p-3"><i class="ti ti-user"></i>Cliente</th>
                     <th class="col-sm-5 text-center"><i class="ti ti-hanger-2"></i>Itens</th>
                     <th class="col-sm-2 text-center"><i class="ti ti-calendar-event"></i> Data Previs&atilde;o</th>
-                    <th class="col-sm-2 text-center"><i class="ti ti-coin"></i>Valor Restante</th>
+                    <th class="col-sm-2 text-center"><i class="ti ti-pencil"></i>Devolução</th>
                 </tr>
             </thead>
             <tbody>
@@ -25,33 +25,20 @@
                         <td class="text-left p-3"><a style="text-decoration: underline; cursor: pointer;" onclick="modalForm('alugueis', <?=$aluguel->get('id')?>, ``, function(){ location.reload(); })"><strong><?=$aluguel->getCliente()->getPessoa()->get('nome')?></strong></a></td>
                         <td><?=$aluguel->getItensAluguel()?></td>
                         <td class="text-center <?=$aluguel->getStatus($aluguel->get('dt_prazo'))?>"><?=Utils::dateFormat($aluguel->get('dt_prazo'), 'd/m/Y')?></td>
-                        <td class="text-center">R$ <?=Utils::parseMoney($aluguel->get('valor_restante'))?></td>
+                        <td class="text-center"><a class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalDevolucao" onclick="setarCamposModal(`<?=$aluguel->get('id')?>`, `<?=$aluguel->get('valor_aluguel')?>`, `<?=$aluguel->get('valor_entrada')?>`, `<?=$aluguel->get('valor_restante')?>`)"><i class="ti ti-arrow-back-up"></i></a></td>
                     </tr>
                 <?php } ?>
             </tbody>
         </table>
     </div>
+    <?php }else{?>
+      <div class="alert alert-primary" role="alert">
+        Nenhuma devolução encontrada
+      </div>
     <?php }?>
 </div>
-    
 
-<div class="modal fade modal-xl" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="exampleModalLabel">Alugueis</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body" id="txtalugueis">
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary fw-bold text-white" data-bs-dismiss="modal">Fechar</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade modal-sm" id="modalDevolucao" tabindex="-1" aria-labelledby="modalDevolucaoLabel" aria-hidden="true">
+<div class="modal fade modal-lg" id="modalDevolucao" tabindex="-1" aria-labelledby="modalDevolucaoLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -59,10 +46,35 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
+        <input type="hidden" id="id_aluguel" name="id_aluguel" value="">
         <div class="row">
-            <div class="col-sm-12">
+            <div class="col-sm-4 mb-3">
                 <div class="form-floating">
-                  <input type="hidden" id="id_aluguel" name="id_aluguel" value="">
+                  <input type="text" class="form-control money" name="valor_aluguel" id="valor_aluguel" value="" disabled>
+                  <label>Valor Total</label>
+                </div>
+            </div>
+            <div class="col-sm-4 mb-3">
+                <div class="form-floating">
+                  <input type="text" class="form-control money" name="valor_entrada" id="valor_entrada" value="" disabled>
+                  <label>Valor Entrda</label>
+                </div>
+            </div>
+            <div class="col-sm-4 mb-3">
+                <div class="form-floating">
+                  <input type="text" class="form-control money" name="valor_restante" id="valor_restante" disabled value="">
+                  <label>Valor Restante</label>
+                </div>
+            </div>
+            
+            <div class="col-sm-6 mb-3">
+                <div class="form-floating">
+                  <input type="text" class="form-control money" name="valor_pago" id="valor_pago" value="">
+                  <label>Valor</label>
+                </div>
+            </div>
+            <div class="col-sm-6 mb-3">
+                <div class="form-floating">
                   <input class="form-control date " id="dt_devolucao" name="dt_devolucao">
                   <label>Data de Devolu&ccedil;&atilde;o</label>
                 </div>
@@ -77,13 +89,20 @@
 </div>
 
 <script>
+  function setarCamposModal(id_aluguel, valor_aluguel, valor_entrada, valor_restante){
+    $(`#id_aluguel`).val(id_aluguel);
+    $(`#valor_aluguel`).val(valor_aluguel);
+    $(`#valor_entrada`).val(valor_entrada);
+    $(`#valor_restante`).val(valor_restante);
+  }
+
   function realizarDevolucao(){
     let id = $('#id_aluguel').val();
     let data = $('#dt_devolucao').val();
+    let valor = $('#valor_pago').val();
     let partes = data.split("/");
     let dataFormatada = partes[0] + "-" + partes[1] + "-" + partes[2];
-    console.log(dataFormatada);
-    const url = '<?=__PATH__?>ajax/devolver-aluguel/id/' + id + '/data/' + dataFormatada;
+    const url = '<?=__PATH__?>ajax/devolver-aluguel/id/' + id + '/data/' + dataFormatada + '/valor/' + valor;
     $.ajax({
         url: url,
         dataType: `json`,
