@@ -25,7 +25,7 @@ class Aluguel extends Flex {
     public static $configGG = array(
         'nome' => 'Alugueis',
         'class' => __CLASS__,
-        'ordenacao' => 'dt_prazo ASC',
+        'ordenacao' => 'dt_cad DESC',
         'envia-arquivo' => false,
         'show-menu'=> true,
         'icon' => 'ti ti-plus'
@@ -506,23 +506,15 @@ class Aluguel extends Flex {
         $string = '';
 
         $string .= '
-        <div class="col-sm-6 col-lg-5 mb-3">
+        <div class="col-sm-12 mb-3">
             <div class="form-floating">
-                <input name="descricao" id="filterDescricao" type="text" class="form-control" value="'.$request->query('descricao').'" placeholder="seu dado aqui" />
-                <label for="filterDescricao" class="form-label">Descri&ccedil;&atilde;o</label>
-            </div>
-        </div>';
-
-        $string .= '
-        <div class="col-sm-6 col-lg-5 mb-3">
-            <div class="form-floating">
-                <input name="tamanho" id="filterTamanho" type="text" class="form-control" value="'.$request->query('tamanho').'" placeholder="seu dado aqui" />
-                <label for="filterTamanho" class="form-label">Tamanho</label>
+                <input name="cliente" id="filterCliente" type="text" class="form-control" value="'.$request->query('cliente').'" placeholder="seu dado aqui" />
+                <label for="filterCliente" class="form-label">Cliente</label>
             </div>
         </div>';
         
         $string .= '
-        <div class="col-sm-6 col-lg-3 mb-3">
+        <div class="col-sm-6 mb-3">
             <div class="form-floating">
                 <input name="preco_min" id="filterPrecoMin" type="text" class="form-control" value="'.$request->query('preco_min').'" placeholder="seu dado aqui" />
                 <label for="filterPrecoMin" class="form-label">Pre&ccedil;o min</label>
@@ -530,7 +522,7 @@ class Aluguel extends Flex {
         </div>';
         
         $string .= '
-        <div class="col-sm-6 col-lg-3 mb-3">
+        <div class="col-sm-6 mb-3">
             <div class="form-floating">
                 <input name="preco_max" id="filterPrecoMax" type="text" class="form-control" value="'.$request->query('preco_max').'" placeholder="seu dado aqui" />
                 <label for="filterPrecoMax" class="form-label">Pre&ccedil;o max</label>
@@ -538,7 +530,7 @@ class Aluguel extends Flex {
         </div>';
       
         $string .= '
-        <div class="col-sm-6 col-lg-3 mb-3">
+        <div class="col-sm-6 mb-3">
             <div class="form-floating">
                 <input name="inicio" id="filterInicio" type="text" class="form-control date" value="'.$request->query('inicio').'" placeholder="seu dado aqui" />
                 <label for="filterInicio">Cadastrados desde</label>
@@ -546,7 +538,7 @@ class Aluguel extends Flex {
         </div>';
         
         $string .= '
-        <div class="col-sm-6 col-lg-3 mb-3">
+        <div class="col-sm-6 mb-3">
             <div class="form-floating">
                 <input name="fim" id="filterFim" type="text" class="form-control date" value="'.$request->query('fim').'" placeholder="seu dado aqui" />
                 <label for="filteFim" class="form-label">Cadastrados at&eacute;</label>
@@ -558,12 +550,12 @@ class Aluguel extends Flex {
             <div class="form-floating">
                 <select class="form-select" name="order" id="order">';
                 foreach([
-                    'descricao' => 'A-Z',
-                    'descricao desc' => 'Z-A',
-                    'preco' => 'Menor pre&ccedil;o',
-                    'preco desc' => 'Maior pre&ccedil;o',
-                    'id' => 'Mais antigo primeiro',
                     'id desc' => 'Mais recente primeiro',
+                    'id' => 'Mais antigo primeiro',
+                    'dt_coleta desc' => 'Coleta mais recente',
+                    'dt_coleta' => 'Coleta mais antiga',
+                    'valor_aluguel' => 'Menor pre&ccedil;o',
+                    'valor_aluguel desc' => 'Maior pre&ccedil;o',
                 ] as $key => $value){
                     $string .= '<option value="'.$key.'"'.($request->query('order') == $key ? ' selected':'').'>'.$value.'</option>';
                 }
@@ -617,7 +609,6 @@ class Aluguel extends Flex {
         $this->set('valor_restante', Utils::parseMoney((float)$this->get('valor_restante') - (float)$valor_pago));
         $this->set('status', 3);
         $this->save();
-        print_r($this); exit;
 
         $rs = ItemAluguel::search([
             's' => 'id, id_item, qtd',

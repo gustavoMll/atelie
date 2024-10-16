@@ -38,7 +38,7 @@
     <?php }?>
 </div>
 
-<div class="modal fade modal-lg" id="modalDevolucao" tabindex="-1" aria-labelledby="modalDevolucaoLabel" aria-hidden="true">
+<div class="modal fade modal-md" id="modalDevolucao" tabindex="-1" aria-labelledby="modalDevolucaoLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -48,32 +48,7 @@
       <div class="modal-body">
         <input type="hidden" id="id_aluguel" name="id_aluguel" value="">
         <div class="row">
-            <div class="col-sm-4 mb-3">
-                <div class="form-floating">
-                  <input type="text" class="form-control money" name="valor_aluguel" id="valor_aluguel" value="" disabled>
-                  <label>Valor Total</label>
-                </div>
-            </div>
-            <div class="col-sm-4 mb-3">
-                <div class="form-floating">
-                  <input type="text" class="form-control money" name="valor_entrada" id="valor_entrada" value="" disabled>
-                  <label>Valor Entrda</label>
-                </div>
-            </div>
-            <div class="col-sm-4 mb-3">
-                <div class="form-floating">
-                  <input type="text" class="form-control money" name="valor_restante" id="valor_restante" disabled value="">
-                  <label>Valor Restante</label>
-                </div>
-            </div>
-            
-            <div class="col-sm-6 mb-3">
-                <div class="form-floating">
-                  <input type="text" class="form-control money" name="valor_pago" id="valor_pago" value="">
-                  <label>Valor</label>
-                </div>
-            </div>
-            <div class="col-sm-6 mb-3">
+            <div class="col-sm-12 mb-3">
                 <div class="form-floating">
                   <input class="form-control date " id="dt_devolucao" name="dt_devolucao">
                   <label>Data de Devolu&ccedil;&atilde;o</label>

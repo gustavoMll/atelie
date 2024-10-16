@@ -38,11 +38,11 @@ if($view['module'] == 'gerar-sitemap'){
     
     include dirname(__FILE__) . "/module." . $view['module'];    
 }else {
-    if (in_array($request->get('module'),array('','home'))) {
-        $view['module'] = 'home.php';
-        $view['page_class'] = 'home';   
+    if (in_array($request->get('module'),array('','proximas-coletas'))) {
+        $view['module'] = 'proximas-coletas.php';
+        $view['page_class'] = 'proximas-coletas';   
     }else{
-        $view['module'] = 'home.php';
+        $view['module'] = 'proximas-coletas.php';
     }
 }
 

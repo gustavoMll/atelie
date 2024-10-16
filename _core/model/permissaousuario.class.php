@@ -223,7 +223,7 @@ class PermissaoUsuario extends Flex {
             <table class="table table-responsive table-striped">
             <thead>
               <tr>
-                <th class="col-sm-8">Permiss&atilde;o</th>
+                <th class="col-sm-8 p-3">Permiss&atilde;o</th>
                 <th class="col-sm-1 text-center">Ver</th>
                 <th class="col-sm-1 text-center">Inserir</th>
                 <th class="col-sm-1 text-center">Editar</th>
@@ -245,7 +245,7 @@ class PermissaoUsuario extends Flex {
 
     public static function getLine($obj){
         return '
-        <td class="link-edit">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->getPermissao()->get('nome'), false).'</td>
+        <td class="link-edit p-3">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->getPermissao()->get('nome'), false).'</td>
         <td class="small text-center align-middle"><strong><span class="ti ti-'.($obj->get('sel')==1?'check text-success':'x text-danger').'"></span></td>
         <td class="small text-center align-middle"><strong><span class="ti ti-'.($obj->get('ins')==1?'check text-success':'x text-danger').'"></span></td>
         <td class="small text-center align-middle"><strong><span class="ti ti-'.($obj->get('upd')==1?'check text-success':'x text-danger').'"></span></td>

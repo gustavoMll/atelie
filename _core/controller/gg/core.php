@@ -12,7 +12,7 @@ $view['paginas'] = 0;
 $view['hasHeader'] = false;
 
 $nonLoggedModules = array("login", 'esqueceu-senha');
-$freeModules = array('ajax', 'login', 'esqueceu-senha', 'home');
+$freeModules = array('ajax', 'login', 'esqueceu-senha');
 
 $view['logged'] = (isset($_SESSION[$GLOBALS['Sessao']]) && $_SESSION[$GLOBALS['Sessao']]['autorizado']);
 if($view['logged']){
@@ -31,8 +31,8 @@ if ($view['logged']) {
         
     }else {
         if ($view['modulo'] == '') {
-            $view['module'] = 'home.php';
-            $view['page_class'] = 'home';
+            $view['module'] = 'proximas-coletas.php';
+            $view['page_class'] = 'proximas-coletas';
             
         } elseif (file_exists(dirname(__FILE__) . "/config.{$view['modulo']}.php")) {
             include(dirname(__FILE__) . "/config.{$view['modulo']}.php");

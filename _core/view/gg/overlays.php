@@ -54,7 +54,7 @@ function saveConfig(id) {
 
 <?php if($view['list-filter'] != ''){ ?>
 <div class="modal fade" id="modalFilter" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-fullscreen-sm-down">
+    <div class="modal-dialog modal-fullscreen-sm-down <?=$request->get('module') == 'alugueis' ? 'modal-lg' : ''?>">
         <form id="formFilter" class="modal-content" onsubmit="return modalFilter(this, `<?=$view['modulo']?>`);">
             <div class="modal-header">
                 <h5 class="modal-title small text-uppercase" id="filtroModalLabel">Filtro</h5>

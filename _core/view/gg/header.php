@@ -5,9 +5,6 @@
         <?php
         if ($view['hasHeader']) {
             include dirname(__FILE__) . "/component.pageheader.php";
-        } else {
-            if($view['title']!= '') 
-                echo '<h2 class="mb-0 h4 lh-1">'.$view['title'].'</h2>';
         }
         ?>
 
