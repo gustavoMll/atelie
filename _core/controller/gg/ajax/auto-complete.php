@@ -56,10 +56,11 @@ if ($dt_coleta != '' || $dt_prazo != ''){
     $where = " AND id NOT IN (
         SELECT id_item FROM {$objIA->getTableName()} WHERE tipo_item = {$tipo} AND id_aluguel IN 
         (
-            SELECT id FROM {$objA->getTableName()} WHERE dt_coleta >= '{$dt_coleta}' AND dt_prazo <= '{$dt_prazo}'
+            SELECT id FROM {$objA->getTableName()} WHERE dt_coleta >= '{$dt_coleta}' AND dt_prazo <= '{$dt_prazo}' AND status <> " . Aluguel::$status_devolvido . "
         )
     )";
 }
+
 $rs = $Modules['class']::search([
     's' => "{$objClass->getPk()[0]},{$name}",
     'w' => "{$paramAdd} {$where}",

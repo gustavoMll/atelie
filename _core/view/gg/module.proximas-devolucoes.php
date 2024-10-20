@@ -25,7 +25,7 @@
                         <td class="text-left p-3"><a style="text-decoration: underline; cursor: pointer;" onclick="modalForm('alugueis', <?=$aluguel->get('id')?>, ``, function(){ location.reload(); })"><strong><?=$aluguel->getCliente()->getPessoa()->get('nome')?></strong></a></td>
                         <td><?=$aluguel->getItensAluguel()?></td>
                         <td class="text-center <?=$aluguel->getStatus($aluguel->get('dt_prazo'))?>"><?=Utils::dateFormat($aluguel->get('dt_prazo'), 'd/m/Y')?></td>
-                        <td class="text-center"><a class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalDevolucao" onclick="setarCamposModal(`<?=$aluguel->get('id')?>`, `<?=$aluguel->get('valor_aluguel')?>`, `<?=$aluguel->get('valor_entrada')?>`, `<?=$aluguel->get('valor_restante')?>`)"><i class="ti ti-arrow-back-up"></i></a></td>
+                        <td class="text-center"><a class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalDevolucao" onclick="$(`#id_aluguel`).val(<?=$aluguel->get('id')?>);"><i class="ti ti-arrow-back-up"></i></a></td>
                     </tr>
                 <?php } ?>
             </tbody>
@@ -64,20 +64,12 @@
 </div>
 
 <script>
-  function setarCamposModal(id_aluguel, valor_aluguel, valor_entrada, valor_restante){
-    $(`#id_aluguel`).val(id_aluguel);
-    $(`#valor_aluguel`).val(valor_aluguel);
-    $(`#valor_entrada`).val(valor_entrada);
-    $(`#valor_restante`).val(valor_restante);
-  }
-
   function realizarDevolucao(){
     let id = $('#id_aluguel').val();
     let data = $('#dt_devolucao').val();
-    let valor = $('#valor_pago').val();
     let partes = data.split("/");
     let dataFormatada = partes[0] + "-" + partes[1] + "-" + partes[2];
-    const url = '<?=__PATH__?>ajax/devolver-aluguel/id/' + id + '/data/' + dataFormatada + '/valor/' + valor;
+    const url = '<?=__PATH__.$request->get('module')?>/devolver-aluguel/id/' + id + '/data/' + dataFormatada;
     $.ajax({
         url: url,
         dataType: `json`,

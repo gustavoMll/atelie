@@ -131,8 +131,10 @@
     let data = $('#dt_coleta').val();
     let valor = $('#valor_pago').val();
     let partes = data.split("/");
+
     let dataFormatada = partes[0] + "-" + partes[1] + "-" + partes[2];
-    const url = '<?=__PATH__?>ajax/coletar-aluguel/id/' + id + '/data/' + dataFormatada + '/valor/' + valor;
+    console.log(dataFormatada + ' # ' + valor);
+    const url = '<?=__PATH__.$request->get('module')?>/coletar-aluguel/id/' + id + '/data/' + dataFormatada + '/valor/' + valor;
     $.ajax({
         url: url,
         dataType: `json`,

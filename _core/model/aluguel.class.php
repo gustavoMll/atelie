@@ -119,6 +119,10 @@ class Aluguel extends Flex {
         'atencao'=> 'bg bg-warning fw-bold',
     ];
 
+    public static $status_aguardando = 1;
+    public static $status_coletado = 2;
+    public static $status_devolvido = 3;
+
     public static $arr_status = [
         1 => 'Aguardando coleta',
         2 => 'Coletado',
@@ -189,9 +193,10 @@ class Aluguel extends Flex {
         if(self::validate()){
         	$id = $request->getInt('id');
             $obj = new $classe(array($id));
-
+            $status_orig = 0;
             if ($id > 0) {
                 $obj = self::load($id);
+                $status_orig = $obj->get('status');
             }
 
 
@@ -204,7 +209,7 @@ class Aluguel extends Flex {
 			$obj->set('valor_aluguel', Utils::parseFloat($id > 0 ? $obj->getValorAluguel() : $obj->getValorAluguel($_POST['tempId'])));
             $obj->set('valor_entrada', Utils::parseFloat($_POST['valor_entrada']));
             $obj->set('status', $_POST['status']);
-            $obj->set('valor_restante', $obj->get('valor_aluguel'));
+            $obj->set('valor_restante', (float)$obj->get('valor_aluguel') - (float)$obj->get('valor_entrada'));
             if($id > 0){
                 $obj->set('valor_restante', Utils::parseFloat($_POST['valor_restante']));
             }
@@ -219,6 +224,16 @@ class Aluguel extends Flex {
             while($rs->next()){
                 $objIA = ItemAluguel::load($rs->getInt('id'));
                 $objIA->set('id_aluguel', $obj->get('id'));
+                if($objIA->get('tipo_item') == 1 && $status_orig != $obj->get('status')){
+                    $objAcess = Acessorio::load($objIA->get('id_item'));
+                    if($obj->get('status') == self::$status_devolvido){
+                        $objAcess->set('qtd_disp', $objAcess->get('qtd_disp') + $objIA->get('qtd'));
+                        $objAcess->save();
+                    }elseif($status_orig == self::$status_devolvido){
+                        $objAcess->set('qtd_disp', $objAcess->get('qtd_disp') - $objIA->get('qtd'));
+                        $objAcess->save();
+                    }
+                }
                 $objIA->save();
             }
 
@@ -401,7 +416,7 @@ class Aluguel extends Flex {
         $string .= '
             <div class="col-sm-4 mb-3">
                 <div class="form-floating">
-                    <input class="form-control money" readonly name="valor_aluguel" placeholder="" value="'.($obj->get('valor_aluguel') != '' ? Utils::parseMoney($obj->getValorAluguel()) : '').'">
+                    <input class="form-control money" name="valor_aluguel" placeholder="" value="'.($obj->get('valor_aluguel') != '' ? Utils::parseMoney($obj->getValorAluguel()) : '').'">
                     <label class="form-label">Valor do Aluguel</label>
                 </div>
         </div>';
@@ -470,16 +485,6 @@ class Aluguel extends Flex {
         if($request->query('id_cliente') != ''){
             $paramAdd .= " AND `id_cliente` = {$request->query('id_cliente')}";
         }
-
-        foreach(['descricao', 'tamanho'] as $key){
-            if($request->query($key) != ''){
-                $paramAdd .= " AND `{$key}` like '%{$request->query($key)}%' ";
-            }
-        }
-        
-        if($request->query('tipo') != ''){
-            $paramAdd .= " AND `tipo` = {$request->query('tipo')}";
-        }
         
         if($request->query('preco_min') != ''){
             $paramAdd .= " AND `preco` >= {$request->query('preco_min')} ";
@@ -502,15 +507,29 @@ class Aluguel extends Flex {
 
     public static function searchForm($request) {
         global $objSession;
-        
+        $cliente = new Cliente();
+        if(Cliente::exists("id = {$request->getInt('cliente')}")){
+            $cliente = Cliente::load($request->get('cliente'));
+        }
         $string = '';
 
         $string .= '
         <div class="col-sm-12 mb-3">
             <div class="form-floating">
-                <input name="cliente" id="filterCliente" type="text" class="form-control" value="'.$request->query('cliente').'" placeholder="seu dado aqui" />
-                <label for="filterCliente" class="form-label">Cliente</label>
-            </div>
+                <select class="form-select multiselsearch" id="id_cliente_filter" name="id_cliente[]" multiple>';
+                        $conn = new Connection();
+                        $sql = "SELECT c.id, c.id_pessoa, p.id, p.nome FROM clientes c
+                                INNER JOIN pessoas p ON p.id = c.id_pessoa
+                                ORDER BY p.nome";
+                        $rs = $conn->prepareStatement($sql)->executeReader();
+
+                        while($rs->next()){
+                            $string .= '<option value="'.$rs->getInt('id').'" '.($rs->getInt('id') == $request->query('id_cliente') ? 'selected' : '').'>'.$rs->getString('nome').'</option>';
+                        }
+                    $string .='
+                </select>
+                <label>Cliente</label>
+            </div> 
         </div>';
         
         $string .= '

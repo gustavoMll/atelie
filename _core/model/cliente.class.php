@@ -129,7 +129,7 @@ class Cliente extends Flex {
         $string .= '
         <div class="col-sm-12 my-3">
             <div class="d-flex justify-content-start gap-2">
-                <label for="">Observa&ccedil;&atilde;o</label>
+                <label for="" class="'.($obj->get('obs') != '' ? 'fw-bold text-danger' : '').'">Observa&ccedil;&atilde;o</label>
                 <a class="d-flex" style="align-items: center;" id="btn_mostrar">
                     <i class="ti ti-eye-off" style="cursor: pointer" onclick="mduarVisibilidade()" data-toggle="tooltip" data-bs-placement="top" title="Mostrar"></i>
                 </a>
