@@ -458,13 +458,13 @@ class ItemAluguel extends Flex {
     public static function getLine($obj){
         return '
         <td class="p-3">'.self::$nm_tipos[$obj->get('tipo_item')].'</td>
-        <td class="link-edit">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->getItem()->get('descricao'), false).'</td>
+        <td class="link-edit">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->getItem()->getNomeItem(), false).'</td>
         <td class="text-center">'.$obj->get('qtd').'</td>
         <td>'.$obj->getItem()->get('preco').'</td>
         <td>'.($obj->get('modificar') ? 'Sim' : 'Não').'</td>
         '.GG::getResponsiveList([
             'Tipo' => self::$nm_tipos[$obj->get('tipo_item')],
-            'Descri&ccedil;&atilde;o' => $obj->getItem()->get('descricao'),
+            'Descri&ccedil;&atilde;o' => $obj->getItem()->getNomeItem(),
             'Quantidade' => $obj->get('qtd'),
             'Pre&ccedil;o' => $obj->getItem()->get('preco'),
         ], $obj).'

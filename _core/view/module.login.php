@@ -24,7 +24,6 @@
                             <input type="password" name="senha" placeholder="senha" id="senha" class="form-control" data-type="togglePassword" required>
                             <label for="senha" class="form-label">Senha*</label>
                         </div>
-                        <a href="<?=__PATH__?>esqueceu-senha" class="small d-block text-end mt-2 text-white-50 text-decoration-none">Recuperar senha</a>
                     </div>
                     
                     <button type="submit" class="btn btn-secondary fw-bold text-white flex-fill">Entrar</button>

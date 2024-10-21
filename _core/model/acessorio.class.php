@@ -24,7 +24,8 @@ class Acessorio extends Flex {
         'ordenacao' => 'descricao ASC',
         'envia-arquivo' => true,
         'show-menu'=> true,
-        'icon' => 'ti ti-hanger-2'
+        'icon' => 'ti ti-hanger-2',
+        'ordem' => 3
     );
 
     public static function createTable(){
@@ -231,7 +232,8 @@ class Acessorio extends Flex {
                     <th width="10" class="p-3">'.GG::getCheckboxHead().'</th>
                     <th class="col-sm-4">Foto</th>
                     <th class="col-sm-5">Descri&ccedil;&atilde;o</th>
-                    <th class="col-sm-3">Pre&ccedil;o (R$)</th>
+                    <th class="col-sm-5">Qtd Disp.</th>
+                    <th class="col-sm-3 p-3">Pre&ccedil;o (R$)</th>
                 </tr>
                 </thead>
                 <tbody>';
@@ -264,6 +266,7 @@ class Acessorio extends Flex {
             </span>
         </td>
         <td class="link-edit">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->get('descricao')).'</td>
+        <td>'.$obj->get('qtd_disp').'</td>
         <td>'.Utils::parseMoney($obj->get('preco')).'</td>';
     }
 
@@ -379,4 +382,9 @@ class Acessorio extends Flex {
         $this->set('qtd_disp', $this->get('qtd_disp') + $qtd);
         $this->save();
     }
+
+    public function getNomeItem(){
+        return $this->get('descricao');
+    }
+
 }

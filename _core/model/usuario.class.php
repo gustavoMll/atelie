@@ -459,7 +459,8 @@ class Usuario extends Pessoa {
                 if($objSession->hasPermition($modulo) && (!isset($Modules['show-menu']) || $Modules['show-menu'] == 1)){
                     $arrMenu = array_merge($arrMenu, array($modulo => [
                         'name' => $Modules['nome'],
-                        'icon' => isset($Modules['icon']) ? $Modules['icon'] : ''
+                        'icon' => isset($Modules['icon']) ? $Modules['icon'] : '',
+                        'ordem' => isset($Modules['ordem']) ? $Modules['ordem'] : 0
                     ]));
                 }
             }

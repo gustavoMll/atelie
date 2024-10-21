@@ -50,7 +50,7 @@
         <tbody>
           <?php foreach($view['alugueis'] as $obj){?>
             <tr>
-                <td class="p-3 fw-bold"><a style="text-decoration: underline; cursor: pointer;" onclick="modalForm('alugueis', <?=$obj->get('id')?>, ``, function(){ location.reload(); })"><strong><?=$obj->getCliente()->getPessoa()->get('nome')?></strong></a></td>
+                <td class="p-3 fw-bold"><a style="text-decoration: none; cursor: pointer;" onclick="modalForm('alugueis', <?=$obj->get('id')?>, ``, function(){ location.reload(); })"><strong><?=$obj->getCliente()->getPessoa()->get('nome')?></strong></a></td>
                 <td class="text-center"><?=Utils::dateFormat($obj->get('dt_cad'), 'd/m/Y')?></td>
                 <td class="text-center"><?=(Utils::dateValid($obj->get('dt_entrega')) ? Utils::dateFormat($obj->get('dt_entrega'), 'd/m/Y') : ' - ')?></td>
                 <td class="text-center"><?=Utils::parseMoney($obj->get('valor_aluguel'))?></td>

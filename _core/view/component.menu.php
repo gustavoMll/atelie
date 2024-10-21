@@ -6,7 +6,15 @@
 
 <li class="dropdown-item"><a href="<?=__PATH__?>relatorio-alugueis" class="d-flex gap-2"><i class="ti ti-brand-cashapp fs-3"></i> <span class="me-auto">Relat&oacute;rio de Alugueis</a></li>
 
-<?php foreach($view['menus'] as $menu => $item){ ?>
+
+<?php
+uasort($view['menus'], function ($a, $b) {
+    if ($a['ordem'] == 0) return 1;
+    if ($b['ordem'] == 0) return -1;
+    return $a['ordem'] <=> $b['ordem'];
+});
+
+foreach($view['menus'] as $menu => $item){ ?>
     <li class="dropdown-item"><a class="nav-link d-flex align-items-center <?=($request->get('module') == $menu? " text-white": '')?> gap-2" href="<?=__PATH__.$menu?>">
         <i class="<?=$item['icon']?> fs-3"></i> 
         <?=$item['name']?>

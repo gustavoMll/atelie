@@ -15,7 +15,7 @@ if(!$objSession->hasPermition($module,'sel')){
 include(__DIR__. "/../config.{$module}.php");
 $objClass = new $Modules['class']();
 
-
+// print_r($request); exit;
 $registros = 0;
 $paramAdd = $Modules['class']::filter($request);
 $order = $request->query('order', $Modules['ordenacao']);

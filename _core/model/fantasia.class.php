@@ -23,7 +23,8 @@ class Fantasia extends Flex {
         'ordenacao' => 'descricao ASC',
         'envia-arquivo' => true,
         'show-menu'=> true,
-        'icon' => 'ti ti-hanger'
+        'icon' => 'ti ti-hanger',
+        'ordem' => 4
     );
 
     public static function createTable(){
@@ -50,7 +51,6 @@ class Fantasia extends Flex {
         'regular' => array('w'=>992,'h'=>992),
         'zoom' => array('w'=>1400,'h'=>1400),
     );
-
 
     public static function validate() {
     	global $request;
@@ -245,7 +245,7 @@ class Fantasia extends Flex {
               '.$ret.'  
             </span>
         </td>
-        <td class="link-edit">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->get('descricao')).'</td>
+        <td class="link-edit">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->getNomeItem()).'</td>
         <td>'.Utils::parseMoney($obj->get('preco')).'</td>
         ';
     }
@@ -367,5 +367,9 @@ class Fantasia extends Flex {
         </div>';
 
         return $string;
+    }
+
+    public function getNomeItem(){
+        return $this->get('descricao') . ($this->get('tamanho') != '' ? ' - ' . $this->get('tamanho') : '');
     }
 }

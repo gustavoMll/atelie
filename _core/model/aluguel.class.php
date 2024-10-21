@@ -28,7 +28,8 @@ class Aluguel extends Flex {
         'ordenacao' => 'dt_cad DESC',
         'envia-arquivo' => false,
         'show-menu'=> true,
-        'icon' => 'ti ti-plus'
+        'icon' => 'ti ti-plus',
+        'ordem' => 1
     );
 
     public static function createTable(){
@@ -467,7 +468,7 @@ class Aluguel extends Flex {
 
     public static function getLine($obj){
         return '
-        <td class="link-edit p-3">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->getCliente()->getPessoa()->get('nome'), false).'</td>
+        <td class="link-edit p-3">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->getCliente()->getPessoa()->get('nome') , false).' <span class="small">('.Utils::dateFormat($obj->get('dt_cad'), 'd/m/Y').')</span></td>
         <td class="text-center '.$obj->getStatus($obj->get('dt_coleta')).'">'.(Utils::dateValid($obj->get('dt_coleta')) ? Utils::dateFormat($obj->get('dt_coleta'), 'd/m/Y') : ' - ').'</td>
         <td class="text-center '.$obj->getStatus($obj->get('dt_prazo')).'">'.(Utils::dateValid($obj->get('dt_coleta')) ? Utils::dateFormat($obj->get('dt_prazo'), 'd/m/Y') : ' - ').'</td>
         <td class="text-center">'.(Utils::dateValid($obj->get('dt_entrega')) ? Utils::dateFormat($obj->get('dt_entrega'), 'd/m/Y') : ' - ').'</td>
@@ -481,17 +482,18 @@ class Aluguel extends Flex {
 
     public static function filter($request) {
         $paramAdd = '1=1';
-        
         if($request->query('id_cliente') != ''){
-            $paramAdd .= " AND `id_cliente` = {$request->query('id_cliente')}";
+            $paramAdd .= " AND `id_cliente` IN ({$request->query('id_cliente')})";
         }
         
-        if($request->query('preco_min') != ''){
-            $paramAdd .= " AND `preco` >= {$request->query('preco_min')} ";
+        if((float)$request->query('valor_min') > 0.00){
+            $val = str_replace(',', '.', $request->query('valor_min'));
+            $paramAdd .= " AND `valor_aluguel` >= {$val} ";
         }
       
-        if($request->query('preco_max') != ''){
-            $paramAdd .= " AND `preco` <= {$request->query('preco_max')} ";
+        if((float)$request->query('valor_max') > 0.00){
+            $val = str_replace(',', '.', $request->query('valor_max'));
+            $paramAdd .= " AND `valor_aluguel` <= {$val} ";
         }
 
         if(Utils::dateValid($request->query('inicio'))){
@@ -516,15 +518,15 @@ class Aluguel extends Flex {
         $string .= '
         <div class="col-sm-12 mb-3">
             <div class="form-floating">
-                <select class="form-select multiselsearch" id="id_cliente_filter" name="id_cliente[]" multiple>';
+                <select class="form-select multiselsearch" id="id_cliente_filter" name="id_cliente" multiple>';
                         $conn = new Connection();
-                        $sql = "SELECT c.id, c.id_pessoa, p.id, p.nome FROM clientes c
+                        $sql = "SELECT c.id as id_cliente, c.id_pessoa, p.id as id_pessoa, p.nome FROM clientes c
                                 INNER JOIN pessoas p ON p.id = c.id_pessoa
                                 ORDER BY p.nome";
                         $rs = $conn->prepareStatement($sql)->executeReader();
 
                         while($rs->next()){
-                            $string .= '<option value="'.$rs->getInt('id').'" '.($rs->getInt('id') == $request->query('id_cliente') ? 'selected' : '').'>'.$rs->getString('nome').'</option>';
+                            $string .= '<option value="'.$rs->getInt('id_cliente').'" '.($rs->getInt('id_cliente') == $request->query('id_cliente') ? 'selected' : '').'>'.$rs->getString('nome').'</option>';
                         }
                     $string .='
                 </select>
@@ -535,16 +537,16 @@ class Aluguel extends Flex {
         $string .= '
         <div class="col-sm-6 mb-3">
             <div class="form-floating">
-                <input name="preco_min" id="filterPrecoMin" type="text" class="form-control" value="'.$request->query('preco_min').'" placeholder="seu dado aqui" />
-                <label for="filterPrecoMin" class="form-label">Pre&ccedil;o min</label>
+                <input name="valor_min" id="filterPrecoMin" type="text" class="form-control money" value="'.$request->query('valor_min').'" placeholder="seu dado aqui" />
+                <label for="filterPrecoMin" class="form-label">Valor min</label>
             </div>
         </div>';
         
         $string .= '
         <div class="col-sm-6 mb-3">
             <div class="form-floating">
-                <input name="preco_max" id="filterPrecoMax" type="text" class="form-control" value="'.$request->query('preco_max').'" placeholder="seu dado aqui" />
-                <label for="filterPrecoMax" class="form-label">Pre&ccedil;o max</label>
+                <input name="valor_max" id="filterPrecoMax" type="text" class="form-control money" value="'.$request->query('valor_max').'" placeholder="seu dado aqui" />
+                <label for="filterPrecoMax" class="form-label">Valor max</label>
             </div>
         </div>';
       
@@ -623,7 +625,6 @@ class Aluguel extends Flex {
             ];
         }
 
-        // echo $valor_pago;exit;
         $this->set('dt_entrega', Utils::dateFormat($dt_devolucao, 'Y-m-d'));
         $this->set('valor_restante', Utils::parseMoney((float)$this->get('valor_restante') - (float)$valor_pago));
         $this->set('status', 3);

@@ -370,20 +370,30 @@ function getName(classe, id, nameField, nameObjField) {
 }
 
 function modalFilter(form, module) {
-	let queryArr = $(form).serializeArray();
-	let queryString = '';
-	if (queryArr.length) {
-		for (i = 0; i < queryArr.length; i++) {
-			if (queryArr[i].value !== '') {
-				queryString += `${queryArr[i].name}=${encodeURI(queryArr[i].value)}&`;
-			}
-		}
-		queryString = (queryString != '' ? queryString.substr(0, queryString.length - 1) : '');
-	}
-	$('#modalFilter').modal('hide');
-	tableList(module, queryString, 'resultados', true);
-	return false; s
+    let queryArr = $(form).serializeArray();
+    let queryString = '';
+    let selectedClients = [];
+
+    for (let i = 0; i < queryArr.length; i++) {
+        if (queryArr[i].name === 'id_cliente') {
+            selectedClients.push(queryArr[i].value);
+        } else if (queryArr[i].value !== '') {
+            queryString += `${queryArr[i].name}=${encodeURI(queryArr[i].value)}&`;
+        }
+    }
+
+    if (selectedClients.length > 0) {
+        queryString += `id_cliente=${encodeURI(selectedClients.join(','))}&`;
+    }
+
+    queryString = (queryString != '' ? queryString.slice(0, -1) : '');
+    
+    $('#modalFilter').modal('hide');
+    tableList(module, queryString, 'resultados', true);
+    
+    return false;
 }
+
 
 function tableList(model, query, selector, changePath) {
 	const imgLoading = '<img src="' + __SYSTEMPATH__ + 'css/img/loading.gif" alt="loading" width="20px" />';

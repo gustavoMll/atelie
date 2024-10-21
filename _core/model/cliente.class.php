@@ -17,7 +17,8 @@ class Cliente extends Flex {
         'ordenacao' => 'id ASC',
         'envia-arquivo' => false,
         'show-menu' => true,
-        'icon' => 'ti ti-users'
+        'icon' => 'ti ti-users',
+        'ordem' => 2
     );
 
     public static function createTable(){
