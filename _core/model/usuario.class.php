@@ -444,7 +444,7 @@ class Usuario extends Pessoa {
 
     public function getMenusUsuario(){
         global $objSession, $cPath;
-        $ggPath = $cPath.'gg/';
+        $ggPath = $cPath;
 
         if(strtolower(substr(getenv('APP_ENVIRONMENT'),0,4)) == 'prod' && isset($_SESSION[$GLOBALS["Sessao"]]["menus"]) && count($_SESSION[$GLOBALS["Sessao"]]["menus"]) > 0){
             return $_SESSION[$GLOBALS["Sessao"]]["menus"];

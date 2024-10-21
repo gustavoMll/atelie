@@ -2,8 +2,7 @@
 
 global $defaultPath, $predefinedPath, $corePath, $mPath, $vPath, $cPath, $request, $view, $conn, $systemPath;
 $predefinedPath = array(
-    'gg'=> array('folder'=>'gg/', 'path' => 'gg/'),
-    ''=> array('folder'=>'site/', 'path' => ''),
+    ''=> array('folder'=>'', 'path' => ''),
 );
 $cPath      = __DIR__.'/controller/';
 $mPath      = __DIR__.'/model/';
