@@ -2,7 +2,6 @@
 
 $view['title'] = $view['title'];
 $view['alugueis'] = $view['itens-aluguel'] = array();
-
 if($request->get('action') == 'coletar-aluguel'){
     Utils::ajaxHeader();
     
@@ -30,7 +29,7 @@ if($request->get('action') == 'coletar-aluguel'){
 
     Utils::jsonResponse("Aluguel coletado com sucesso", true);
     
-}else{
+}elseif($request->get('action') == ''){
     $rs = Aluguel::search([
         's' => 'id',
         'w' => "status = 1",

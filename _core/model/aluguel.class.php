@@ -62,12 +62,61 @@ class Aluguel extends Flex {
             'w' => "modificar = 1 AND id_aluguel = {$this->get('id')}"  
         ]);
 
-        if($rs->next()){
-            return 1;
-        }
-        return 0;
+        return $rs->next() ? 1 : 0;
     }
     
+    public function modificadoUltimoAluguel(){
+        $arr = $this->getItensAluguel();
+        $acessorios = $fantasias = [];
+        $in = "";
+        foreach($arr as $k => $objIA){
+            $obj = null;
+            if($objIA->get('tipo_item') == 1){
+                $obj = Acessorio::load($objIA->get('id_item'));
+                $acessorios[] = $obj->get('id');
+            }elseif($objIA->get('tipo_item') == 2){
+                $obj = Fantasia::load($objIA->get('id_item'));
+                $fantasias[] = $obj->get('id');
+            }
+        }
+        
+        if(count($fantasias) > 0){
+            $fantasias_str = $fantasias[0];
+            if(count($fantasias) > 1){
+                $fantasias_str = implode(",", $fantasias);
+            }
+            $in = "SELECT id FROM acessorios WHERE id IN ({$fantasias_str})";
+        }
+        if(count($acessorios) > 0){
+            if(count($fantasias) > 0){
+                $in .= " UNION ";
+            }
+            $acessorios_str = $acessorios[0];
+            if(count($fantasias) > 1){
+                $acessorios_str = implode(",", $acessorios);
+            }
+            $in .= "SELECT id FROM acessorios WHERE id IN ({$acessorios_str})";
+        }
+
+        $objIA = new ItemAluguel();
+        $where = "
+        id IN (
+            SELECT id_aluguel 
+            FROM itensaluguel 
+            WHERE modificar = 1";
+        if($in != ''){
+            $where .= " AND id_item IN ({$in})";
+        } 
+        $where .= "
+        );";
+
+        $rs = self::search([
+            's' => 'id, dt_cad',
+            'w' => $where
+        ]);
+        return $rs->next() ? 1 : 0;
+    }
+
     public function getValorAluguel($tempId = 0){
         $valor = 0;
         $id = $tempId > 0 ? $tempId : $this->get('id'); 
@@ -94,8 +143,7 @@ class Aluguel extends Flex {
     }
 
     public function getItensAluguel(){
-        $string = '';
-        $obj = null;
+        $arr = [];
         $rs = ItemAluguel::search([
             's' => 'id',
             'w' => 'id_aluguel='.$this->get('id'),
@@ -104,6 +152,16 @@ class Aluguel extends Flex {
 
         while($rs->next()){
             $obj = ItemAluguel::load($rs->getInt('id'));
+            $arr[] = $obj;
+        }
+
+        return $arr;
+    }
+
+    public function getItensAluguelString(){
+        $string = '';
+        $arr = $this->getItensAluguel();
+        foreach($arr as $k => $obj){
             $nome = $obj->get('tipo_item') == 1 ? $obj->getAcessorio()->get('descricao') : $obj->getFantasia()->get('descricao');
 
             $preco = $obj->get('tipo_item') == 1 ? $obj->getAcessorio()->get('preco') : $obj->getFantasia()->get('preco');
@@ -131,16 +189,14 @@ class Aluguel extends Flex {
     ];
 
     public function getStatus($data){
-        if($this->get('status') == 1){
-            $dtComparacao = strtotime($data);
-            $dataAtual = strtotime(date('Y/m/d'));
-            $diferencaDias = ($dtComparacao - $dataAtual) / (60 * 60 * 24);
-            
-            if($diferencaDias < 0){
-                return $this::$arr_situacoes['atraso'];
-            }elseif($diferencaDias <=7){
-                return $this::$arr_situacoes['atencao'];
-            }
+        $dtComparacao = strtotime($data);
+        $dataAtual = strtotime(date('Y/m/d'));
+        $diferencaDias = ($dtComparacao - $dataAtual) / (60 * 60 * 24);
+        
+        if($diferencaDias < 0){
+            return $this::$arr_situacoes['atraso'];
+        }elseif($diferencaDias <=7){
+            return $this::$arr_situacoes['atencao'];
         }
         return "";
     }
@@ -297,8 +353,9 @@ class Aluguel extends Flex {
         $classe = __CLASS__;
         $obj = new $classe();
         $obj->set('id', $codigo);
-        $edit = 0;
+        $obj->set('valor_entrada', 50.00);
         $valor_restante = 0;
+
         if ($codigo > 0) {
             $obj = self::load($codigo);
             $valor_restante = (float)$obj->get('valor_restante');
@@ -307,9 +364,6 @@ class Aluguel extends Flex {
         	$string = '<input name="tempId" type="hidden" value="'.$codigo.'"/>';
         }
 
-        // echo $codigo; exit;
-        // echo $edit; exit;
-        
         $string .= '
         <div class="col-sm-12 mb-3 required">
             <input type="hidden" name="id_cliente" id="id_cliente" value="' . $obj->get('id_cliente') . '"/>

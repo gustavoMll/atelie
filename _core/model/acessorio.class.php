@@ -181,46 +181,65 @@ class Acessorio extends Flex {
         	$codigo = time();
         	$string = '<input name="tempId" type="hidden" value="'.$codigo.'"/>';
         }
+
+        $string .= '
+        <ul class="nav nav-underline gap-4 ms-0 mt-1 shadow-sm bg-white">
+                <li class="active"><button type="button" class="nav-link active" data-bs-toggle="tab" data-bs-target="#dados'.$obj->getTableName().'" role="tab" aria-controls="#dados'.$obj->getTableName().'" aria-selected="true">Dados</button></li>
+    
+                <li><button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#historico'.$obj->getTableName().'" role="tab" aria-controls="#historico'.$obj->getTableName().'" aria-selected="true">Histórico Modifica&ccedil;&otilde;es</button></li>
+        </ul>';
+
     	$string .= '
-        <div class="col-sm-8 mb-3 required">
-            <div class="form-floating">
-                <input class="form-control" name="descricao" placeholder="" value="'.$obj->get('descricao').'">
-                <label class="form-label">Descrição</label>
+         <div class="tab-content py-4">
+            <div class="tab-pane fade show active" id="dados'.$obj->getTableName().'">
+                <div class="row">
+                    <div class="col-sm-8 mb-3 required">
+                        <div class="form-floating">
+                            <input class="form-control" name="descricao" placeholder="" value="'.$obj->get('descricao').'">
+                            <label class="form-label">Descrição</label>
+                        </div>
+                    </div>';
+
+                    $string .= '
+                        <div class="col-sm-4 mb-3 required">
+                            <div class="form-floating">
+                                <input class="form-control money" name="preco" placeholder="" value="'.($obj->get('preco') != '' ? Utils::parseMoney($obj->get('preco')) : '').'">
+                                <label class="form-label">Preço</label>
+                            </div>
+                    </div>';
+                
+                    $string .= '
+                        <div class="col-sm-4 mb-3 required">
+                            <div class="form-floating">
+                                <input class="form-control" name="qtd_total" placeholder="" value="'.$obj->get('qtd_total').'">
+                                <label class="form-label">Quantidade '.($obj->get('id') > 0 ? 'Total' : '').'</label>
+                            </div>
+                    </div>';
+                    
+                    if($obj->get('id') > 0){
+                        $string .= '
+                            <div class="col-sm-4 mb-3">
+                                <div class="form-floating">
+                                    <input class="form-control" readonly name="qtd_disp" placeholder="" value="'.$obj->get('qtd_disp').'">
+                                    <label class="form-label">Quantidade Disponível</label>
+                                </div>
+                        </div>';
+                    }
+
+                    $string .= '
+                    <div class="form-group col-sm-12 mb-3">
+                        <label for="input_img_'.$obj->getTableName().'">Imagem<small class="rule">('.implode(', ',Image::$typesAllowed).')</small></label>
+                        <input name="img" id="input_img_'.$obj->getTableName().'" onchange="showPreview(this, `img`, `'.$obj->getTableName().'`);" type="file" class="form-control" value=""/>
+                    </div>'.GG::getPreviewImage($obj);
+
+                $string .= '
+                </div>
+            </div>
+            
+            <div class="tab-pane" id="historico'.$obj->getTableName().'">
+            '.$obj->montarHistoricoModificacoes().'
             </div>
         </div>';
-
-        $string .= '
-            <div class="col-sm-4 mb-3 required">
-                <div class="form-floating">
-                    <input class="form-control money" name="preco" placeholder="" value="'.($obj->get('preco') != '' ? Utils::parseMoney($obj->get('preco')) : '').'">
-                    <label class="form-label">Preço</label>
-                </div>
-        </div>';
-       
-        $string .= '
-            <div class="col-sm-4 mb-3 required">
-                <div class="form-floating">
-                    <input class="form-control" name="qtd_total" placeholder="" value="'.$obj->get('qtd_total').'">
-                    <label class="form-label">Quantidade '.($obj->get('id') > 0 ? 'Total' : '').'</label>
-                </div>
-        </div>';
-        
-        if($obj->get('id') > 0){
-            $string .= '
-                <div class="col-sm-4 mb-3">
-                    <div class="form-floating">
-                        <input class="form-control" readonly name="qtd_disp" placeholder="" value="'.$obj->get('qtd_disp').'">
-                        <label class="form-label">Quantidade Disponível</label>
-                    </div>
-            </div>';
-        }
-
-        $string .= '
-        <div class="form-group col-sm-12 mb-3">
-            <label for="input_img_'.$obj->getTableName().'">Imagem<small class="rule">('.implode(', ',Image::$typesAllowed).')</small></label>
-            <input name="img" id="input_img_'.$obj->getTableName().'" onchange="showPreview(this, `img`, `'.$obj->getTableName().'`);" type="file" class="form-control" value=""/>
-        </div>'.GG::getPreviewImage($obj);
-
         return $string;
     }
 
@@ -385,6 +404,59 @@ class Acessorio extends Flex {
 
     public function getNomeItem(){
         return $this->get('descricao');
+    }
+
+    public function modificadoUltimoAluguel(){
+        $obj = new ItemAluguel();
+        $rs = Aluguel::search([
+            's' => 'MAX(dt_devolucao) data',
+            'w' => "id IN (SELECT id_aluguel FROM {$obj->getTableName()} WHERE tipo_item = 1 AND id_item = {$this->get('id')} AND modificar = 1)"
+        ]);
+
+        return $rs->next() ? 1 : 0;
+    }
+
+    public function montarHistoricoModificacoes(){
+        $string = ' 
+        <div class="alert alert-primary" role="alert">
+            Nenhuma modificação encontrada
+        </div>';
+        
+        $rs = ItemAluguel::search([
+            's' => 'id',
+            'w' => "tipo_item = 1 AND id_item = {$this->get('id')} AND modificar = 1",
+            'o' => 'dt_cad DESC',
+            'l' => 10
+        ]);
+
+        if($rs->numRows() > 0){
+            $string = '
+            <table class="table table-striped">
+                <thead class="">
+                    <tr>
+                        <th class="p-3">Aluguel</th>
+                        <th>Descrição</th>
+                    </tr>
+                </thead>
+                    <tbody>';
+
+            while($rs->next()){
+                $obj = ItemAluguel::load($rs->getInt('id'));
+                $string .= '
+                <tr>
+                <td class="text-left p-3"><a style="text-decoration: underline; cursor: pointer;" onclick="modalForm(`alugueis`, '.$obj->getAluguel()->get('id').', ``, function(){ location.reload(); })"><strong>'.($obj->getAluguel()->getCliente()->getPessoa()->get('nome')).'</strong> <span class="small"> ('.(Utils::dateFormat($obj->getAluguel()->get('dt_cad'), 'd/m/Y')).'</span>)</a>
+                <td>'.$obj->get('obs').'</td>
+                </tr>';
+            }
+
+            $string .= '
+            </tbody>
+            </table>
+        </div>';
+        }
+
+
+      return $string;
     }
 
 }

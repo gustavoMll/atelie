@@ -277,6 +277,7 @@ class ItemAluguel extends Flex {
         $classe = __CLASS__;
         $obj = new $classe();
         $obj->set('id', $codigo);
+        $obj->set('modificar', 0);
         $dt_coleta = $request->get('dt_coleta');
         $dt_prazo = $request->get('dt_prazo');
 
@@ -374,7 +375,7 @@ class ItemAluguel extends Flex {
             <div class="form-floating">
                 <select class="form-select" name="modificar" id="modificar" onchange="mostrarTxt(this.value)">
                     <option value="0">Não</option>
-                    <option value="1" '.($obj->get('obs') != '' ? 'selected' : '').'>Sim</option>
+                    <option value="1" '.($obj->get('modificar') == 1 ? 'selected' : '').'>Sim</option>
                 </select>
                 <label>Modificar?</label>
             </div>
@@ -382,7 +383,7 @@ class ItemAluguel extends Flex {
         ';
 
         $string .= '
-        <div class="col-sm-12 mb-3" id="div_txt" '.($obj->get('obs') == '' ? 'style="display: none"' : '').'>
+        <div class="col-sm-12 mb-3" id="div_txt" '.($obj->get('modificar') == 0 ? 'style="display: none"' : '').'>
             <div class="form-group">
                 <label for="">Observa&ccedil;&atilde;o</label>
                 <textarea class="form-control ckeditor" name="obs" id="obs'.$obj->getTableName().'">'.$obj->get('obs').'</textarea>
@@ -439,6 +440,7 @@ class ItemAluguel extends Flex {
                     <th class="col-sm-2 text-center">Quantidade</th>
                     <th class="col-sm-2">Pre&ccedil;o (R$)</th>
                     <th class="col-sm-1">Modificado</th>
+                    <th></th>
                 </tr>
                 </thead>
                 <tbody>';
@@ -456,12 +458,17 @@ class ItemAluguel extends Flex {
     }
 
     public static function getLine($obj){
+        $module = 'acessorios';
+        if($obj->get('tipo_item') == 2){
+            $module = 'fantasias';
+        }
         return '
         <td class="p-3">'.self::$nm_tipos[$obj->get('tipo_item')].'</td>
         <td class="link-edit">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->getItem()->getNomeItem(), false).'</td>
         <td class="text-center">'.$obj->get('qtd').'</td>
         <td>'.$obj->getItem()->get('preco').'</td>
         <td>'.($obj->get('modificar') ? 'Sim' : 'Não').'</td>
+        <td><a onclick="modalForm(`'.$module.'`, '.($obj->get('id_item')).', ``, function(){ location.reload(); })" class="btn btn-sm btn-primary" title="Visualizar Item"><i class="ti ti-hanger"></i></a></td>
         '.GG::getResponsiveList([
             'Tipo' => self::$nm_tipos[$obj->get('tipo_item')],
             'Descri&ccedil;&atilde;o' => $obj->getItem()->getNomeItem(),

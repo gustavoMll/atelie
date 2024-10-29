@@ -23,7 +23,7 @@
                 foreach($view['alugueis'] as $aluguel) {?>
                     <tr>
                         <td class="text-left p-3"><a style="text-decoration: underline; cursor: pointer;" onclick="modalForm('alugueis', <?=$aluguel->get('id')?>, ``, function(){ location.reload(); })"><strong><?=$aluguel->getCliente()->getPessoa()->get('nome')?></strong></a></td>
-                        <td><?=$aluguel->getItensAluguel()?></td>
+                        <td><?=$aluguel->getItensAluguelString()?></td>
                         <td class="text-center <?=$aluguel->getStatus($aluguel->get('dt_prazo'))?>"><?=Utils::dateFormat($aluguel->get('dt_prazo'), 'd/m/Y')?></td>
                         <td class="text-center"><a class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalDevolucao" onclick="$(`#id_aluguel`).val(<?=$aluguel->get('id')?>);"><i class="ti ti-arrow-back-up"></i></a></td>
                     </tr>
