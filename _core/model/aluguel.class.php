@@ -25,7 +25,7 @@ class Aluguel extends Flex {
     public static $configGG = array(
         'nome' => 'Alugueis',
         'class' => __CLASS__,
-        'ordenacao' => 'dt_cad DESC',
+        'ordenacao' => 'dt_cad desc',
         'envia-arquivo' => false,
         'show-menu'=> true,
         'icon' => 'ti ti-plus',
@@ -100,7 +100,7 @@ class Aluguel extends Flex {
 
         $objIA = new ItemAluguel();
         $where = "
-        id IN (
+        (dt_entrega = '0000-00-00' OR dt_entrega >= DATE('{$this->get('dt_cad')}')) AND id IN (
             SELECT id_aluguel 
             FROM itensaluguel 
             WHERE modificar = 1";
@@ -111,7 +111,7 @@ class Aluguel extends Flex {
         );";
 
         $rs = self::search([
-            's' => 'id, dt_cad',
+            's' => 'id',
             'w' => $where
         ]);
         return $rs->next() ? 1 : 0;
@@ -500,10 +500,11 @@ class Aluguel extends Flex {
                 <thead>
                 <tr>
                     <th class="col-sm-4 p-3">Cliente</th>
-                    <th class="col-sm-2 text-center">Coleta</th>
-                    <th class="col-sm-2 text-center">Prazo</th>
-                    <th class="col-sm-2 text-center">Devolu&ccedil;&atilde;o</th>
-                    <th class="col-sm-2 text-center">Valor (R$)</th>
+                    <th class="col-sm-2">Status</th>
+                    <th class="text-center">Coleta</th>
+                    <th class="text-center">Prazo</th>
+                    <th class="text-center">Devolu&ccedil;&atilde;o</th>
+                    <th class="text-center">Valor (R$)</th>
                 </tr>
                 </thead>
                 <tbody>';
@@ -523,6 +524,7 @@ class Aluguel extends Flex {
     public static function getLine($obj){
         return '
         <td class="link-edit p-3">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->getCliente()->getPessoa()->get('nome') , false).' <span class="small">('.Utils::dateFormat($obj->get('dt_cad'), 'd/m/Y').')</span></td>
+        <td>'.self::$arr_status[$obj->get('status')].'</td>
         <td class="text-center '.$obj->getStatus($obj->get('dt_coleta')).'">'.(Utils::dateValid($obj->get('dt_coleta')) ? Utils::dateFormat($obj->get('dt_coleta'), 'd/m/Y') : ' - ').'</td>
         <td class="text-center '.$obj->getStatus($obj->get('dt_prazo')).'">'.(Utils::dateValid($obj->get('dt_coleta')) ? Utils::dateFormat($obj->get('dt_prazo'), 'd/m/Y') : ' - ').'</td>
         <td class="text-center">'.(Utils::dateValid($obj->get('dt_entrega')) ? Utils::dateFormat($obj->get('dt_entrega'), 'd/m/Y') : ' - ').'</td>

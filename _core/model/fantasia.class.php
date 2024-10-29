@@ -429,7 +429,7 @@ class Fantasia extends Flex {
                 $obj = ItemAluguel::load($rs->getInt('id'));
                 $string .= '
                 <tr>
-                <td class="text-left p-3"><a style="text-decoration: underline; cursor: pointer;" onclick="modalForm(`alugueis`, '.$obj->getAluguel()->get('id').', ``, function(){ location.reload(); })"><strong>'.($obj->getAluguel()->getCliente()->getPessoa()->get('nome')).'</strong> <span class="small"> ('.(Utils::dateFormat($obj->getAluguel()->get('dt_cad'), 'd/m/Y')).'</span>)</a>
+                <td class="text-left p-3"><strong>'.($obj->getAluguel()->getCliente()->getPessoa()->get('nome')).'</strong> <span class="small"> ('.(Utils::dateFormat($obj->getAluguel()->get('dt_cad'), 'd/m/Y')).'</span>)</td>
                 <td>'.$obj->get('obs').'</td>
                 </tr>';
             }

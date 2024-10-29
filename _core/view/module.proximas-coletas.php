@@ -82,7 +82,7 @@
             </div>
             <div class="col-sm-6 mb-3">
                 <div class="form-floating">
-                  <input class="form-control date " id="dt_coleta" name="dt_coleta">
+                  <input class="form-control date " id="dt_coleta_pc" name="dt_coleta_pc">
                   <label>Data de Coleta</label>
                 </div>
             </div>
@@ -107,7 +107,7 @@
             <div class="col-sm-12">
                 <div class="form-floating">
                   <input type="hidden" id="id_aluguel" name="id_aluguel" value="">
-                  <input class="form-control date " id="dt_coleta" name="dt_coleta">
+                  <input class="form-control date " id="dt_coleta_pc" name="dt_coleta_pc">
                   <label>Data de Devolu&ccedil;&atilde;o</label>
                 </div>
             </div>
@@ -133,7 +133,7 @@
 
   function realizarColeta(){
     let id = $('#id_aluguel').val();
-    let data = $('#dt_coleta').val();
+    let data = $('#dt_coleta_pc').val();
     let valor = $('#valor_pago').val();
     let partes = data.split("/");
 

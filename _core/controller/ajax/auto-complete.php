@@ -40,6 +40,7 @@ if($Modules['class'] == 'Pessoa'){
     $paramAdd .= " AND id IN (SELECT id_pessoa FROM clientes)";
 }
 
+// echo $dt_coleta; exit;
 $where = '';
 if ($dt_coleta != '' || $dt_prazo != ''){
     $tipo = 1;
