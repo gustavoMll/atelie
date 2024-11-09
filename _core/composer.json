@@ -4,6 +4,7 @@
         "phpmailer/phpmailer": "^6.2",
         "smottt/wideimage": "^1.1",
         "filp/whoops": "^2.9",
-        "facebook/php-business-sdk": "^12.0"
+        "facebook/php-business-sdk": "^12.0",
+        "spipu/html2pdf": "^5.2"
     }
 }

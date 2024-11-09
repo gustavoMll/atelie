@@ -17,8 +17,6 @@
         <link href="<?=__BASEPATH__?>css/gg.css?v=<?=filemtime($defaultPath.'css/gg.css')?>" rel="stylesheet">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.5/dist/sweetalert2.min.css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-        
-        
     </head>
     <body class="<?= $view['page_class'] ?> d-flex align-items-stretch">
         <?php

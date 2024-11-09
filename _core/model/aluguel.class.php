@@ -414,16 +414,16 @@ class Aluguel extends Flex {
             </div>
         </div>';
 
-        $string .='
-        <div class="col-sm-12 mb-3">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between"> 
-                        <h5 class="card-title">Itens do Aluguel</h5>
-                        <a type="button" class="btn btn-secondary btn-sm px-3 text-white fw-bold" onclick="javascript:atualizarDtColeta();">
-                            <i class="ti ti-plus"></i>Adicionar Itens
-                        </a>
-                    </div>
+        $string .= '
+    <div class="col-sm-12 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between"> 
+                    <h5 class="card-title">Itens do Aluguel</h5>
+                    <a type="button" class="btn btn-secondary btn-sm px-3 text-white fw-bold" onclick="atualizarDtColeta();">
+                        <i class="ti ti-plus"></i>Adicionar Itens
+                    </a>
+                </div>
 
                 <div>
                     <script> 
@@ -435,17 +435,19 @@ class Aluguel extends Flex {
                             modalForm(`itensaluguel`,0, `/id_aluguel/'.$codigo.'/dt_coleta/`+ dt_coleta_formatada + `/dt_prazo/`+ dt_prazo_formatada, loadItens)
                         }
 
-                        function loadItens(resp){
-                            let dt_coleta = atualizarDtColeta();
+                        function loadItens(){
                             tableList(`itensaluguel`, `id_aluguel='.$codigo.'&dt_coleta='.$obj->get('dt_coleta').'&dt_prazo='.$obj->get('dt_prazo').'&offset=10`, `txt_itens`, false);
-                        } 
+                        }
+                        
+                        loadItens();
                     </script>
                     <div class="form-group col-sm-12" id="txt_itens">'.GG::moduleLoadData('loadItens();').'</div>    
-                    </div>
                 </div>
             </div>
         </div>
-        ';
+    </div>
+    ';
+
     	
         $string .= '
         <div class="col-sm-6 mb-3 required">
@@ -505,6 +507,7 @@ class Aluguel extends Flex {
                     <th class="text-center">Prazo</th>
                     <th class="text-center">Devolu&ccedil;&atilde;o</th>
                     <th class="text-center">Valor (R$)</th>
+                    <th></th>
                 </tr>
                 </thead>
                 <tbody>';
@@ -522,6 +525,7 @@ class Aluguel extends Flex {
     }
 
     public static function getLine($obj){
+        $arquivo_pdf = __BASEPATH__.'/uploads/atestado-escoalridade.pdf';
         return '
         <td class="link-edit p-3">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->getCliente()->getPessoa()->get('nome') , false).' <span class="small">('.Utils::dateFormat($obj->get('dt_cad'), 'd/m/Y').')</span></td>
         <td>'.self::$arr_status[$obj->get('status')].'</td>
@@ -529,6 +533,7 @@ class Aluguel extends Flex {
         <td class="text-center '.$obj->getStatus($obj->get('dt_prazo')).'">'.(Utils::dateValid($obj->get('dt_coleta')) ? Utils::dateFormat($obj->get('dt_prazo'), 'd/m/Y') : ' - ').'</td>
         <td class="text-center">'.(Utils::dateValid($obj->get('dt_entrega')) ? Utils::dateFormat($obj->get('dt_entrega'), 'd/m/Y') : ' - ').'</td>
         <td class="text-center">'.Utils::parseMoney($obj->getValorAluguel()).'</td>
+        <th><a href="'.$arquivo_pdf.'" target="_blank" class="btn btn-sm border-transparent opacity-50" title="Imprimir Termos"><i class="ti ti-printer"></i></a></th>
         '.GG::getResponsiveList([
             'Prazo' => Utils::dateFormat($obj->get('dt_prazo'), 'd/m/Y'),
             'Valor' => Utils::parseMoney($obj->getValorAluguel()),

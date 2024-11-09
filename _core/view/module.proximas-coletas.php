@@ -16,6 +16,7 @@
                     <th class="col-sm-4 text-center"><i class="ti ti-hanger-2"></i>Itens</th>
                     <th class="col-sm-3 text-center"><i class="ti ti-calendar-event"></i> Data Coleta</th>
                     <th class="col-sm-3 text-center"><i class="ti ti-calendar-month"></i>Coleta</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -32,6 +33,7 @@
                         <td><?=$aluguel->getItensAluguelString()?></td>
                         <td class="text-center <?=$aluguel->getStatus($aluguel->get('dt_coleta'))?>"><?=Utils::dateValid($aluguel->get('dt_coleta'))? Utils::dateFormat($aluguel->get('dt_coleta'), 'd/m/Y'): '-'?></td>
                         <td class="text-center"><a class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalDevolucao" onclick="setarCamposModal(`<?=$aluguel->get('id')?>`, `<?=Utils::parseMoney($aluguel->get('valor_aluguel'))?>`, `<?=Utils::parseMoney($aluguel->get('valor_entrada'))?>`, `<?=Utils::parseMoney($aluguel->get('valor_restante'))?>`)"><i class="ti ti-calendar-plus"></i></a></td>
+                        <th><a href="<?=__PATH__?>termos_pdf.php" target="_blank" class="btn btn-sm border-transparent opacity-50" title="Imprimir Termos"><i class="ti ti-printer"></i></a></th>
                     </tr>
                 <?php } ?>
             </tbody>

@@ -397,7 +397,6 @@ function modalFilter(form, module) {
 
 function tableList(model, query, selector, changePath) {
 	const imgLoading = '<img src="' + __SYSTEMPATH__ + 'css/img/loading.gif" alt="loading" width="20px" />';
-
 	changePath = changePath || false;
 	if (changePath) {
 		setHref(`${model}?${query}`);
@@ -675,7 +674,6 @@ function fieldFunctions() {
 				if ($(obj).attr("data-filter")) {
 					url += "?" + $(obj).attr("data-filter");
 				}
-				console.log(url);
 				$.ajax({
 					url: url,
 					dataType: "json",
