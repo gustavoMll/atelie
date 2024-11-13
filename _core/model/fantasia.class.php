@@ -277,12 +277,14 @@ class Fantasia extends Flex {
             }
         }
         
-        if($request->query('preco_min') != ''){
-            $paramAdd .= " AND `preco` >= {$request->query('preco_min')} ";
+        if((float)$request->query('preco_min') > 0.00){
+            $val = str_replace(',', '.', $request->query('preco_min'));
+            $paramAdd .= " AND `preco` >= {$val} ";
         }
       
-        if($request->query('preco_max') != ''){
-            $paramAdd .= " AND `preco` <= {$request->query('preco_max')} ";
+        if((float)$request->query('preco_max') > 0.00){
+            $val = str_replace(',', '.', $request->query('preco_max'));
+            $paramAdd .= " AND `preco` <= {$val} ";
         }
 
         if(Utils::dateValid($request->query('inicio'))){
@@ -311,7 +313,7 @@ class Fantasia extends Flex {
     
 
         $string .= '
-        <div class="col-sm-6 col-lg-5 mb-3">
+        <div class="col-sm-4 mb-3">
             <div class="form-floating">
                 <input name="tamanho" id="filterTamanho" type="text" class="form-control" value="'.$request->query('tamanho').'" placeholder="seu dado aqui" />
                 <label for="filterTamanho" class="form-label">Tamanho</label>
@@ -319,23 +321,23 @@ class Fantasia extends Flex {
         </div>';
         
         $string .= '
-        <div class="col-sm-6 col-lg-3 mb-3">
+        <div class="col-sm-6 mb-3">
             <div class="form-floating">
-                <input name="preco_min" id="filterPrecoMin" type="text" class="form-control" value="'.$request->query('preco_min').'" placeholder="seu dado aqui" />
+                <input name="preco_min" id="filterPrecoMin" type="text" class="form-control money" value="'.$request->query('preco_min').'" placeholder="seu dado aqui" />
                 <label for="filterPrecoMin" class="form-label">Pre&ccedil;o min</label>
             </div>
         </div>';
         
         $string .= '
-        <div class="col-sm-6 col-lg-3 mb-3">
+        <div class="col-sm-6 mb-3">
             <div class="form-floating">
-                <input name="preco_max" id="filterPrecoMax" type="text" class="form-control" value="'.$request->query('preco_max').'" placeholder="seu dado aqui" />
+                <input name="preco_max" id="filterPrecoMax" type="text" class="form-control money" value="'.$request->query('preco_max').'" placeholder="seu dado aqui" />
                 <label for="filterPrecoMax" class="form-label">Pre&ccedil;o max</label>
             </div>
         </div>';
       
         $string .= '
-        <div class="col-sm-6 col-lg-3 mb-3">
+        <div class="col-sm-6 mb-3">
             <div class="form-floating">
                 <input name="inicio" id="filterInicio" type="text" class="form-control date" value="'.$request->query('inicio').'" placeholder="seu dado aqui" />
                 <label for="filterInicio">Cadastrados desde</label>
@@ -343,7 +345,7 @@ class Fantasia extends Flex {
         </div>';
         
         $string .= '
-        <div class="col-sm-6 col-lg-3 mb-3">
+        <div class="col-sm-6 mb-3">
             <div class="form-floating">
                 <input name="fim" id="filterFim" type="text" class="form-control date" value="'.$request->query('fim').'" placeholder="seu dado aqui" />
                 <label for="filteFim" class="form-label">Cadastrados at&eacute;</label>

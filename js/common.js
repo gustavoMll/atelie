@@ -530,7 +530,7 @@ function getAddress(idField='') {
 				text: "Deseja substituir o cep existe?",
 				icon: 'warning',
 				showCancelButton: true,
-				confirmButtonColor: 'var(--lev-secondary)',
+				confirmButtonColor: 'var(--atelie-secondary)',
 				cancelButtonColor: '#d33',
 				confirmButtonText: 'Sim, substituir!'
 			}).then((result) => {

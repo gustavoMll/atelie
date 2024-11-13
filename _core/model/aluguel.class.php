@@ -174,7 +174,7 @@ class Aluguel extends Flex {
     }
 
     public static $arr_situacoes = [
-        'atraso' => 'bg bg-danger fw-bold',
+        'atraso' => 'bg bg-danger fw-bold text-white',
         'atencao'=> 'bg bg-warning fw-bold',
     ];
 

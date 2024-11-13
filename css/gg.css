@@ -7,7 +7,7 @@
 
 @media(min-width:768px){
   :root{
-    --lev-body-font-size: 1rem;
+    --atelie-body-font-size: 1rem;
   }
   
   .form-control:not(.form-control-sm),
@@ -15,7 +15,7 @@
   .fs-6, h6, .h6 { 
     font-size: 1rem !important }
 
-  .btn:not(.btn-sm) { --lev-btn-font-size: 1rem }  
+  .btn:not(.btn-sm) { --atelie-btn-font-size: 1rem }  
 
   .table-responsive {  overflow-x: inherit !important }
 }
@@ -50,8 +50,8 @@ body { background:#EEE }
 ::-webkit-scrollbar-thumb { 
   padding: 3px; }
 
-::-webkit-scrollbar-thumb { background: var(--lev-primary) }
-::-webkit-scrollbar-thumb:hover { background: var(--lev-primary)  }
+::-webkit-scrollbar-thumb { background: var(--atelie-primary) }
+::-webkit-scrollbar-thumb:hover { background: var(--atelie-primary)  }
 
 .container, 
 .container-fluid, 
@@ -201,7 +201,7 @@ header .nav-link.active { color: var(--flex-primary) !important }
 }
 
 .text-gradient{
-  color: var(--lev-secondary); background-image: -webkit-linear-gradient(45deg, var(--lev-secondary) 0%, #fff 98%); background-clip: text; -webkit-background-clip: text; text-fill-color: transparent; -webkit-text-fill-color: transparent;
+  color: var(--atelie-secondary); background-image: -webkit-linear-gradient(45deg, var(--atelie-secondary) 0%, #fff 98%); background-clip: text; -webkit-background-clip: text; text-fill-color: transparent; -webkit-text-fill-color: transparent;
 }
 
 header .nav-link{
@@ -244,10 +244,10 @@ header .nav-link:hover::after, header .nav-link.active::after{
 }
 
 #page-404 .text-gradient {
-  color: var(--lev-secondary);
+  color: var(--atelie-secondary);
   background-image: -webkit-linear-gradient(
     0deg,
-    var(--lev-secondary) 0%,
+    var(--atelie-secondary) 0%,
     #fff 97%
   );
   background-clip: text;
@@ -269,20 +269,20 @@ header .nav-link:hover::after, header .nav-link.active::after{
   padding: 2px;
   background: -moz-linear-gradient(
       45deg,
-      var(--lev-secondary) 0%,
-      var(--lev-white) 100%
+      var(--atelie-secondary) 0%,
+      var(--atelie-white) 100%
     )
     border-box;
   background: -webkit-linear-gradient(
       45deg,
-      var(--lev-secondary) 0%,
-      var(--lev-white) 100%
+      var(--atelie-secondary) 0%,
+      var(--atelie-white) 100%
     )
     border-box;
     background-image: linear-gradient(
       45deg,
-      var(--lev-secondary) 0%,
-      var(--lev-white) 100%
+      var(--atelie-secondary) 0%,
+      var(--atelie-white) 100%
     );
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
@@ -291,7 +291,7 @@ header .nav-link:hover::after, header .nav-link.active::after{
 
 #sidebar {
   min-width: 270px;
-  background: var(--lev-dark);
+  background: var(--atelie-dark);
   color: #fff;
   -webkit-transition: all 0.2s;
   -o-transition: all 0.2s;
@@ -319,7 +319,7 @@ header .nav-link:hover::after, header .nav-link.active::after{
  #sidebar { margin-left: -270px;}
 
  #sidebar.collapse { 
-  box-shadow: 0 0 0 1000rem rgba(var(--lev-dark-rgb),.95);
+  box-shadow: 0 0 0 1000rem rgba(var(--atelie-dark-rgb),.95);
   margin-left: 0 }
 
   .scroll-xs-y { overflow-y:auto }
@@ -345,7 +345,7 @@ header .nav-link:hover::after, header .nav-link.active::after{
    
   #sidebar.collapse .dropdown-menu .dropdown-menu.show {
     padding-top: .5rem;
-    background:var(--lev-dark);
+    background:var(--atelie-dark);
     position: absolute !important;
     left: 100% !important
   }
@@ -371,14 +371,14 @@ header .nav-link:hover::after, header .nav-link.active::after{
 
 #sidebar .form-control {
   font-weight: normal;
-  background-color: var(--lev-dark);
+  background-color: var(--atelie-dark);
   color: #FFF;
   border-color: rgba(255,255,255,.25);
 }
 
 #sidebar .form-control:focus {
   color: #FFF;
-  border-color: var(--lev-secondary);
+  border-color: var(--atelie-secondary);
 }
 
 #sidebar .form-control::placeholder{
@@ -562,16 +562,16 @@ table td { vertical-align: middle}
 .multiselect-container li{
   display: block;
   width: 100%;
-  padding: var(--lev-dropdown-item-padding-y) var(--lev-dropdown-item-padding-x) !important;
+  padding: var(--atelie-dropdown-item-padding-y) var(--atelie-dropdown-item-padding-x) !important;
   clear: both;
   font-weight: 400;
-  color: var(--lev-dropdown-link-color);
+  color: var(--atelie-dropdown-link-color);
   text-align: inherit;
   text-decoration: none;
   white-space: nowrap;
   background-color: transparent;
   border: 0;
-  border-radius: var(--lev-dropdown-item-border-radius,0) }
+  border-radius: var(--atelie-dropdown-item-border-radius,0) }
 
 
 .multiselect.dropdown-toggle { background: #FFF }
@@ -589,29 +589,29 @@ table td { vertical-align: middle}
 .multiselect-container{ width: 100%; }
 
 .form-floating:has( > .multiselect-native-select) > label {
-  color: rgba(var(--lev-body-color-rgb),.65);
+  color: rgba(var(--atelie-body-color-rgb),.65);
   transform: scale(.85) translateY(-.5rem) translateX(.15rem);
 }
 
 .form-select.is-invalid, 
 .was-validated .form-select:invalid + div > button{
-  border-color: var(--lev-form-invalid-border-color) !important;
+  border-color: var(--atelie-form-invalid-border-color) !important;
   
 }
 
 .form-select.is-invalid, 
 .was-validated .form-select:invalid + div > button:active{
-  box-shadow: 0 0 0 .25rem rgba(var(--lev-danger-rgb),.25) !important;
+  box-shadow: 0 0 0 .25rem rgba(var(--atelie-danger-rgb),.25) !important;
 }
 
 .form-select.is-valid, 
 .was-validated .form-select:valid + div > button{
-  border-color: var(--lev-form-valid-border-color) !important;
+  border-color: var(--atelie-form-valid-border-color) !important;
 }
 
 .form-select.is-valid, 
 .was-validated .form-select:valid + div > button:active{
-  box-shadow: 0 0 0 .25rem rgba(var(--lev-success-rgb),.25) !important;
+  box-shadow: 0 0 0 .25rem rgba(var(--atelie-success-rgb),.25) !important;
 }
 
 .icon { 
@@ -627,10 +627,10 @@ table td { vertical-align: middle}
 .icon-128 { width: 128px; height: 128px }
 .w-128 { width: 128px }
 
-.text-gray-600{ color: var(--lev-gray-600); }
+.text-gray-600{ color: var(--atelie-gray-600); }
 
-.icon.text-primary    { fill: var(--lev-primary); color: var(--lev-primary) }
-.icon.text-secondary  { fill: var(--lev-secondary); color: var(--lev-secondary) }
+.icon.text-primary    { fill: var(--atelie-primary); color: var(--atelie-primary) }
+.icon.text-secondary  { fill: var(--atelie-secondary); color: var(--atelie-secondary) }
 .icon.text-white      { fill: #FFF }
 .icon.text-whatsapp   { fill: #03B35B }
 
@@ -647,7 +647,7 @@ table td { vertical-align: middle}
 .modal-backdrop { display: none; }
 .modal { background: rgba(0, 0, 0, 0.5); }
 
-.modal-body{ background-color: var(--lev-light); }
+.modal-body{ background-color: var(--atelie-light); }
 
 li.dropdown-item.multiselect-item.multiselect-filter {
   background-color: transparent !important;
@@ -656,7 +656,7 @@ li.dropdown-item.multiselect-item.multiselect-filter {
 [type="search"]::-webkit-search-cancel-button {
   clip-path: polygon(20% 0%, 0% 20%, 30% 50%, 0% 80%, 20% 100%, 50% 70%, 80% 100%, 100% 80%, 70% 50%, 100% 20%, 80% 0%, 50% 30%);
   -webkit-appearance: none;
-  background-color: var(--lev-secondary);
+  background-color: var(--atelie-secondary);
   height: 10px;
   width: 10px;
 }
@@ -664,7 +664,7 @@ li.dropdown-item.multiselect-item.multiselect-filter {
 .dragable{ position: relative }
 
 .form-floating:has(.form-control.input-white) label{
-  color: var(--lev-light);
+  color: var(--atelie-light);
 }
 
 .form-floating:has(> .input-white)>.form-control-plaintext~label::after, 
@@ -703,7 +703,7 @@ a:has(> .ti){ text-decoration: none !important }
 .form-floating>.form-control:not(:placeholder-shown)~label::after, 
 .form-floating>.form-select~label::after{ background-color: rgba(0,0,0,0); }
 
-.border-opacity-10{ --lev-border-opacity: .1 }
+.border-opacity-10{ --atelie-border-opacity: .1 }
 
 .iti{ width: 100% }
 .input-group .iti{ flex-grow: 1; width: auto; }
@@ -773,8 +773,8 @@ table .link-edit a {
   font-weight:bold; 
   text-decoration: none !important }
 
-tr.bg-light > * { background: var(--lev-light) }
-tr.bg-dark > * { background: var(--lev-dark) }
+tr.bg-light > * { background: var(--atelie-light) }
+tr.bg-dark > * { background: var(--atelie-dark) }
 tr.text-white > * { color: #FFF }
 
 td.position-relative { z-index: 5 }
@@ -804,7 +804,7 @@ table tr:not(:hover) td.position-relative { z-index: 0 }
 .modal-backdrop.show { opacity: .25 }
 
 .modal-body,
-.modal-footer { background: var(--lev-light) }
+.modal-footer { background: var(--atelie-light) }
 
 .modal-footer { padding-top: 0 }
 
@@ -835,13 +835,13 @@ table tr:not(:hover) td.position-relative { z-index: 0 }
 
 [class*="Cancelado"].badge,[class*="status0"].badge { 
   color: currentColor;
-  background: var(--lev-light) }
+  background: var(--atelie-light) }
 
 [class*="Liquidado"].badge,[class*="status1"].badge  { 
-  background: var(--lev-success) }
+  background: var(--atelie-success) }
 
 [class*="Aberto"].badge  { 
-  background: var(--lev-primary) }
+  background: var(--atelie-primary) }
 
 .form-label { font-size: 87.5% }
 
@@ -849,7 +849,7 @@ a.opacity-50:hover,
 .btn.opacity-50:hover { opacity: 1 !important }
 .btn.border-transparent { border-color: transparent !important }
 
-.text-danger-hover:hover { color: var(--lev-danger) }
+.text-danger-hover:hover { color: var(--atelie-danger) }
 
 tr.text-opacity-50 td:not(td:has(.badge)) { color: rgba(0,0,0,0.5)}
 
@@ -869,8 +869,8 @@ tr.text-opacity-50 td:not(td:has(.badge)) { color: rgba(0,0,0,0.5)}
 
 .table-hover>tbody>tr:hover {
  box-shadow: 
-    -1.5rem 0 0 0 var(--lev-table-hover-bg), 
-    1.5rem 0 0 0 var(--lev-table-hover-bg) !important;
+    -1.5rem 0 0 0 var(--atelie-table-hover-bg), 
+    1.5rem 0 0 0 var(--atelie-table-hover-bg) !important;
 }
 
 tr.nohover:hover td {background:transparent !important}
@@ -879,7 +879,7 @@ tr.nohover:hover td {background:transparent !important}
 .form-floating>.form-control:focus~label, 
 .form-floating>.form-control:not(:placeholder-shown)~label, 
 .form-floating>.form-select~label,
-.form-floating>label { color: rgba(var(--lev-body-color-rgb), .75) }
+.form-floating>label { color: rgba(var(--atelie-body-color-rgb), .75) }
 
 @media (max-width: 767.98px){
   [class*=container] {
@@ -909,7 +909,7 @@ tr.nohover:hover td {background:transparent !important}
 }
 
 .dropdown-menu {
-  --lev-dropdown-font-size: 1rem;
+  --atelie-dropdown-font-size: 1rem;
 }
 
 td .dropdown:hover > .dropdown-menu { display:block }

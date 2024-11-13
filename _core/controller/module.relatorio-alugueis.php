@@ -31,7 +31,8 @@ if($dt_ini != ''){
         $dt_ini_form = $parts[2] . '-'. $parts[1] .'-' . $parts[0];
     };
 
-    $where .= "DATE('dt_cad') >= {$dt_ini_form}";
+    $where .= "DATE(dt_cad) >= '{$dt_ini_form}'";
+    
 }
 
 if($dt_fim != ''){
@@ -44,12 +45,13 @@ if($dt_fim != ''){
         $dt_fim_form = $parts[2] . '-'. $parts[1] .'-' . $parts[0];
     };
 
-    $where .= "DATE('dt_cad') <= {$dt_fim_form}";
+    $where .= "DATE(dt_cad) <= '{$dt_fim_form}'";
 
 }
 
 $valor_total = 0;
 
+// echo $where; exit;
 $rs = Aluguel::search([
     's' => 'id',
     'w' => $where,
