@@ -267,9 +267,7 @@ class Aluguel extends Flex {
             $obj->set('valor_entrada', Utils::parseFloat($_POST['valor_entrada']));
             $obj->set('status', $_POST['status']);
             $obj->set('valor_restante', (float)$obj->get('valor_aluguel') - (float)$obj->get('valor_entrada'));
-            if($id > 0){
-                $obj->set('valor_restante', Utils::parseFloat($_POST['valor_restante']));
-            }
+            $obj->set('valor_restante', (float)$obj->get('valor_aluguel') - (float)$obj->get('valor_entrada'));
             // print_r($obj); exit;
             $obj->save();
 
