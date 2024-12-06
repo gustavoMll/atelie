@@ -66,8 +66,8 @@ class Pessoa extends Flex {
         ";
     }
 
-    public function getAddress(){
-       return $this->get('endereco') . ', '. ($this->get('numero') > 0 ? $this->get('numero') . ', ' : ', ') . ($this->get('complemento') != '' ? $this->get('complemento') .', ' : '') . ($this->get('referencia') != '' ? $this->get('referencia') . ', ' : '') . $this->get('bairro') . ($this->get('cidade') != '' ? ' - ' .$this->get('cidade') : '') . ($this->get('estado') != '' ? '/'.$this->get('estado') : '') .'. ' . ($this->get('cep') != '' ? 'CEP: '.Utils::mask($this->get('cep'), '##.###-###') : '');
+    public function getAddress($show_cep = 1, $break_city_uf = 0){
+       return $this->get('endereco') . ', '. ($this->get('numero') > 0 ? $this->get('numero') . ', ' : ', ') . ($this->get('complemento') != '' ? $this->get('complemento') .', ' : '') . ($this->get('referencia') != '' ? $this->get('referencia') . ', ' : '') . $this->get('bairro') . ($break_city_uf ? ',<br>' : ', ') .($this->get('cidade') != '' ? $this->get('cidade') : '') . ($this->get('estado') != '' ? ' - '.$this->get('estado') : '') . ($show_cep && $this->get('cep') != '' ? ', '.Utils::mask($this->get('cep'), '##.###-###') : '');
        
     }
 

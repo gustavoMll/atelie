@@ -29,6 +29,23 @@ if($request->get('action') == 'coletar-aluguel'){
 
     Utils::jsonResponse("Aluguel coletado com sucesso", true);
     
+}elseif($request->get('action') == 'montar-pdf'){
+    Utils::ajaxHeader();
+    $id_aluguel = $request->getInt('id');
+    if (Aluguel::exists("id={$id_aluguel}")) {
+        $aluguel = Aluguel::load($id_aluguel);
+        $pdfPath = $aluguel->montarContrato();
+        if (file_exists($pdfPath)) {
+            header('Content-Type: application/pdf');
+            header('Content-Disposition: attachment; filename="contrato_'.$aluguel->get('id').'.pdf"');
+            readfile($pdfPath);
+            exit;
+        } else {
+            Utils::jsonResponse(false, "Erro ao gerar o PDF.");
+        }
+    } 
+    Utils::jsonResponse(false, "Aluguel não encontrado.");
+    
 }elseif($request->get('action') == ''){
     $rs = Aluguel::search([
         's' => 'id',

@@ -671,5 +671,107 @@ class Utils {
         
         echo $buffer;
     }
+
+    public static function numberToWords($number, $conjunction = ' e ', $separator = ',', $negative = 'menos ', $decimal = 'ponto ', $hyphen = '-') {
+        $dictionary = array(
+            0 => 'zero',
+            1 => 'um',
+            2 => 'dois',
+            3 => 'três',
+            4 => 'quatro',
+            5 => 'cinco',
+            6 => 'seis',
+            7 => 'sete',
+            8 => 'oito',
+            9 => 'nove',
+            10 => 'dez',
+            11 => 'onze',
+            12 => 'doze',
+            13 => 'treze',
+            14 => 'quatorze',
+            15 => 'quinze',
+            16 => 'dezesseis',
+            17 => 'dezessete',
+            18 => 'dezoito',
+            19 => 'dezenove',
+            20 => 'vinte',
+            30 => 'trinta',
+            40 => 'quarenta',
+            50 => 'cinquenta',
+            60 => 'sessenta',
+            70 => 'setenta',
+            80 => 'oitenta',
+            90 => 'noventa',
+            100 => 'cento',
+            200 => 'duzentos',
+            300 => 'trezentos',
+            400 => 'quatrocentos',
+            500 => 'quinhentos',
+            600 => 'seiscentos',
+            700 => 'setecentos',
+            800 => 'oitocentos',
+            900 => 'novecentos',
+            1000 => 'mil'
+        );
+    
+        if (!is_numeric($number)) {
+            return false;
+        }
+    
+        if ($number < 0) {
+            return $negative . self::numberToWords(abs($number));
+        }
+    
+        $string = $fraction = null;
+    
+        if (strpos($number, '.') !== false) {
+            list($number, $fraction) = explode('.', $number);
+        }
+    
+        switch (true) {
+            case $number < 21:
+                $string = $dictionary[$number];
+                break;
+            case $number < 100:
+                $tens = ((int) ($number / 10)) * 10;
+                $units = $number % 10;
+                $string = $dictionary[$tens];
+                if ($units) {
+                    $string .= $conjunction . $dictionary[$units];
+                }
+                break;
+            case $number < 1000:
+                $hundreds = ((int) ($number / 100)) * 100;
+                $remainder = $number % 100;
+                $string = $dictionary[$hundreds];
+                if ($remainder) {
+                    $string .= $conjunction . self::numberToWords($remainder);
+                }
+                break;
+            case $number < 1000000:
+                $baseUnit = 1000;
+                $numBaseUnits = (int) ($number / $baseUnit);
+                $remainder = $number % $baseUnit;
+                $string = self::numberToWords($numBaseUnits) . ' ' . $dictionary[$baseUnit];
+                if ($remainder) {
+                    $string .= $remainder < 100 ? $conjunction : $separator;
+                    $string .= self::numberToWords($remainder);
+                }
+                break;
+            default:
+                return $number;
+        }
+    
+        if (null !== $fraction && is_numeric($fraction)) {
+            $string .= $decimal;
+            $words = array();
+            foreach (str_split((string) $fraction) as $digit) {
+                $words[] = $dictionary[$digit];
+            }
+            $string .= implode(' ', $words);
+        }
+    
+        return $string;
+    }
     
 }

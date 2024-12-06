@@ -828,3 +828,8 @@ $(function () {
 		}
     });
 });
+
+function montarPdf(module, id_aluguel){
+    const url = __PATH__+module+'/montar-pdf/id/' + id_aluguel;
+    window.location.href = url;
+}

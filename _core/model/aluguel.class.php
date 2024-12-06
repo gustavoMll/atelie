@@ -531,7 +531,7 @@ class Aluguel extends Flex {
         <td class="text-center '.$obj->getStatus($obj->get('dt_prazo')).'">'.(Utils::dateValid($obj->get('dt_coleta')) ? Utils::dateFormat($obj->get('dt_prazo'), 'd/m/Y') : ' - ').'</td>
         <td class="text-center">'.(Utils::dateValid($obj->get('dt_entrega')) ? Utils::dateFormat($obj->get('dt_entrega'), 'd/m/Y') : ' - ').'</td>
         <td class="text-center">'.Utils::parseMoney($obj->getValorAluguel()).'</td>
-        <th><a href="'.$arquivo_pdf.'" target="_blank" class="btn btn-sm border-transparent opacity-50" title="Imprimir Termos"><i class="ti ti-printer"></i></a></th>
+        <th><a target="_blank" class="btn btn-sm border-transparent opacity-50" title="Imprimir Termos"><i class="ti ti-printer" onclick="montarPdf(`proximas-devolucoes`,'.$obj->get('id').')"></i></a></th>
         '.GG::getResponsiveList([
             'Prazo' => Utils::dateFormat($obj->get('dt_prazo'), 'd/m/Y'),
             'Valor' => Utils::parseMoney($obj->getValorAluguel()),
@@ -703,5 +703,192 @@ class Aluguel extends Flex {
             'msg' => "Devolução realizada com sucesso",
             'success' => true,
         ];
+    }
+
+    public function montarContrato(){
+        global $defaultPath;
+        $ret = [];
+        $uploadsPath = $defaultPath . 'uploads/';
+        $contratosPath = $uploadsPath . 'contratos/';
+
+        // Garantir que a pasta 'uploads' exista
+        if (!is_dir($uploadsPath)) {
+            if (!mkdir($uploadsPath, 0777, true) && !is_dir($uploadsPath)) {
+                $ret = [
+                 'msg' => "Erro: Não foi possível criar o diretório 'uploads'.",
+                 'success' => 'false'  
+                ];
+            }
+        }
+    
+        // Garantir que a pasta 'contratos' dentro de 'uploads' exista
+        if (!is_dir($contratosPath)) {
+            if (!mkdir($contratosPath, 0777, true) && !is_dir($contratosPath)) {
+                $ret = [
+                   'msg' => "Erro: Não foi possível criar o diretório 'uploads/contratos'.",
+                   'success' => 'false'
+                ];
+            }
+        }
+
+        $cpf = $this->getCliente()->getPessoa()->get('cpf') != '' ? 'inscrito no CPF sob o nº <strong>'.Utils::getMaskedDoc($this->getCliente()->getPessoa()->get('cpf')).'</strong>' : ' CPF não informado';
+
+        $itens = $this->getItensAluguel();
+        $lista_itens = '';
+        $x = 1;
+        foreach($itens as $obj){
+            if($obj->get('tipo_item') == 1){
+                $lista_itens .= "<p>1.{$x}&nbsp;&nbsp;&nbsp;Acessório: ";
+            }elseif($obj->get('tipo_item') == 2){
+                $lista_itens .= "<p>1.{$x}&nbsp;&nbsp;&nbsp;Traje: ";
+            }
+            $lista_itens .= "<strong>{$obj->getItem()->get('descricao')}</strong></p>";
+            $x++;
+        }
+
+        $data_retirada = Utils::dateValid($this->get('dt_coleta')) ? Utils::dateFormat($this->get('dt_coleta'), 'd/m/Y') : date('d/m/Y');
+        $data_devolucao = Utils::dateValid($this->get('dt_prazo')) ? Utils::dateFormat($this->get('dt_prazo'), 'd/m/Y') : 'não informada';
+
+        $total_extenso = Utils::numberToWords($this->getValorAluguel());
+        $entrada = Utils::parseMoney($this->get('valor_entrada')); 
+        $entrada_extenso = Utils::numberToWords((float)$this->get('valor_entrada'),' e ', ' e ');
+        $restante = Utils::parseMoney((float)$this->getValorAluguel() - (float)$this->get('valor_entrada')); 
+        $restante_extenso = Utils::numberToWords((float)$restante, ' e ', ' e '); 
+
+        $data_atual = date('d/m/Y');
+        $html = '
+        <html>
+            <head>
+                <title>Contrato de Locação</title>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        line-height: 1.3;
+                    }
+                    h1, h2 {
+                        font-size: 14px;
+                        text-align: left;
+                    }
+                    p, ul {
+                        text-align: justify;
+                        font-size: 14px; 
+                        line-height: 1.3;
+                        margin-bottom: 0px;
+                    }
+                    .titulo {
+                        font-size: 16px;
+                        text-align: center;
+                    }
+                    .subtitulo{
+                        margin-bottom: 0px;
+                    }
+                    .section {
+                        margin-bottom: 5px;
+                    }
+                    .signature {
+                        margin-top: 30px;
+                        display: flex;
+                        justify-content: space-between; /* Espaça igualmente os blocos */
+                        align-items: center; /* Alinha verticalmente ao centro */
+                        gap: 20px; /* Espaço extra entre os itens */
+                    }
+                    .signature div {
+                        flex: 1; /* Faz com que cada assinatura ocupe a mesma largura */
+                        text-align: center; /* Centraliza o texto em cada bloco */
+                    }
+                </style>
+            </head>
+            <body>
+            <h1 class="titulo">CONTRATO DE LOCAÇÃO</h1>
+
+                <div class="section">
+                    <p>
+                    Pelo presente contrato, de um lado, <strong>'.$this->getCliente()->getPessoa()->get('nome').'</strong>, '.$cpf.', residente no endereço <strong>'.$this->getCliente()->getPessoa()->getAddress().'</strong>, doravante chamado de LOCATÁRIO; e de outro lado, a loja Ateliê Festa e Fantasia, localizada na Rua Santa Maria, 250 - Centro, Colatina - ES, 29700-200, doravante chamada de LOCADORA, acordam com as seguintes condições:
+                    </p>
+                </div>
+
+                <h2 class="subtitulo">1.&nbsp;&nbsp;&nbsp;OBJETO DO CONTRATO</h2>
+                <div class="section">
+                    <p>
+                    Este contrato tem como objetivo a locação dos trajes descritos abaixo:
+                    </p>
+                    '.$lista_itens.'
+                </div>
+
+                <h2 class="subtitulo">2.&nbsp;&nbsp;&nbsp;PRAZO DA LOCAÇÃO</h2>
+                <div class="section">
+                    <p>2.1.&nbsp;&nbsp;&nbsp;Retirada: <strong>'.$data_retirada.'</strong>.</p>
+                    <p>2.2.&nbsp;&nbsp;&nbsp;Devolução: <strong>'.$data_devolucao.'</strong>.</p>
+                </div>
+
+                <h2 class="subtitulo">3.&nbsp;&nbsp;&nbsp;VALOR E PAGAMENTO</h2>
+                <div class="section">
+                    <p>3.1.&nbsp;&nbsp;&nbsp;Valor total: R$ <strong>'.Utils::parseMoney($this->getValorAluguel()).'</strong> (<strong>'.$total_extenso.' reais</strong>).</p>
+                    <p>3.2.&nbsp;&nbsp;&nbsp;Entrada: R$ <strong>'.$entrada.'</strong> (<strong>'.$entrada_extenso.' reais</strong>).</p>
+                    <p>3.3.&nbsp;&nbsp;Saldo restante: R$ <strong>'.$restante.'</strong> (<strong>'.$restante_extenso.' reais</strong>), a ser quitado na retirada do traje, em dinheiro ou PIX.</p>
+                </div>
+
+                <h2 class="subtitulo">4.&nbsp;&nbsp;&nbsp;RESPONSABILIDADES DO LOCATÁRIO</h2>
+                <div class="section">
+                    <p>4.1.&nbsp;&nbsp;&nbsp;Conferir os trajes no momento da retirada.</p>
+                    <p>4.2.&nbsp;&nbsp;&nbsp;Cuidar do traje e evitar manchas ou danos.</p>
+                    <p>4.3.&nbsp;&nbsp;&nbsp;Não fazer ajustes ou alterações no traje.</p>
+                    <p>4.4.&nbsp;&nbsp;&nbsp;Devolver o traje no prazo combinado.</p>
+                    <p>4.5.&nbsp;&nbsp;&nbsp;Usar o traje exclusivamente para uso pessoal.</p>
+                </div>
+
+                <h2 class="subtitulo">5.&nbsp;&nbsp;&nbsp;MULTAS E PENALIDADES</h2>
+                <div class="section">
+                    <p>5.1.&nbsp;&nbsp;&nbsp;Multa por atraso na devolução: R$ 50,00 (cinquenta reais) por dia.</p>
+                    <p>5.2.&nbsp;&nbsp;&nbsp;Taxa de pmpeza em caso de sujeira excessiva: R$ 30,00 (trinta reais).</p>
+                    <p>5.3.&nbsp;&nbsp;&nbsp;Em caso de perda de acessórios, será cobrado o valor correspondente.</p>
+                    <p>5.4.&nbsp;&nbsp;&nbsp;O valor da entrada não será devolvido em caso de desistência.</p>
+                </div>
+
+                <div class="section">
+                    <p>Data: <strong>'.$data_atual.'</strong></p>
+                </div>
+
+                <div class="section" style="margin-top: 30px;">
+                    <table style="width: 100%; text-align: center; border-spacing: 30px 0;">
+                        <tr>
+                            <td style="width: 50%; padding: 10px;">
+                            _____________________________<br>
+                            '.$this->getCliente()->getPessoa()->get('nome').'<br>
+                            '.($cpf != '' ? Utils::getMaskedDoc($this->getCliente()->getPessoa()->get('cpf')) : '').'<br>
+                            '.$this->getCliente()->getPessoa()->getAddress(0, 1).'
+                            </td>
+                            
+                            <td style="width: 50%; padding: 10px;">
+                            _____________________________<br>
+                            Ateliê Festa e Fantasia<br>
+                            Rua Santa Maria, 250, Centro,<br>
+                            Colatina - ES.
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </body>
+        </html>
+        ';
+
+        // echo $html; exit;
+        try {
+            $html2pdf = new Spipu\Html2Pdf\Html2Pdf('P', 'A4', 'en', true, 'UTF-8', [30, 5, 20, 8]);
+            $html2pdf->pdf->SetDisplayMode('fullpage');
+            $html2pdf->WriteHTML($html);
+
+            $id = $this->get('id');
+            if (empty($id)) {
+            $ret = "Erro: ID inválido ou não fornecido.";
+            }
+
+            $fileName = $contratosPath . 'contrato_'.$this->get('id') . '.pdf';
+            $html2pdf->Output($fileName, 'F');
+
+            return $fileName;
+        } catch (Exception $e) {
+            return "Erro ao gerar o PDF: " . $e->getMessage();
+        }
     }
 }

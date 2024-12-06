@@ -16,6 +16,7 @@
                     <th class="col-sm-5 text-center"><i class="ti ti-hanger-2"></i>Itens</th>
                     <th class="col-sm-2 text-center"><i class="ti ti-calendar-event"></i> Data Previs&atilde;o</th>
                     <th class="col-sm-2 text-center"><i class="ti ti-pencil"></i>Devolução</th>
+                    <th class="px-3"></th>
                 </tr>
             </thead>
             <tbody>
@@ -26,6 +27,7 @@
                         <td><?=$aluguel->getItensAluguelString()?></td>
                         <td class="text-center <?=$aluguel->getStatus($aluguel->get('dt_prazo'))?>"><?=Utils::dateFormat($aluguel->get('dt_prazo'), 'd/m/Y')?></td>
                         <td class="text-center"><a class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalDevolucao" onclick="$(`#id_aluguel`).val(<?=$aluguel->get('id')?>);"><i class="ti ti-arrow-back-up"></i></a></td>
+                        <th class="px-3"><a onclick="montarPdf('proximas-coletas', <?=$aluguel->get('id')?>)"  target="_blank" class="btn btn-sm border-transparent opacity-50" title="Imprimir Termos"><i class="ti ti-printer"></i></a></th>
                     </tr>
                 <?php } ?>
             </tbody>

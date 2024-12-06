@@ -301,3 +301,4 @@ function calculaMovimentacao(sufixo) {
     if(desconto == '') desconto = '0';
     $('#total'+sufixo).val(number_format(parseFloat(valor) + parseFloat(juro) + parseFloat(multa) - parseFloat(desconto),2,',','.'));
 }
+
