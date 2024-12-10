@@ -670,7 +670,6 @@ function fieldFunctions() {
 					url += "/campoaux/" + $(obj).attr("data-aux");
 				}
 				
-				console.log($(obj).attr("data-filter"));
 				if ($(obj).attr("data-filter")) {
 					url += "?" + $(obj).attr("data-filter");
 				}

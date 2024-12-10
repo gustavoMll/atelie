@@ -23,7 +23,6 @@ if($view['logged']){
 }
 
 if ($view['logged']) {
-    
     if (file_exists(dirname(__FILE__) . "/module.{$view['modulo']}.php")) {
         if ($objSession->hasPermition($view['modulo']) || in_array($view['modulo'], $freeModules)){
             $view['module'] = "{$request->get('module')}.php";

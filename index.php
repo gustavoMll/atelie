@@ -1,6 +1,7 @@
 <?php
-global $corePath,$defaultPath;
-$defaultPath = __DIR__."/";
+global $corePath,$defaultPath, $homePath;
+$homePath = __DIR__;
+$defaultPath = $homePath."/";
 $corePath = $defaultPath.'_core/';
 require $corePath.'vendor/autoload.php';
 

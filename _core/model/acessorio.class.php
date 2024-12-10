@@ -280,7 +280,7 @@ class Acessorio extends Flex {
         return '
         <td class="p-3">'.GG::getCheckboxLine($obj->get('id')).'</td>
         <td class="text-center">
-            <span class="ratio ratio-1x1">
+            <span class="ratio ratio-1x1" style="max-width: 200px">
               '.$ret.'  
             </span>
         </td>

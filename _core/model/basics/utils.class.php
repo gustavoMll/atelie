@@ -673,6 +673,12 @@ class Utils {
     }
 
     public static function numberToWords($number, $conjunction = ' e ', $separator = ',', $negative = 'menos ', $decimal = 'ponto ', $hyphen = '-') {
+        $hundred = 'cento';
+        for($i = 1; $i <= 3; $i++){
+            if(10 ** $i == $number){
+                $hundred = 'cem';
+            }
+        }
         $dictionary = array(
             0 => 'zero',
             1 => 'um',
@@ -702,7 +708,7 @@ class Utils {
             70 => 'setenta',
             80 => 'oitenta',
             90 => 'noventa',
-            100 => 'cento',
+            100 => $hundred,
             200 => 'duzentos',
             300 => 'trezentos',
             400 => 'quatrocentos',

@@ -1,6 +1,6 @@
 <?php
 
-global $defaultPath, $predefinedPath, $corePath, $mPath, $vPath, $cPath, $request, $view, $conn, $systemPath;
+global $defaultPath, $predefinedPath, $corePath, $mPath, $vPath, $cPath, $request, $view, $conn, $systemPath, $homePath;
 $predefinedPath = array(
     ''=> array('folder'=>'', 'path' => ''),
 );
