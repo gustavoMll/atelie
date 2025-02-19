@@ -13,7 +13,7 @@ class Pessoa extends Flex {
         'email' => 'string',
         'cep' => 'string',
         'endereco' => 'string',
-        'numero' => 'int',
+        'numero' => 'string',
         'bairro' => 'string',
         'cidade' => 'string',
         'estado' => 'string',
@@ -48,7 +48,7 @@ class Pessoa extends Flex {
             `email` VARCHAR(200) NOT NULL,
             `cep` VARCHAR(9) DEFAULT NULL,
             `endereco` VARCHAR(255) NOT NULL,
-            `numero` int(11) NOT NULL,
+            `numero` VARCHAR(20) NOT NULL,
             `bairro` VARCHAR(255) NOT NULL,
             `cidade` VARCHAR(255) NULL,
             `estado` VARCHAR(2) NULL,
@@ -67,7 +67,7 @@ class Pessoa extends Flex {
     }
 
     public function getAddress($show_cep = 1, $break_city_uf = 0){
-       return $this->get('endereco') . ', '. ($this->get('numero') > 0 ? $this->get('numero') . ', ' : ', ') . ($this->get('complemento') != '' ? $this->get('complemento') .', ' : '') . ($this->get('referencia') != '' ? $this->get('referencia') . ', ' : '') . $this->get('bairro') . ($break_city_uf ? ',<br>' : ', ') .($this->get('cidade') != '' ? $this->get('cidade') : '') . ($this->get('estado') != '' ? ' - '.$this->get('estado') : '') . ($show_cep && $this->get('cep') != '' ? ', '.Utils::mask($this->get('cep'), '##.###-###') : '');
+       return $this->get('endereco') . ', '. ($this->get('numero') != '' ? $this->get('numero') . ', ' : ', ') . ($this->get('complemento') != '' ? $this->get('complemento') .', ' : '') . ($this->get('referencia') != '' ? $this->get('referencia') . ', ' : '') . $this->get('bairro') . ($break_city_uf ? ',<br>' : ', ') .($this->get('cidade') != '' ? $this->get('cidade') : '') . ($this->get('estado') != '' ? ' - '.$this->get('estado') : '') . ($show_cep && $this->get('cep') != '' ? ', '.Utils::mask($this->get('cep'), '##.###-###') : '');
        
     }
 
@@ -240,7 +240,7 @@ class Pessoa extends Flex {
         $string .= '
         <div class="col-sm-6 col-md-2 mb-3 required">
             <div class="form-floating">
-                <input name="numero" id="numero" min="0" type="number" placeholder="seu dado aqui" class="form-control" value="'.$obj->get('numero').'" required/>
+                <input name="numero" id="numero" type="text" placeholder="seu dado aqui" class="form-control" value="'.$obj->get('numero').'" required/>
                 <label for="numero" class="form-label">N&uacute;mero</label>
             </div>
         </div>';

@@ -10,7 +10,8 @@
                     <img src="<?=__BASEPATH__?>img/brand.png" alt="" class="img-fluid" loading="lazy" width="100">
                 </div> -->
                 
-                <h4 class="text-white h1 fw-bold lh-1">Boas vindas!</h1>
+                <h4 class="text-white h1 fw-bold lh-1">Ateliê Festa e Fantasia</h4>
+                <h7 class="text-white h3 fw-bold lh-1">Boas vindas!</h7>
                 <p class="text-white fs-5 mb-4">Acesse com seus dados abaixo.</p>
 
                 <div class="d-flex flex-column gap-3 mb-5">

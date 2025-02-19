@@ -336,6 +336,10 @@ class Aluguel extends Flex {
             $objIA = ItemAluguel::load($rs->getInt('id'));
             if($objIA->get('tipo_item') == 1){
                 $objA = Acessorio::load($objIA->get('id_item'));
+                $nova_qtd = $objA->get('qtd_disp') + $objIA->get('qtd');
+                if($nova_qtd > $objA->get('qtd')){
+                    $nova_qtd = $objA->get('qtd');
+                }
                 $objA->set('qtd_disp', $objA->get('qtd_disp') + $objIA->get('qtd'));
                 $objA->save();
             }
@@ -577,7 +581,7 @@ class Aluguel extends Flex {
         $string .= '
         <div class="col-sm-12 mb-3">
             <div class="form-floating">
-                <select class="form-select multiselsearch" id="id_cliente_filter" name="id_cliente" multiple>';
+                <select class="form-select" id="id_cliente_filter" name="id_cliente" multiple>';
                         $conn = new Connection();
                         $sql = "SELECT c.id as id_cliente, c.id_pessoa, p.id as id_pessoa, p.nome FROM clientes c
                                 INNER JOIN pessoas p ON p.id = c.id_pessoa
