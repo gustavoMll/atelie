@@ -500,7 +500,7 @@ class Aluguel extends Flex {
 
     public static function getTable($rs) {
         $string = '
-            <table class="table lev-table table-striped">
+            <table class="table atelie-table table-striped">
                 <thead>
                 <tr>
                     <th class="col-sm-4 p-3">Cliente</th>

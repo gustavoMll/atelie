@@ -877,7 +877,7 @@ class MessageBox {
 	}
 }
 
-class LevModal {
+class AtelieModal {
 	modal;
 	dialog;
 	props = {

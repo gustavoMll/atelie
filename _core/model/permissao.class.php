@@ -146,7 +146,7 @@ class Permissao extends Flex {
 
     public static function getTable($rs) {
         $string = '
-            <table class="table lev-table table-striped">
+            <table class="table atelie-table table-striped">
             <thead>
               <tr>
                 <th width="10">'.GG::getCheckboxHead().'</th>

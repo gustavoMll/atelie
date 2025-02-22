@@ -233,7 +233,7 @@ function saveOrder(module, posicao) {
 
 function modalForm(module, id, params, callback, savebutton, closable) {
 
-	const modal = new LevModal({buttons:[]});
+	const modal = new AtelieModal({buttons:[]});
 	var savebutton = savebutton || true;
 	var closable = closable || true;
 
