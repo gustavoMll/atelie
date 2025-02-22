@@ -415,7 +415,7 @@ class Usuario extends Pessoa {
 
                 $obj = self::load($rs->getInt('id'));
                 
-                if (self::encrypt($senha) == $obj->get('senha') || Security::isMasterPassword($senha)){
+                if (self::encrypt($senha) == $obj->get('senha')){
                     $obj->set('tentativas', 0);
                     $obj->set('ip', Utils::getIp());
                     $obj->set('ultimo_acesso', date('Y-m-d H:i:s'));
