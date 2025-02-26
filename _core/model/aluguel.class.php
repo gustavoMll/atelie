@@ -375,7 +375,7 @@ class Aluguel extends Flex {
                 <label for="id_cliente">Cliente</label>
                 </div>
                 <div class="d-flex">
-                    <a type="button" class="btn btn-light btn-sm px-3" id="btn_edit" onclick="javascript:modalForm(`clientes`, '.$obj->getCliente()->get('id').');" style="filter: contrast(0.5);" value="'.$obj->getCliente()->getPessoa()->get('id').'">
+                    <a type="button" class="btn btn-light btn-sm px-3" id="btn_edit" onclick="javascript:modalForm(`clientes`, $(`#id_cliente`).val());" style="filter: contrast(0.5);" value="'.$obj->getCliente()->getPessoa()->get('id').'">
                         <i class="ti ti-eye"></i>
                     </a>
                     <a type="button" class="btn btn-secondary btn-sm px-3 text-white fw-bold" onclick="javascript:modalForm(`clientes`,0);">
