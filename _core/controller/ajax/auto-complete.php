@@ -1,7 +1,5 @@
 <?php
 
-use FacebookAds\Object\Album;
-
 Utils::ajaxHeader();
 
 $module = $request->get('class');

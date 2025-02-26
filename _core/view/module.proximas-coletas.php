@@ -33,7 +33,7 @@
                       <td><?=$aluguel->getItensAluguelString()?></td>
                       <td class="text-center <?=$aluguel->getStatus($aluguel->get('dt_coleta'))?>"><?=Utils::dateValid($aluguel->get('dt_coleta'))? Utils::dateFormat($aluguel->get('dt_coleta'), 'd/m/Y'): '-'?></td>
                       <td class="text-center"><a class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalDevolucao" onclick="setarCamposModal(`<?=$aluguel->get('id')?>`, `<?=Utils::parseMoney($aluguel->get('valor_aluguel'))?>`, `<?=Utils::parseMoney($aluguel->get('valor_entrada'))?>`, `<?=Utils::parseMoney($aluguel->get('valor_restante'))?>`)"><i class="ti ti-calendar-plus"></i></a></td>
-                      <th class="px-3"><a onclick="montarPdf('<?=$request->get('module')?>', <?=$aluguel->get('id')?>)"  target="_blank" class="btn btn-sm border-transparent opacity-50" title="Imprimir Termos"><i class="ti ti-printer"></i></a></th>
+                      <th class="px-3"><a onclick="montarPdf('proximas-coletas', <?=$aluguel->get('id')?>)"  target="_blank" class="btn btn-sm border-transparent opacity-50" title="Imprimir Termos"><i class="ti ti-printer"></i></a></th>
                     </tr>
                 <?php } ?>
             </tbody>
