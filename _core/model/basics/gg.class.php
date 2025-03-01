@@ -4,7 +4,7 @@ class GG {
 
     public static function getLinksTable($module, $id, $name, $changeHref=true, $edit=true, $responsive=true){
         $string = '';
-
+        
         if($edit) {
             $string.= '<a 
             class="text-uppercase text-reset text-decoration-underline"

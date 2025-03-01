@@ -232,7 +232,7 @@ function saveOrder(module, posicao) {
 }
 
 function modalForm(module, id, params, callback, savebutton, closable) {
-
+	
 	const modal = new AtelieModal({buttons:[]});
 	var savebutton = savebutton || true;
 	var closable = closable || true;
@@ -263,7 +263,7 @@ function modalForm(module, id, params, callback, savebutton, closable) {
 			success: function (resp) {
 
 				if (resp.success) {
-					unblockUi();
+					
 					if(closable){
 						modal.hide();
 					}
@@ -272,6 +272,17 @@ function modalForm(module, id, params, callback, savebutton, closable) {
 					}
 
 					MessageBox.success(resp.message);
+
+					if(module == 'fantasias'){
+						setTimeout(function () {
+							location.reload();
+						}, 800);
+					}else{
+						unblockUi();
+					}
+
+					
+
 				} else {
 					unblockUi();
 					MessageBox.error(resp.message);

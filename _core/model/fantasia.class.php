@@ -8,6 +8,7 @@ class Fantasia extends Flex {
 		'preco' => 'float',
 		'tamanho' => 'string',
 		'img' => 'string',
+		'quadrilha' => 'int',
         'ativo' => 'int',
         'usr_cad' => 'string',
         'dt_cad' => 'sql',
@@ -36,6 +37,7 @@ class Fantasia extends Flex {
             `preco` FLOAT(11, 2) NOT NULL,
             `tamanho` VARCHAR(50) NOT NULL,
             `img` VARCHAR(255) NULL,
+            `quadrilha` INT(11) NOT NULL DEFAULT 0,
             `ativo` INT(1) NOT NULL,
             `usr_cad` varchar(20) NOT NULL,
             `dt_cad` datetime NOT NULL,
@@ -70,6 +72,10 @@ class Fantasia extends Flex {
     		$error .= '<li>O campo "Tamanho" n&atilde;o foi informado</li>';
     	}
     	
+        if(!isset($_POST['quadrilha']) || !in_array($_POST['quadrilha'], [0,1])){
+            $error .= '<li>O campo "Quadrilha" n&atilde;o foi informado</li>';
+        }
+
         if($error==''){
             return true;
         }else{
@@ -82,25 +88,27 @@ class Fantasia extends Flex {
     	global $request, $defaultPath;
         $classe = __CLASS__;
         $ret = array('success'=>false, 'obj'=> null);
-
         if(self::validate()){
         	$id = $request->getInt('id');
             $obj = new $classe(array($id));
 
+            
             if ($id == 0) {
                 $obj->set('ativo', 1);
             }else{
                 $obj = self::load($id);
             }
-            
+
 			$obj->set('descricao', $_POST['descricao']);
 			$obj->set('preco', Utils::parseFloat($_POST['preco']));
 			$obj->set('tamanho', $_POST['tamanho']);
+            $obj->set('quadrilha', (int) $_POST['quadrilha']);
             $imgBefore = '';
             if (isset($_FILES['img']) && $_FILES['img']['name'] != '') {
                 $imgBefore = $obj->get('img');
                 $obj->set('img', Image::configureName($_FILES['img']['name']));
             }
+
             $obj->save();
 
             $id = $obj->get('id');
@@ -171,9 +179,13 @@ class Fantasia extends Flex {
             $obj = self::load($codigo);
         }else{
         	$codigo = time();
+            $parts = explode('/', $_SERVER['HTTP_REFERER']);
+            if($parts[4] != $obj->getTableName()){
+                $obj->set('quadrilha', 1);
+            }
         	$string = '<input name="tempId" type="hidden" value="'.$codigo.'"/>';
         }
-
+        
         $string .= '
         <ul class="nav nav-underline gap-4 ms-0 mt-1 shadow-sm bg-white">
                 <li class="active"><button type="button" class="nav-link active" data-bs-toggle="tab" data-bs-target="#dados'.$obj->getTableName().'" role="tab" aria-controls="#dados'.$obj->getTableName().'" aria-selected="true">Dados</button></li>
@@ -208,10 +220,24 @@ class Fantasia extends Flex {
                     </div>';
 
                     $string .= '
+                    <div class="form-group col-sm-4 mb-3">
+                        <div class="form-floating">
+                            <select class="form-select" name="quadrilha">
+                                <option value="0">Não</option>
+                                <option value="1" '.($obj->get('quadrilha') ? 'selected' : '').'>Sim</option>
+                            </select>
+                            <label>Esta Fantasia é de Quadrilha?</label>
+                        </div>
+                    </div>
+                    ';
+
+                    $string .= '
                     <div class="form-group col-sm-12 mb-3">
                         <label for="input_img_'.$obj->getTableName().'">Imagem<small class="rule">('.implode(', ',Image::$typesAllowed).')</small></label>
                         <input name="img" id="input_img_'.$obj->getTableName().'" onchange="showPreview(this, ``, `'.$obj->getTableName().'`);" type="file" class="form-control" value=""/>
                     </div>'.GG::getPreviewImage($obj);
+
+                    
             
             $string .='
                 </div>
@@ -250,6 +276,12 @@ class Fantasia extends Flex {
     }
 
     public static function getLine($obj){
+        global $request;
+        $changeHref = true;
+        if($request->get('class') != $obj->getTableName()){
+            $changeHref = false;
+        }
+        
         $img = $obj->getImage('t'); 
         $ret = '<img src="'.__BASEPATH__.'/img/no-image-default.jpg'.'"/ class="imgPreviewList">';        
         
@@ -263,14 +295,17 @@ class Fantasia extends Flex {
               '.$ret.'  
             </span>
         </td>
-        <td class="link-edit">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->getNomeItem()).'</td>
+        <td class="link-edit">'.GG::getLinksTable($obj->getTableName(), $obj->get('id'), $obj->getNomeItem(), $changeHref).'</td>
         <td>'.Utils::parseMoney($obj->get('preco')).'</td>
         ';
     }
 
     public static function filter($request) {
-        $paramAdd = '1=1';
-       
+        $paramAdd = '1=1 AND quadrilha = 1';
+        if($request->get('class') == 'fantasias'){
+            $paramAdd = '1=1 AND quadrilha = 0';
+        }
+
         foreach(['descricao', 'tamanho'] as $key){
             if($request->query($key) != ''){
                 $paramAdd .= " AND `{$key}` like '%{$request->query($key)}%' ";
