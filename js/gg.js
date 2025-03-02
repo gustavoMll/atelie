@@ -273,7 +273,7 @@ function modalForm(module, id, params, callback, savebutton, closable) {
 
 					MessageBox.success(resp.message);
 
-					if(module == 'fantasias'){
+					if(module == 'fantasias' || module == 'acessorios'){
 						setTimeout(function () {
 							location.reload();
 						}, 800);

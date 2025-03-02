@@ -9,6 +9,7 @@ class Acessorio extends Flex {
 		'qtd_total' => 'int',
 		'qtd_disp' => 'int',
 		'img' => 'string',
+        'quadrilha' => 'int',
         'ativo' => 'int',
         'usr_cad' => 'string',
         'dt_cad' => 'sql',
@@ -38,6 +39,7 @@ class Acessorio extends Flex {
             `qtd_total` INT(11) NOT NULL,
             `qtd_disp` INT(11) NOT NULL,
             `img` VARCHAR(255) NULL,
+            `quadrilha` INT(11) NOT NULL DEFALT 0,
             `ativo` INT(1) NOT NULL,
             `usr_cad` varchar(20) NOT NULL,
             `dt_cad` datetime NOT NULL,
@@ -73,6 +75,10 @@ class Acessorio extends Flex {
         if(!isset($_POST['qtd_total']) || $_POST['qtd_total'] == ''){
     		$error .= '<li>O campo "Quantidade Total" n&atilde;o foi informado</li>';
     	}
+
+        if(!isset($_POST['quadrilha']) || !in_array($_POST['quadrilha'], [0,1])){
+            $error .= '<li>O campo "Quadrilha" n&atilde;o foi informado</li>';
+        }
     	
         if($error==''){
             return true;
@@ -101,7 +107,8 @@ class Acessorio extends Flex {
 			$obj->set('preco', Utils::parseFloat($_POST['preco']));
 			$obj->set('qtd_total', (int) $_POST['qtd_total']);
             $obj->set('qtd_disp',(int) $_POST['qtd_total']);
-            
+            $obj->set('quadrilha', (int) $_POST['quadrilha']);
+
             $imgBefore = '';
             if (isset($_FILES['img']) && $_FILES['img']['name'] != '') {
                 $imgBefore = $obj->get('img');
@@ -179,6 +186,10 @@ class Acessorio extends Flex {
             $obj = self::load($codigo);
         }else{
         	$codigo = time();
+            $parts = explode('/', $_SERVER['HTTP_REFERER']);
+            if($parts[4] != $obj->getTableName()){
+                $obj->set('quadrilha', 1);
+            }
         	$string = '<input name="tempId" type="hidden" value="'.$codigo.'"/>';
         }
 
@@ -225,6 +236,18 @@ class Acessorio extends Flex {
                                 </div>
                         </div>';
                     }
+
+                    $string .= '
+                    <div class="form-group col-sm-4 mb-3">
+                        <div class="form-floating">
+                            <select class="form-select" name="quadrilha">
+                                <option value="0">Não</option>
+                                <option value="1" '.($obj->get('quadrilha') ? 'selected' : '').'>Sim</option>
+                            </select>
+                            <label>Este Acess&oacute;rio é de Quadrilha?</label>
+                        </div>
+                    </div>
+                    ';
 
                     $string .= '
                     <div class="form-group col-sm-12 mb-3">
@@ -291,6 +314,13 @@ class Acessorio extends Flex {
 
     public static function filter($request) {
         $paramAdd = '1=1';
+        if($request->get('action') == 'table-list'){
+            if($request->get('class') == 'acessorios'){
+                $paramAdd .= ' AND quadrilha = 0';
+            }else if($request->get('class') == 'acessorios-quadrilha'){
+                $paramAdd .= ' AND quadrilha = 1';
+            }
+        }
         
         // print_r($request); exit;
         if($request->query('descricao') != ''){

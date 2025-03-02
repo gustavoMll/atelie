@@ -11,6 +11,7 @@ $filter = $request->query('dt_coleta');
 $dt_coleta = ($request->query('dt_coleta'));
 $dt_prazo = ($request->query('dt_prazo'));
 
+
 if (!file_exists(__DIR__. "/../config.{$module}.php")) {
     echo json_encode(['value' => '', 'label' => 'M&oacute;dulo n&atilde;o instalado. Contate o suporte t&eacute;cnico.']);
     exit;
@@ -38,7 +39,6 @@ if($Modules['class'] == 'Pessoa'){
     $paramAdd .= " AND id IN (SELECT id_pessoa FROM clientes)";
 }
 
-// echo $dt_coleta; exit;
 $where = '';
 if ($dt_coleta != '' || $dt_prazo != ''){
     $tipo = 1;

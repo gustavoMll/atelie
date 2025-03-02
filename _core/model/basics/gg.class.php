@@ -46,8 +46,6 @@ class GG {
         ';
         }
 
-
-
         return $string;
 
     }

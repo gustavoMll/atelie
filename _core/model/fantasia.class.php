@@ -301,10 +301,17 @@ class Fantasia extends Flex {
     }
 
     public static function filter($request) {
-        $paramAdd = '1=1 AND quadrilha = 1';
-        if($request->get('class') == 'fantasias'){
-            $paramAdd = '1=1 AND quadrilha = 0';
+        $paramAdd = '1=1';
+        if($request->get('action') == 'table-list'){
+            if($request->get('class') == 'fantasias'){
+                $paramAdd .= ' AND quadrilha = 0';
+            }else if($request->get('class') == 'fantasias-quadrilha'){
+                $paramAdd .= ' AND quadrilha = 1';
+            }
         }
+
+        // print_r($request);
+        // echo $paramAdd; exit;
 
         foreach(['descricao', 'tamanho'] as $key){
             if($request->query($key) != ''){
