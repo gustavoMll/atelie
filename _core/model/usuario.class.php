@@ -9,6 +9,7 @@ class Usuario extends Pessoa {
         'login' => 'string',
         'senha' => 'string',
         'acesso_total' => 'int',
+        'master' => 'int',
         'ip' => 'string',
         'ultimo_acesso' => 'date',
         'tentativas' => 'int',
@@ -38,6 +39,7 @@ class Usuario extends Pessoa {
             `login` VARCHAR(20) NOT NULL,
             `senha` VARCHAR(50) NOT NULL,
             `acesso_total` INT NULL,
+            `master INT(1) DEFAULT 0`,
             `ip` varchar(20) NULL,
             `token` varchar(20) NULL,
             `ultimo_acesso` DATETIME NULL,
@@ -159,10 +161,10 @@ class Usuario extends Pessoa {
         $classe = __CLASS__;
         $obj = new $classe();
 
-
-        Flex::dbDelete(new PermissaoUsuario(), "id_usuario IN({$ids})");
-        Flex::dbDelete(new Pessoa(), "id IN(SELECT id_pessoa FROM {$obj->tableName} WHERE id IN({$ids}))");
-        return Flex::dbDelete($obj, "id IN({$ids})");
+        
+        Flex::dbDelete(new PermissaoUsuario(), "id_usuario NOT IN(SELECT id FROM usuarios WHERE master = 1) AND id_usuario IN({$ids})");
+        Flex::dbDelete(new Pessoa(), "id IN(SELECT id_pessoa FROM {$obj->tableName} WHERE master <> 1 AND id IN({$ids}))");
+        return Flex::dbDelete($obj, "master <> 1 AND id IN({$ids})");
     }
 
     public static function form($codigo = 0) {
