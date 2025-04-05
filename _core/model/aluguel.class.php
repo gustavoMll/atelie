@@ -417,39 +417,38 @@ class Aluguel extends Flex {
         </div>';
 
         $string .= '
-    <div class="col-sm-12 mb-3">
-        <div class="card">
-            <div class="card-body">
-                <div class="d-flex justify-content-between"> 
-                    <h5 class="card-title">Itens do Aluguel</h5>
-                    <a type="button" class="btn btn-secondary btn-sm px-3 text-white fw-bold" onclick="atualizarDtColeta();">
-                        <i class="ti ti-plus"></i>Adicionar Itens
-                    </a>
-                </div>
+        <div class="col-sm-12 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between"> 
+                        <h5 class="card-title">Itens do Aluguel</h5>
+                        <a type="button" class="btn btn-secondary btn-sm px-3 text-white fw-bold" onclick="atualizarDtColeta();">
+                            <i class="ti ti-plus"></i>Adicionar Itens
+                        </a>
+                    </div>
 
-                <div>
-                    <script> 
-                        function atualizarDtColeta(){
-                            let dt_coleta = $(`#dt_coleta`).val();
-                            let dt_coleta_formatada = dt_coleta.replace(/\//g, `-`); 
-                            let dt_prazo = $(`#dt_prazo`).val();
-                            let dt_prazo_formatada = dt_prazo.replace(/\//g, `-`); 
-                            modalForm(`itensaluguel`,0, `/id_aluguel/'.$codigo.'/dt_coleta/`+ dt_coleta_formatada + `/dt_prazo/`+ dt_prazo_formatada, loadItens)
-                        }
+                    <div>
+                        <script> 
+                            function atualizarDtColeta(){
+                                let dt_coleta = $(`#dt_coleta`).val();
+                                let dt_coleta_formatada = dt_coleta.replace(/\//g, `-`); 
+                                let dt_prazo = $(`#dt_prazo`).val();
+                                let dt_prazo_formatada = dt_prazo.replace(/\//g, `-`); 
+                                modalForm(`itensaluguel`,0, `/id_aluguel/'.$codigo.'/dt_coleta/`+ dt_coleta_formatada + `/dt_prazo/`+ dt_prazo_formatada, loadItens)
+                            }
 
-                        function loadItens(){
-                            tableList(`itensaluguel`, `id_aluguel='.$codigo.'&dt_coleta='.$obj->get('dt_coleta').'&dt_prazo='.$obj->get('dt_prazo').'&offset=10`, `txt_itens`, false);
-                        }
-                        
-                        loadItens();
-                    </script>
-                    <div class="form-group col-sm-12" id="txt_itens">'.GG::moduleLoadData('loadItens();').'</div>    
+                            function loadItens(){
+                                tableList(`itensaluguel`, `id_aluguel='.$codigo.'&dt_coleta='.$obj->get('dt_coleta').'&dt_prazo='.$obj->get('dt_prazo').'&offset=10`, `txt_itens`, false);
+                            }
+                            
+                            loadItens();
+                        </script>
+                        <div class="form-group col-sm-12" id="txt_itens">'.GG::moduleLoadData('loadItens();').'</div>    
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    ';
-
+        ';
     	
         $string .= '
         <div class="col-sm-6 mb-3 required">
